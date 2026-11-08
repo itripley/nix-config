@@ -44,7 +44,7 @@ Other findings that matter for dual-boot:
 | Unraid server | `UNRAID-OLIVIA` = **192.168.1.65**; SSH with `~/.ssh/id_unraid` (root) |
 | Mapped drives | `X:` → `\\UNRAID-OLIVIA\appdata`, `Y:` → `\downloads`, `Z:` → `\files` |
 | DNS | Static **1.1.1.1 / 1.0.0.1**. The router (192.168.1.1) has DNS-rebind protection that blanks `*.plex.direct` answers for private IPs, which breaks LAN Plex over TLS (plex-mpv-shim casting). |
-| VPN / overlay | NetBird (`wt0` WireGuard interface), Cloudflare One / WARP, PrivadoVPN |
+| VPN / overlay | NetBird (`wt0` WireGuard interface, self-hosted management at `netbird.weblivia.dev`), Cloudflare One / WARP, PrivadoVPN |
 | LAN services used | Plex + plex-mpv-shim (HTTP on 3000, GDM discovery), LocalSend, KDE Connect |
 
 ## Software

@@ -107,7 +107,7 @@ reboot
 - **plex-mpv-shim:** run it once, then set `"allow_http": true` in `~/.config/plex-mpv-shim/conf.json`
   (Plex desktop casts use plain HTTP).
 - **Monitor:** System Settings → Display → set 2560×1440 @ 165 Hz and Adaptive Sync "Automatic" if not picked.
-- **Services that need a login:** `netbird up`, `warp-cli registration new && warp-cli connect`, Steam, Heroic,
+- **Services that need a login:** `netbird up` (logs in to the self-hosted server set in `networking.nix`; add `--setup-key <key>` if SSO isn't set up), `warp-cli registration new && warp-cli connect`, Steam, Heroic,
   Bitwarden, Signal (re-link), VS Code Settings Sync (brings back the remaining extensions).
 - **PrivadoVPN:** no Linux app — download its WireGuard/OpenVPN configs and import them in
   System Settings → Wi-Fi & Networking.

@@ -18,6 +18,13 @@
   ];
 
   services.netbird.enable = true;
+  # Self-hosted management server (same as the Windows client). Merged into
+  # /var/lib/netbird/config.json on every start, so `netbird up` logs in there
+  # instead of NetBird's cloud. NetBird stores the URL as Go's url.URL object.
+  services.netbird.clients.default.config.ManagementURL = {
+    Scheme = "https";
+    Host = "netbird.weblivia.dev:443";
+  };
   services.cloudflare-warp.enable = true;
 
   networking.firewall = {
