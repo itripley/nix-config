@@ -44,7 +44,8 @@ docs/                          full documentation: what, how and why
 3. After any edit, check the config still evaluates: `pwsh -File scripts\verify.ps1`.
    It runs `nix eval` in a throwaway `nixos/nix` container on the Unraid server's Docker over SSH
    (key `~/.ssh/id_unraid`); the Nix store is cached in the server's `nixos-eval-store` volume.
-4. Push this repo somewhere you can clone from (private GitHub repo, or copy it to the Unraid share).
+4. Commit and `git push` any changes. The installer clones from
+   [github.com/itripley/nixos-config](https://github.com/itripley/nixos-config), so unpushed edits won't be there.
 5. Flash the **NixOS 26.05 graphical ISO** to a USB stick (Rufus/Etcher). Not the Philips portable SSD.
 
 ## Install
@@ -52,7 +53,8 @@ docs/                          full documentation: what, how and why
 Boot the USB from the ASUS boot menu (**F8**), connect to the network, open a terminal:
 
 ```sh
-git clone <repo-url> ~/nixos-config && cd ~/nixos-config
+git clone https://github.com/itripley/nixos-config ~/nixos-config && cd ~/nixos-config
+# (if git is missing on the ISO: nix-shell -p git, then run the line above)
 
 # 0. Make sure the config evaluates BEFORE touching any disk (prints a /nix/store/...drv path)
 nix --experimental-features "nix-command flakes" eval --raw \
