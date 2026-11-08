@@ -75,6 +75,9 @@
   };
 
   home.packages = with pkgs; [
+    # Plain package, not programs.wezterm: that module writes wezterm.lua, but
+    # ~/.config/wezterm is a live link to dotfiles/wezterm (see default.nix)
+    wezterm
     nodejs
     python3
     uv

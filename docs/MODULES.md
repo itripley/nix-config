@@ -192,8 +192,9 @@ Notable choices:
 |---|---|
 | `programs.git`, `package = gitFull`, `credential.helper = libsecret` | Email from Windows. `gitFull` includes the libsecret helper, so HTTPS credentials are stored in KWallet (the wincred equivalent). |
 | `programs.ssh.settings` | Hosts `github-artlivia` (deploy key) and `unraid` (root@192.168.1.65 with `id_unraid`), `IdentitiesOnly` so the right key is offered. `AddKeysToAgent` for all hosts. Uses HM's new `settings` format (upstream OpenSSH directive names); the old `matchBlocks` is deprecated. `enableDefaultConfig = false` opts out of HM's legacy defaults. |
-| `programs.neovim` + `extraPackages` | LazyVim needs a C compiler (treesitter), ripgrep/fd (search), lazygit, and LSPs; Nix provides them on Neovim's PATH. |
+| `programs.neovim` + `extraPackages` | LazyVim needs a C compiler (treesitter), ripgrep/fd (search), lazygit, and LSPs; Nix provides them on Neovim's PATH. `sideloadInitLua = true` because HM 26.05 always generates `nvim/init.lua`, which can't be written into the live-linked LazyVim folder. |
 | `programs.vscode`, `package = vscode.fhs` | The FHS variant lets marketplace extensions with native binaries work. 8 extensions available in nixpkgs are declared; the rest come back through Settings Sync. |
+| `wezterm` (plain package) | The terminal. Not `programs.wezterm`, which would generate `wezterm.lua` into the live-linked config folder. Uses JetBrainsMono Nerd Font from `desktop.nix`. |
 | Dev tools | Node, Python + uv, .NET SDK (Godot C#), Godot 4 + Mono, docker-compose, tmux, mc, fastfetch, jq, gh. |
 
 ## `home/olivia/firefox.nix`
