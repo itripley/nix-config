@@ -1,0 +1,5 @@
+result
+result-*
+# Wallpapers are third-party art — copy them into the checkout by hand
+home/olivia/dotfiles/wezterm/backdrops/*
+!home/olivia/dotfiles/wezterm/backdrops/.gitkeep

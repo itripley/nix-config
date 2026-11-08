@@ -1,0 +1,88 @@
+{ pkgs, ... }:
+{
+  programs.git = {
+    enable = true;
+    package = pkgs.gitFull; # includes git-credential-libsecret (KWallet-backed)
+    settings = {
+      user.email = "oliviacmcarmo@gmail.com";
+      credential.helper = "libsecret";
+      init.defaultBranch = "main";
+    };
+  };
+
+  programs.ssh = {
+    enable = true;
+    enableDefaultConfig = false;
+    # Keys are not in the repo; copy them from /mnt/windows/Users/olivi/.ssh after install
+    settings = {
+      "github-artlivia" = {
+        # remote: git@github-artlivia:itripley/artlivia.git
+        HostName = "github.com";
+        User = "git";
+        IdentityFile = "~/.ssh/id_ed25519_artlivia";
+        IdentitiesOnly = true;
+      };
+      "unraid" = {
+        HostName = "192.168.1.65";
+        User = "root";
+        IdentityFile = "~/.ssh/id_unraid";
+        IdentitiesOnly = true;
+      };
+      "*" = {
+        AddKeysToAgent = "yes";
+      };
+    };
+  };
+
+  # LazyVim config is linked from dotfiles/nvim (see default.nix)
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+    viAlias = true;
+    vimAlias = true;
+    extraPackages = with pkgs; [
+      gcc
+      gnumake
+      unzip
+      ripgrep
+      fd
+      tree-sitter
+      lazygit
+      lua-language-server
+      nil
+      nixfmt
+    ];
+  };
+
+  # FHS build so marketplace extensions with native binaries work.
+  # The rest of your 43 extensions come back through Settings Sync.
+  programs.vscode = {
+    enable = true;
+    package = pkgs.vscode.fhs;
+    profiles.default.extensions = with pkgs.vscode-extensions; [
+      ms-python.python
+      ms-python.vscode-pylance
+      ms-python.debugpy
+      ms-dotnettools.csharp
+      ms-vscode-remote.remote-containers
+      aaron-bond.better-comments
+      bmalehorn.vscode-fish
+      jnoortheen.nix-ide
+    ];
+  };
+
+  home.packages = with pkgs; [
+    nodejs
+    python3
+    uv
+    dotnet-sdk # Godot C#
+    godot_4
+    godot_4-mono
+    docker-compose
+    tmux
+    mc
+    fastfetch
+    jq
+    gh
+  ];
+}

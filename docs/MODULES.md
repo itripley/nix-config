@@ -1,0 +1,204 @@
+# File-by-file reference
+
+What each file does and why each non-obvious setting is there. For the big-picture reasoning see
+[DESIGN.md](DESIGN.md).
+
+```
+flake.nix                         inputs, overlay, nixpkgs config, wires everything together
+flake.lock                        exact pinned revisions of every input
+hosts/desktop-olivia/
+  configuration.nix               host entry: imports, user, nix settings, nh, nix-ld
+  disko.nix                       partitioning of the Samsung disk
+  hardware-configuration.nix      placeholder → regenerated during install
+modules/nixos/                    system level (root, services, hardware)
+  boot.nix  amd.nix  desktop.nix  audio.nix  networking.nix  storage.nix  gaming.nix  services.nix
+home/olivia/                      user level (home-manager)
+  default.nix  apps.nix  dev.nix  firefox.nix  plasma.nix  flatpak.nix
+  dotfiles/                       wezterm/ nvim/ fastfetch/ firefox/userChrome.css
+scripts/
+  verify.ps1                      evaluate the flake from Windows via Unraid's Docker
+  migrate-firefox-profile.sh      copy the Windows Firefox profile into NixOS
+```
+
+---
+
+## `flake.nix`
+
+- **`unstableOverlay`** adds `pkgs.unstable` (nixos-unstable with unfree allowed) for the few
+  fast-moving tools. Everything else comes from stable.
+- **`nixpkgs.config.allowUnfree`**: Steam, Resolve, VS Code, Plex, Obsidian, etc. are unfree.
+- **`permittedInsecurePackages = [ "openssl-1.1.1w" ]`**: needed only by Sublime Text 4 (see DESIGN §4).
+- **home-manager block:** `useGlobalPkgs` (same pkgs as the system), `useUserPackages` (user
+  packages installed through the system profile), `backupFileExtension`, and `sharedModules` loading
+  plasma-manager and nix-flatpak's HM module for the user.
+- Output: `nixosConfigurations.desktop-olivia`.
+
+## `hosts/desktop-olivia/configuration.nix`
+
+| Setting | Why |
+|---|---|
+| `networking.hostName = "desktop-olivia"` | Matches the Windows hostname. |
+| user `olivia`, **`uid = 1000`** | The CIFS and NTFS mounts map file ownership to uid 1000; pinning it keeps them in sync. |
+| groups `wheel networkmanager audio video docker gamemode i2c` | sudo; Wi-Fi/VPN changes; realtime audio; GPU; Docker without sudo; gamemode; DDC/CI monitor control. |
+| `shell = pkgs.fish` + `programs.fish.enable` | WezTerm's Linux config launches `fish -l`; the fish VS Code extension was installed on Windows too. |
+| `nix.settings.experimental-features` | Flakes and the `nix` command. |
+| `auto-optimise-store`, `trusted-users` | Dedupe the store; let wheel users use extra caches. |
+| **`programs.nh`** with `flake = /home/olivia/nixos-config` and `clean` | `nh os switch` = friendlier `nixos-rebuild`; automatic GC keeps 10 generations / 14 days. Replaces `nix.gc`. |
+| **`programs.nix-ld`** | Lets unpatched Linux binaries run: Mason-installed LSPs in LazyVim, the VS Code server, random downloaded tools. |
+| `system.stateVersion = "26.05"` | The release this system was first installed with. **Never bump it**; it isn't an upgrade switch. |
+
+## `hosts/desktop-olivia/disko.nix`
+
+See [DESIGN.md §2](DESIGN.md#2-disk-layout-hostsdesktop-oliviadiskonix). Key safety property:
+`device` is the by-id path including the Samsung's serial, so it can't match the Windows NVMe.
+**Always check `ls -l /dev/disk/by-id/ | grep Samsung` before running disko.**
+
+## `hosts/desktop-olivia/hardware-configuration.nix`
+
+Placeholder with sensible AMD/NVMe/SATA/USB initrd modules so the config evaluates. During install
+it is **replaced** with the output of `nixos-generate-config --no-filesystems`. `--no-filesystems`
+matters because disko already declares the filesystems; a second set would conflict.
+
+## `modules/nixos/boot.nix`
+
+| Setting | Why |
+|---|---|
+| systemd-boot, `configurationLimit = 15`, `editor = false` | Keep the ESP from filling up; disable the boot-time kernel-cmdline editor (an easy root shell otherwise). |
+| `efi.canTouchEfiVariables` | Lets the installer register NixOS in the firmware boot menu. |
+| `linuxPackages_latest` | Newest RDNA3 / Zen 4 support. |
+| `supportedFilesystems = [ btrfs ntfs ]` | Root filesystem + the Windows drive. |
+| **`time.hardwareClockInLocalTime`** | Windows stores local time in the RTC (DESIGN §3). |
+| `enableRedistributableFirmware` | amdgpu, Realtek and Bluetooth firmware blobs. |
+| `zramSwap`, `fstrim`, `btrfs.autoScrub` | Compressed RAM swap; weekly TRIM for SSD health; periodic checksum scrub to catch silent corruption. |
+
+## `modules/nixos/amd.nix`
+
+| Setting | Why |
+|---|---|
+| `hardware.graphics` + `enable32Bit` | Mesa (RADV Vulkan, radeonsi, VA-API); 32-bit for Steam/Proton/Wine. |
+| `amdgpu.initrd.enable` | Load the GPU driver early: correct resolution from the first frame, smoother boot. |
+| `amdgpu.opencl.enable` | ROCm OpenCL, which DaVinci Resolve needs for GPU processing on AMD. |
+| **`services.lact`** | Fan curves, power limits, clocks: the AMD Software (Adrenalin) replacement. |
+| **`hardware.i2c`** | DDC/CI so Plasma can control the monitor's real brightness (Twinkle Tray replacement). |
+| `nvtop`, `clinfo`, `ddcutil` | GPU monitor, OpenCL check, DDC command-line tool. |
+
+## `modules/nixos/desktop.nix`
+
+| Setting | Why |
+|---|---|
+| Plasma 6 + SDDM on Wayland | DESIGN §7. |
+| `time.timeZone = "Europe/Lisbon"` | "GMT Standard Time" covers Lisbon and London, which share the same rules. Lisbon was picked from the pt-PT keyboard; switching is a one-line change. |
+| `i18n.defaultLocale = en_US.UTF-8` | Windows UI was en-US. |
+| `xkb.layout = "pt,us"`, `grp:win_space_toggle` | Same layouts and order as Windows, and the same Win+Space switch. Also applies to the login screen and TTY (`console.useXkbConfig`). |
+| `programs.kdeconnect` | Was in use on Windows; this also opens its firewall ports. |
+| `partition-manager`, `printing` | KDE disk tool; CUPS printing. |
+| `services.flatpak`, `programs.appimage` (+binfmt) | Escape hatches for apps outside nixpkgs (DESIGN §8). |
+| fonts: JetBrainsMono Nerd Font, Noto (+CJK, emoji), corefonts | WezTerm's font; full Unicode coverage including Japanese/Chinese; Microsoft core fonts for websites and documents that expect them. |
+
+## `modules/nixos/audio.nix`
+
+| Setting | Why |
+|---|---|
+| PipeWire with ALSA (+32-bit), PulseAudio and **JACK** | One audio server for everything; JACK for Renoise, Cardinal, VCV Rack and plugdata. |
+| `security.rtkit` | Realtime scheduling for audio threads, which prevents dropouts. |
+| **Low-latency clock:** rate 48000 (44.1k/96k allowed), quantum 256, min 64, max 2048 | 256 samples ≈ 5.3 ms is safe for daily use; apps like a DAW can request down to 64. Allowed rates avoid resampling 44.1 kHz music. |
+| **Virtual sinks Game / Music / Chat** | The Voicemeeter replacement. Each is a `libpipewire-module-loopback`: an output device apps can be assigned to, which forwards to the real default output. Loopbacks were chosen over plain null-sinks because **a null-sink is silent** unless something routes it onward. Each bus gets its own volume slider in Plasma; use qpwgraph for custom routing. |
+
+## `modules/nixos/networking.nix`
+
+| Setting | Why |
+|---|---|
+| NetworkManager + `insertNameservers = [1.1.1.1 1.0.0.1]` | Reproduces the Windows static DNS that works around the router's DNS-rebind protection breaking `*.plex.direct`. Inserted *first*, with the router DNS left as fallback. |
+| `networkmanager-openvpn` plugin | PrivadoVPN has no Linux app; import its OpenVPN or WireGuard configs instead. |
+| `networking.hosts."192.168.1.65" = [ unraid-olivia UNRAID-OLIVIA ]` | Public DNS can't resolve the Unraid NetBIOS name. |
+| `services.netbird`, `services.cloudflare-warp` | Same overlay/VPN clients as on Windows. |
+| Firewall: TCP 53317, 3000; UDP 53317, 32410, 32412–32414 | LocalSend; plex-mpv-shim's HTTP control port; Plex GDM discovery. Everything else stays closed (Steam, KDE Connect and Avahi open their own). |
+
+## `modules/nixos/storage.nix`
+
+**Unraid shares** `/mnt/unraid/{appdata,downloads,files}` (the old X:, Y:, Z:):
+
+| Option | Why |
+|---|---|
+| `credentials=/etc/nixos/smb-secrets` | Password stays out of the world-readable store and the repo. |
+| `uid=1000,gid=100` | Files appear owned by olivia. |
+| `noauto` + `x-systemd.automount` | Mount on first access, not at boot, so boot never waits for the server. |
+| `x-systemd.idle-timeout=600` | Unmount after 10 min idle; no hung mounts if the server goes away. |
+| `device-timeout` / `mount-timeout = 5s` | Fail fast instead of freezing a file manager. |
+| `nofail`, `_netdev` | Never block boot; wait for the network. |
+
+**Windows `C:`** at `/mnt/windows`: `ntfs3` (kernel driver), **read-only**, automount, addressed by
+partition GUID. It's read-only so Linux can never corrupt the Windows install. It needs Fast Startup
+off. Used for one-time imports (SSH keys, wallpapers, Firefox profile).
+
+## `modules/nixos/gaming.nix`
+
+| Setting | Why |
+|---|---|
+| Steam + Remote Play + local game transfers (firewall opened) | Same as Windows; LAN transfers avoid re-downloading. |
+| `gamescopeSession` | An extra "Steam" session on the login screen (console-like big picture). |
+| `extest` | Translates Steam Input to work on Wayland. |
+| `extraCompatPackages = [ proton-ge-bin ]` | Proton-GE for games that need its extra fixes and codecs. |
+| `gamemode`, `gamescope` (+`capSysNice`) | CPU/GPU performance mode while gaming; per-game compositor for scaling/HDR/frame limiting. |
+
+## `modules/nixos/services.nix`
+
+| Setting | Why |
+|---|---|
+| Docker | Replaces Docker Desktop. The `docker` group allows use without sudo. |
+| **Ollama with `ollama-rocm`** | Local LLMs on the 7800 XT (gfx1101 is a supported ROCm target, no override needed). Was a startup app on Windows. |
+| OpenRGB (`motherboard = "amd"`) | Same RGB control. Loads the AMD SMBus driver (Windows needed PawnIO for this). |
+| Avahi + nss-mdns | `.local` name resolution and service discovery (replaces Apple Bonjour). |
+
+## `home/olivia/default.nix`
+
+- Imports the other HM modules; `home.stateVersion = "26.05"` (never bump, same as the system one).
+- **`xdg.configFile` live links** for `wezterm`, `nvim`, `fastfetch` → `~/nixos-config/home/olivia/dotfiles/…` (DESIGN §6).
+- `services.easyeffects`: background audio effects; RNNoise noise suppression for the Seiren Mini
+  replaces NVIDIA Broadcast / AMD Noise Suppression.
+
+## `home/olivia/apps.nix`
+
+The user package list, grouped by category, with the replaced Windows app noted in comments.
+Notable choices:
+- `pkgsRocm.blender`: Blender with HIP (GPU rendering on AMD). The older `blender-hip` name was removed from nixpkgs.
+- `davinci-resolve`: see the codec caveat in [MIGRATION.md](MIGRATION.md).
+- `yabridge` / `yabridgectl`: run Windows VST plugins in Linux DAWs through Wine.
+- `unstable.claude-code`, `unstable.codex`, `unstable.opencode`: from unstable because they move fast.
+
+## `home/olivia/dev.nix`
+
+| Setting | Why |
+|---|---|
+| `programs.git`, `package = gitFull`, `credential.helper = libsecret` | Email from Windows. `gitFull` includes the libsecret helper, so HTTPS credentials are stored in KWallet (the wincred equivalent). |
+| `programs.ssh.settings` | Hosts `github-artlivia` (deploy key) and `unraid` (root@192.168.1.65 with `id_unraid`), `IdentitiesOnly` so the right key is offered. `AddKeysToAgent` for all hosts. Uses HM's new `settings` format (upstream OpenSSH directive names); the old `matchBlocks` is deprecated. `enableDefaultConfig = false` opts out of HM's legacy defaults. |
+| `programs.neovim` + `extraPackages` | LazyVim needs a C compiler (treesitter), ripgrep/fd (search), lazygit, and LSPs; Nix provides them on Neovim's PATH. |
+| `programs.vscode`, `package = vscode.fhs` | The FHS variant lets marketplace extensions with native binaries work. 8 extensions available in nixpkgs are declared; the rest come back through Settings Sync. |
+| Dev tools | Node, Python + uv, .NET SDK (Godot C#), Godot 4 + Mono, docker-compose, tmux, mc, fastfetch, jq, gh. |
+
+## `home/olivia/firefox.nix`
+
+See [FIREFOX.md](FIREFOX.md) for the full story. In short: declares the profile with the **same
+name and path as on Windows**, ships `userChrome.css`, sets three Linux prefs in `user.js`, and
+declares Bitwarden's native-messaging manifest. Add-ons are deliberately not declared.
+
+## `home/olivia/plasma.nix`
+
+Breeze Dark look-and-feel, pt+us layouts with Win+Space, and KWin shortcuts mirroring `whkdrc`:
+Alt+H/J/K/L focus window left/down/up/right, Alt+Shift+H/J/K/L quick-tile, Alt+Q close, Alt+M minimize.
+Note: Alt+letter shortcuts override app menu accelerators (e.g. Alt+H for a Help menu), the same as
+whkd did on Windows.
+
+## `home/olivia/flatpak.nix`
+
+Flathub apps installed and auto-updated weekly by nix-flatpak: JDownloader 2 and Stremio (not usable
+from nixpkgs).
+
+## `scripts/verify.ps1`
+
+Runs from Windows. Streams the git-tracked files over SSH into a throwaway `nixos/nix` container on
+the Unraid server and evaluates the full system. See [VERIFICATION.md](VERIFICATION.md).
+
+## `scripts/migrate-firefox-profile.sh`
+
+Runs on NixOS after install. See [FIREFOX.md](FIREFOX.md).
