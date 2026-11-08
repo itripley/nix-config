@@ -78,7 +78,7 @@
     _7zz
     unrar
     innoextract # innounp
-    netbird-ui
+    # NetBird tray app comes from services.netbird (networking.nix), wrapped for its socket
 
     # AI
     lmstudio

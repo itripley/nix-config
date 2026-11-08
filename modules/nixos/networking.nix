@@ -33,6 +33,14 @@
   # The server offers "Exit Node (unraid)" (0.0.0.0/0) and the client auto-selects it.
   # Deselected once with `netbird networks deselect "Exit Node (unraid)" "Exit Node (unraid)-v6"`,
   # as on Windows; the choice is kept in /var/lib/netbird/state.json.
+  # Tray toggles at login. WARP's warp-taskbar already autostarts from its package;
+  # NetBird's tray app (the module's wrapped netbird-ui) doesn't, so add it.
+  environment.systemPackages = [
+    (pkgs.makeAutostartItem {
+      name = "netbird";
+      package = config.services.netbird.clients.default.wrapper;
+    })
+  ];
   services.cloudflare-warp.enable = true;
 
   networking.firewall = {

@@ -107,7 +107,7 @@ history, open tabs) moves over. See [FIREFOX.md](FIREFOX.md) for what, how and w
 
 | Windows | NixOS | |
 |---|---|---|
-| NetBird | same | `services.netbird` + netbird-ui |
+| NetBird | same | `services.netbird` (self-hosted server, tray app autostarts) |
 | Cloudflare One / WARP | same | `services.cloudflare-warp` |
 | PrivadoVPN | NetworkManager | import its WireGuard/OpenVPN configs |
 | Static DNS 1.1.1.1 | same | router DNS-rebind protection breaks `*.plex.direct` |
