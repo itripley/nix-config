@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   networking.networkmanager = {
     enable = true;
@@ -25,6 +25,14 @@
     Scheme = "https";
     Host = "netbird.weblivia.dev:443";
   };
+  # The merge only runs when the daemon starts, and the module doesn't restart it when
+  # that file changes, so a switch would silently keep the old settings.
+  systemd.services.netbird.restartTriggers = [
+    config.environment.etc."netbird/config.d/50-nixos.json".text
+  ];
+  # The server offers "Exit Node (unraid)" (0.0.0.0/0) and the client auto-selects it.
+  # Deselected once with `netbird networks deselect "Exit Node (unraid)" "Exit Node (unraid)-v6"`,
+  # as on Windows; the choice is kept in /var/lib/netbird/state.json.
   services.cloudflare-warp.enable = true;
 
   networking.firewall = {

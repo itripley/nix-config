@@ -57,6 +57,7 @@ git add -A && git commit -m "…"  # record it
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
+| No internet while NetBird is connected | NetBird auto-selected the server's **Exit Node (unraid)** (`0.0.0.0/0`); if that peer isn't reachable, everything goes into the tunnel and fails (`write: required key not available` in `journalctl -u netbird`) | `netbird networks deselect "Exit Node (unraid)" "Exit Node (unraid)-v6"` (kept across restarts). Check with `netbird networks list`. To stop new devices auto-selecting it, turn off *auto apply* for that route in the NetBird dashboard. |
 | Plex LAN casting / plex-mpv-shim can't connect | Router DNS-rebind protection on `*.plex.direct` | `cat /etc/resolv.conf` should list 1.1.1.1 first (`networking.nix`). WARP or NetBird DNS taking over can also mask or cause it. Long-term: whitelist `plex.direct` in the router. Also set `allow_http: true` in `~/.config/plex-mpv-shim/conf.json`. |
 | `/mnt/windows` empty or error | Windows Fast Startup / hibernation | Boot Windows, disable Fast Startup (`powercfg /h off`), shut down, retry. `journalctl -b -u mnt-windows.mount`. |
 | `/mnt/unraid/*` hangs or errors | Server down, wrong credentials | `journalctl -b -u mnt-unraid-files.mount`; check `/etc/nixos/smb-secrets`; `ping 192.168.1.65`. Times out after 5 s by design. |
