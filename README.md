@@ -46,7 +46,11 @@ docs/                          full documentation: what, how and why
    (key `~/.ssh/id_unraid`); the Nix store is cached in the server's `nixos-eval-store` volume.
 4. Commit and `git push` any changes. The installer clones from
    [github.com/itripley/nixos-config](https://github.com/itripley/nixos-config), so unpushed edits won't be there.
-5. Flash the **NixOS 26.05 graphical ISO** to a USB stick (Rufus/Etcher). Not the Philips portable SSD.
+5. Installer: the **Philips portable SSD** already has the NixOS graphical ISO flashed on it.
+   Any recent NixOS ISO works: `nixos-install --flake` uses the pinned nixpkgs from `flake.lock`,
+   not the ISO's. It can stay plugged in during the install, because disko only targets the
+   Samsung disk (by serial). To reuse the drive for storage afterwards, delete its partitions
+   (Disk Management or `diskpart` → `clean`) and reformat it.
 
 ## Install
 

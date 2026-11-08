@@ -23,7 +23,7 @@ nothing on Windows was changed to gather it.
 |---|---|---|---|
 | Fanxiang S770 1TB | NVMe | GPT: `C:` NTFS 931 GB (partition GUID `62cd18cb-2a2f-4de3-9849-fc529fea7536`) + 100 MB EFI system partition | **Windows; never touched.** Mounted read-only at `/mnt/windows` |
 | Samsung SSD 850 EVO 500GB, serial `S3R3NF0J901761H` | SATA | **MBR, two partitions Windows can't read** (457 GB + 8.8 GB), likely an old Linux install + swap | **NixOS target; fully erased by disko** |
-| PHILIPS Portable SSD 233 GB | USB | raw / unpartitioned | not used; deliberately excluded as an install medium |
+| PHILIPS Portable SSD 233 GB | USB | shows as "RAW" in Windows, because it holds a flashed NixOS ISO (Windows can't read the ISO's hybrid layout) | **the NixOS installer**; not part of the installed system |
 
 Other findings that matter for dual-boot:
 - **Windows Fast Startup is on** (`HiberbootEnabled = 1`). That leaves `C:` in a hibernated state
