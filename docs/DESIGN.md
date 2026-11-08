@@ -113,5 +113,7 @@ The Nix store is **world-readable**, and this repo may be pushed somewhere. So:
 - `.gitattributes` forces **LF line endings**. The repo is edited on Windows but run on Linux,
   where CRLF breaks shell scripts.
 - Flakes only see **git-tracked files**, so the verify script runs `git add -A` first.
-- `hardware-configuration.nix` is a placeholder that evaluates, so the config can be checked
-  before the real hardware scan exists.
+- `hardware-configuration.nix` started as a placeholder that evaluated, so the config could be
+  checked before the real hardware scan existed. The install replaced it with the generated one.
+- Upstream build failures are fixed in `overlays/build-fixes.nix`, not by commenting packages out,
+  so the app list in `apps.nix` stays the source of truth.

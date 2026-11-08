@@ -30,7 +30,8 @@ git add -A && git commit -m "…"  # record it
 | Edit Firefox `userChrome.css` | Edit `home/olivia/dotfiles/firefox/userChrome.css`, then `nh os switch`, then restart Firefox. |
 | Change time zone | `time.timeZone` in `modules/nixos/desktop.nix` (e.g. `"Europe/London"`). |
 | Change SMB password | `sudo $EDITOR /etc/nixos/smb-secrets` (not in the repo). |
-| Drop Sublime Text | Remove `sublime4` from `apps.nix` **and** the `permittedInsecurePackages` line in `flake.nix`. |
+| Drop Sublime Text | Remove `sublime4` from `apps.nix`, the `permittedInsecurePackages` line in `flake.nix` **and** the `openssl_1_1` fix in `overlays/build-fixes.nix`. |
+| A package fails to build | Read the log (`nix log /nix/store/…drv`). Fix it in `overlays/build-fixes.nix` rather than commenting the app out; see that file for examples. To unblock a rebuild right away, comment the app out, then put it back once fixed. |
 | Upgrade to the next NixOS release | Change `nixos-26.05` / `release-26.05` in `flake.nix`, `nh os switch --update`. **Don't** touch `stateVersion`. |
 
 ## Booting Windows

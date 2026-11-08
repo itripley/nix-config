@@ -74,18 +74,49 @@ Zero warnings, zero errors against `flake.lock`. Pinned revisions:
 | nix-flatpak | | `02656785` |
 | zen-browser | | `5f45f55b` |
 
-## Not verified (can only be checked on the real install)
+## First real build (2026-11-08)
 
-| Area | Risk | How you'd notice / fix |
-|---|---|---|
-| **Building** the system | A package could fail to build or download. Evaluation doesn't build anything. | `nixos-install` stops with a build error before anything is activated. |
-| Disk id | The by-id name is inferred from the Windows model and serial. | README step 1 checks `ls -l /dev/disk/by-id/` before disko runs. |
-| Hardware | 165 Hz/VRR mode selection, LACT, OpenRGB device detection, ROCm in Resolve/Ollama, the Seiren Mini | Plasma display settings, `lact`, OpenRGB GUI, `ollama ps`. |
-| Plasma shortcuts | KWin action names could differ in this Plasma version. | System Settings → Shortcuts; adjust `plasma.nix`. |
-| PipeWire virtual sinks | Config is valid but routing behaviour is untested. | `wpctl status` should list Game/Music/Chat. |
-| SMB mounts | Credentials and share names. | `ls /mnt/unraid/files`, `journalctl -u mnt-unraid-files.mount`. |
-| `/mnt/windows` | Needs Fast Startup off. | `ls /mnt/windows`. |
-| Firefox migration | Real Firefox opening the migrated profile. | See [FIREFOX.md](FIREFOX.md). |
-| Flatpaks | Installed on first activation, so they need network. | `flatpak list`. |
+The install itself hit build failures, and to get a bootable system a set of apps in `apps.nix`
+and `neovim`/`vscode` in `dev.nix` were commented out. Back on the installed system, the original
+config was rebuilt with `nix build --keep-going` to find which packages really fail. Most of the
+disabled apps built fine. Only these failed, all because of upstream bugs:
 
-Run `pwsh -File scripts\verify.ps1` after **any** edit before installing or rebuilding.
+| # | Package | Error | Cause | Fix |
+|---|---|---|---|---|
+| 4 | `vscode` 1.144.0 | `rm: cannot remove 'resources/app/node_modules/@vscode/ripgrep/bin/rg'` | VS Code moved ripgrep to `@vscode/ripgrep-universal/bin/linux-x64/rg`; nixpkgs' `postPatch` still uses the old path | `overlays/build-fixes.nix`: link nixpkgs' ripgrep at the new paths |
+| 5 | `openssl-1.1.1w` → `sublime4` | `30-test_afalg.t ... Failed: 1` | the test uses the running kernel's AF_ALG socket, which Linux 7.3 handles differently | drop that one test |
+| 6 | `unstable.codex` 0.167.0 | `AWS_LC_SYS_USE_SYSTEM=1 requires a system-installed AWS-LC`, then `zstd-sys: Can't probe for zstd in pkg-config` | nixpkgs' new `cargoUseSystemLibs` hook forces system C libraries; codex's inputs weren't updated | `dontCargoUseSystemLibs = true` |
+| 7 | `programs.neovim` | `Error installing file '.config/nvim/init.lua' outside $HOME` | HM 26.05 always writes `nvim/init.lua`, but `~/.config/nvim` is a live link to `dotfiles/nvim` | `sideloadInitLua = true` (HM passes its lines through the wrapper) |
+
+#7 only showed up after #4–#6 were fixed, because `home-manager-files` is built after the packages.
+`makemkv` logs `curl: (22) ... 404` but succeeds: its fetcher falls back to `makemkv.com/download/old/`.
+codex is not in the binary cache (it fails on Hydra too), so it compiles locally (~10 min).
+
+After the fixes, the full system (`config.system.build.toplevel`) with **every** app from the
+original lists builds.
+
+## Checked on the installed system (2026-11-08)
+
+| Area | Result |
+|---|---|
+| Disk id / disko | ✅ installed on the Samsung, Windows NVMe untouched |
+| Display | ✅ DP-1 2560×1440 @ 165 Hz picked automatically; Adaptive Sync set to *Automatic* (`kscreen-doctor output.DP-1.vrrpolicy.automatic`). A second 1600×1200 @ 75 Hz monitor is on DP-2. |
+| Services | ✅ `lactd`, `ollama`, `openrgb`, `docker`, `netbird`, `cloudflare-warp` running; no failed units |
+| PipeWire virtual sinks | ✅ `virtual_game`, `virtual_music`, `virtual_chat` exist. Newer `wpctl status` lists them under **Filters**, not Sinks. |
+| SMB mounts | ✅ `/mnt/unraid/*` automount with the credentials file |
+| `/mnt/windows` | ✅ mounted read-only (ntfs3) |
+| Flatpaks | ✅ JDownloader and Stremio installed |
+| SSH | ✅ `ssh unraid` works. ❌ `github-artlivia`: GitHub rejects the deploy key (`Permission denied (publickey)`); re-add `id_ed25519_artlivia.pub` as a deploy key on `itripley/artlivia`. |
+| Firefox migration | ✅ script ran: 126 profile add-ons (22 enabled). Opening it in Firefox is still to be checked. |
+
+## Still to check by hand
+
+| Area | How |
+|---|---|
+| Plasma shortcuts | System Settings → Shortcuts; adjust `plasma.nix` if a KWin action name differs. |
+| ROCm in Resolve / Blender / Ollama | Render with HIP in Blender, run a model and check `ollama ps` shows GPU. |
+| Seiren Mini + EasyEffects | Record a test clip. |
+| Firefox | Open it: add-ons, Sidebery panels, logins and tabs should all be there. |
+
+After any edit, build before switching: `nh os build` (or `nh os switch`, which stops on errors
+before activating). `scripts/verify.ps1` is still useful when editing from Windows.

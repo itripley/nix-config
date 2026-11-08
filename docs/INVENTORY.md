@@ -12,7 +12,7 @@ nothing on Windows was changed to gather it.
 | CPU | AMD Ryzen 7 7700X (Zen 4, 8 cores) | `kvm-amd`, AMD microcode, `linuxPackages_latest` |
 | GPU | AMD Radeon RX 7800 XT (RDNA3, `gfx1101`) | amdgpu, ROCm (Resolve, Blender HIP, Ollama), LACT |
 | RAM | 32 GB | 16 GB swapfile + zram |
-| Display | DELL S2721DGF, 2560×1440 @ 165 Hz | set refresh/VRR after install (Plasma display settings) |
+| Display | DELL S2721DGF, 2560×1440 @ 165 Hz (DP-1), plus a 1600×1200 @ 75 Hz second monitor (DP-2, found on NixOS) | 165 Hz picked automatically; Adaptive Sync set to Automatic after install |
 | Network | Realtek Gaming 2.5GbE (wired) | NetworkManager defaults |
 | Audio | Realtek HDA, AMD HDMI audio, **Razer Seiren Mini** USB mic, Voicemeeter virtual devices | PipeWire, virtual sinks, EasyEffects |
 | Firmware | UEFI, **Secure Boot off**, SVM (virtualization) on | plain systemd-boot, no Secure Boot tooling needed |

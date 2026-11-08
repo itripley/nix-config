@@ -36,11 +36,15 @@
       ...
     }@inputs:
     let
+      # Workarounds for packages that don't build in the pinned nixpkgs
+      buildFixes = import ./overlays/build-fixes.nix;
+
       # Fast-moving tools (AI CLIs etc.) come from unstable as pkgs.unstable.<name>
       unstableOverlay = final: prev: {
         unstable = import nixpkgs-unstable {
           inherit (prev.stdenv.hostPlatform) system;
           config.allowUnfree = true;
+          overlays = [ buildFixes ];
         };
       };
     in
@@ -49,7 +53,10 @@
         specialArgs = { inherit inputs; };
         modules = [
           {
-            nixpkgs.overlays = [ unstableOverlay ];
+            nixpkgs.overlays = [
+              buildFixes
+              unstableOverlay
+            ];
             nixpkgs.config.allowUnfree = true;
             # Only needed by Sublime Text 4 (still links the EOL OpenSSL 1.1).
             # Remove together with sublime4 in home/olivia/apps.nix.

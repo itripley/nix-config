@@ -13,7 +13,8 @@ Generated from an inventory of the Windows machine (hardware, apps, dotfiles, ne
 
 ```
 flake.nix                      inputs + nixosConfigurations.desktop-olivia
-hosts/desktop-olivia/          configuration.nix, disko.nix, hardware-configuration.nix (placeholder)
+hosts/desktop-olivia/          configuration.nix, disko.nix, hardware-configuration.nix (generated at install)
+overlays/build-fixes.nix       workarounds for packages that fail to build upstream
 modules/nixos/                 boot, amd, desktop, audio, networking, storage, gaming, services
 home/olivia/                   home-manager: apps, dev (git/ssh/nvim/vscode), firefox, plasma, flatpak
 home/olivia/dotfiles/          wezterm, nvim (LazyVim), fastfetch, firefox userChrome — copied from Windows

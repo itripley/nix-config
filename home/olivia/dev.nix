@@ -40,6 +40,9 @@
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;
+    # HM 26.05 always generates init.lua (provider toggles). ~/.config/nvim is a live link
+    # to dotfiles/nvim (LazyVim's own init.lua), so pass HM's lines via the wrapper instead.
+    sideloadInitLua = true;
     extraPackages = with pkgs; [
       gcc
       gnumake

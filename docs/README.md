@@ -18,12 +18,13 @@ Installation steps are in the top-level [README](../README.md).
 
 ## Status (2026-11-08)
 
-- Config **evaluates cleanly** against the pinned inputs in `flake.lock`, with zero warnings.
-  Every module, option and package name resolves; see [VERIFICATION.md](VERIFICATION.md).
-- **Not yet installed.** Nothing has been built or booted. Build failures and hardware behaviour
-  can only show up on the real install.
-- `hardware-configuration.nix` is a placeholder until the install regenerates it.
-- Git: everything is staged but not committed (no `user.name` is configured on the Windows machine).
+- **Installed** on the Samsung 850 EVO and booting; `hardware-configuration.nix` is the generated one.
+- The install hit four upstream build failures (vscode, openssl 1.1 for Sublime, codex, the neovim
+  module). They're fixed in `overlays/build-fixes.nix` and `dev.nix`, and the full system builds
+  with every app. See [VERIFICATION.md](VERIFICATION.md#first-real-build-2026-11-08).
+- Post-install steps done: SSH keys, WezTerm wallpapers, Firefox profile migration, plex-mpv-shim
+  `allow_http`, Adaptive Sync. Logins (NetBird, WARP, Steam, …) and a few hardware checks remain;
+  see [VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand).
 
 ## Conventions
 
