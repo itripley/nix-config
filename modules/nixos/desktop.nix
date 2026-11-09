@@ -28,6 +28,14 @@
   ];
   console.useXkbConfig = true;
 
+  # Plasma 6 turns these on by default (mkDefault); neither is used here.
+  # Orca screen reader, and speech-dispatcher with its voices (~1.2 GiB closure, ran at every
+  # login; also enabled by NixOS' graphical-desktop defaults). No text-to-speech without it.
+  services.orca.enable = false;
+  services.speechd.enable = false;
+  # KDE PIM (Akonadi + a MariaDB server) for KMail/KOrganizer/Kontact:
+  programs.kde-pim.enable = false;
+
   programs.kdeconnect.enable = true; # opens its firewall ports
   programs.partition-manager.enable = true;
   services.printing.enable = true;

@@ -81,7 +81,7 @@
     nodejs
     python3
     uv
-    dotnet-sdk # Godot C#
+    # Godot C#: godot_4-mono brings its own .NET SDK, so no separate dotnet-sdk
     godot_4
     godot_4-mono
     docker-compose
