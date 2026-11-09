@@ -26,9 +26,12 @@ Installation steps are in the top-level [README](../README.md).
   plex-mpv-shim `allow_http`, Adaptive Sync, NetBird on the self-hosted server (exit node off),
   WARP registered, tray toggles for both, and the old **Fedora** setup (theme, Krohnkite, Ulauncher,
   apps; [FEDORA.md](FEDORA.md)).
-- **2026-11-09 app changes are committed and build, but not switched to yet:** PhotoCraft + FilmCraft,
-  Claude Desktop, and the removal of 44 apps. After `nh os switch`, do the checks in
-  [VERIFICATION.md](VERIFICATION.md#app-changes-2026-11-09).
+- The 2026-11-09 app changes (PhotoCraft + FilmCraft, Claude Desktop, 44 apps removed) are
+  **switched to**; the running system was byte-identical to that commit's build. Their hand checks
+  are in [VERIFICATION.md](VERIFICATION.md#app-changes-2026-11-09).
+- **Audit fixes (2026-11-09, branch `audit-fixes`) build but are not switched to yet.** Apply them
+  with `nh os boot` and reboot (the amdgpu overdrive kernel parameter needs a reboot). Do the one-time
+  steps and checks in [VERIFICATION.md](VERIFICATION.md#audit-2026-11-09) first.
 - Open: the `github-artlivia` deploy key is rejected by GitHub; a few hand checks
   ([VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand)); remaining app logins (Steam, Bitwarden, …).
 
@@ -49,6 +52,7 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-09 | Warehouse removed | `663b28e` |
 | 2026-11-09 | Claude Desktop (official Linux beta) added from the claude-desktop-nix flake | `9be83f4`, DESIGN §4 |
 | 2026-11-09 | WARP tray: Cloudflare's Zero Trust-only `warp-taskbar` replaced by warp-cloudflare-gui (consumer on/off) | `cc26af0` |
+| 2026-11-09 | Best-practice audit. Fixes: root-only `trusted-users`, no legacy channels, `build-vm` works, LACT overdrive, `nix fmt`/`nix flake check`/`nix develop` + CI, warp-gui moved to `pkgs/`, shared nixpkgs config, no hardcoded uid/path, closure 43.1 → 40.6 GiB (orca/speechd, KDE PIM, extra JDKs, second .NET SDK) | branch `audit-fixes`, [VERIFICATION.md](VERIFICATION.md#audit-2026-11-09) |
 
 ## Conventions
 

@@ -12,6 +12,8 @@ git add -A && git commit -m "…"  # record it
 - `nh os switch` = `nixos-rebuild switch --flake ~/nixos-config#desktop-olivia`, with a readable diff
   of what changed. `nh os boot` applies at next boot instead (safer for kernel/driver changes).
 - **New files must be `git add`ed** before rebuilding, or the flake won't see them.
+- `nix flake check` (≈15 s) evaluates the whole system and lints the repo; `nix fmt` formats it.
+  CI runs the same check on every push.
 - From Windows, check edits before rebooting into NixOS: `pwsh -File scripts\verify.ps1`.
 
 ## Common tasks
@@ -28,12 +30,17 @@ git add -A && git commit -m "…"  # record it
 | Add another ArtCraft app | Add it to `programs.artcraft.apps` in `modules/nixos/desktop.nix`: `vectorcraft`, `designcraft`, `lightcraft`, `effectcraft`, `pdfcraft`. |
 | Pin an ArtCraft version | Use `<app>_<x>_<y>_<z>` in that list, e.g. `"photocraft_0_20_1"`; plain `<app>` is the newest in the lock. |
 | Roll back | Pick an older generation in the boot menu, or `sudo nixos-rebuild switch --rollback`. |
+| Try a risky change in a VM | `nixos-rebuild build-vm --flake .#desktop-olivia`, then `./result/bin/run-desktop-olivia-vm`. Its disk is `./desktop-olivia.qcow2` (gitignored; delete it for a fresh VM). No artwork or secrets inside. With the real btrfs layout: `nix build .#nixosConfigurations.desktop-olivia.config.system.build.vmWithDisko`, then `./result/bin/disko-vm` (disk in a temp dir). |
+| See what an update changes | `nix build .#nixosConfigurations.desktop-olivia.config.system.build.toplevel` and `nvd diff /run/current-system result` (`nvd` is in `nix develop`). `nh os switch` shows the same diff before activating. |
+| Format / lint | `nix fmt`; `nix flake check`. `nix develop` has nixfmt-tree, statix, deadnix, nvd and nil. |
+| Build a repo package alone | `nix build .#warp-cloudflare-gui` (packages in `pkgs/`). |
+| Play Minecraft 1.16 or older | Add `jdk17` / `jdk8` to the Prism Launcher `jdks` list in `apps.nix`. |
 | Free disk space | Automatic (`programs.nh.clean`: keeps 10 generations / 14 days). Manual: `nh clean all`. |
 | Edit nvim / WezTerm / fastfetch config | Edit under `home/olivia/dotfiles/…`; they're live links, so there's no rebuild. |
 | Edit Firefox `userChrome.css` | Edit `home/olivia/dotfiles/firefox/userChrome.css`, then `nh os switch`, then restart Firefox. |
 | Change time zone | `time.timeZone` in `modules/nixos/desktop.nix` (e.g. `"Europe/London"`). |
 | Change SMB password | `sudo $EDITOR /etc/nixos/smb-secrets` (not in the repo). |
-| Drop Sublime Text | Remove `sublime4` from `apps.nix`, the `permittedInsecurePackages` line in `flake.nix` **and** the `openssl_1_1` fix in `overlays/build-fixes.nix`. |
+| Drop Sublime Text | Remove `sublime4` from `apps.nix`, the `permittedInsecurePackages` line in `flake.nix` (`nixpkgsConfig`) **and** the `openssl_1_1` fix in `overlays/build-fixes.nix`. |
 | A package fails to build | Read the log (`nix log /nix/store/…drv`). Fix it in `overlays/build-fixes.nix` rather than commenting the app out; see that file for examples. To unblock a rebuild right away, comment the app out, then put it back once fixed. |
 | Upgrade to the next NixOS release | Change `nixos-26.05` / `release-26.05` in `flake.nix`, `nh os switch --update`. **Don't** touch `stateVersion`. |
 
@@ -154,8 +161,7 @@ cleanup, the leftovers were checked on disk and deleted the same day:
 
 Nothing was found for the other removed apps, and `flatpak list --app` was already empty.
 
-`/var/lib/libvirt` (GNOME Boxes) holds only libvirt's default files, with no VMs. It needs root, so
-delete it after `nh os switch` (which stops libvirtd for good): `sudo rm -rf /var/lib/libvirt`.
+`/var/lib/libvirt` (GNOME Boxes, only libvirt's default files) was deleted after the switch too.
 
 The next time an app is removed, look for its data in `~/.config/<app>`, `~/.local/share/<app>`,
 `~/.cache/<app>` and `~/.var/app/<id>` (Flatpaks).

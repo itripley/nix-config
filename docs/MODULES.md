@@ -4,9 +4,14 @@ What each file does and why each non-obvious setting is there. For the big-pictu
 [DESIGN.md](DESIGN.md).
 
 ```
-flake.nix                         inputs, overlays, nixpkgs config, wires everything together
+flake.nix                         inputs, overlays, nixpkgs config, wires everything together;
+                                  also packages, formatter, checks, devShells
 overlays/build-fixes.nix          local workarounds for packages that fail to build upstream
+overlays/packages.nix             adds this repo's own packages (pkgs/) to the package set
+pkgs/warp-cloudflare-gui/         consumer WARP tray toggle (used by home/olivia/warp-gui.nix)
 flake.lock                        exact pinned revisions of every input
+statix.toml                       linter config (`nix flake check`)
+.github/workflows/check.yml       CI: `nix flake check` on every push
 hosts/desktop-olivia/
   configuration.nix               host entry: imports, user, nix settings, nh, nix-ld
   disko.nix                       partitioning of the Samsung disk
@@ -26,29 +31,45 @@ scripts/
 
 ## `flake.nix`
 
-- **`unstableOverlay`** adds `pkgs.unstable` (nixos-unstable with unfree allowed) for the few
-  fast-moving tools. Everything else comes from stable.
+- **`unstableOverlay`** adds `pkgs.unstable` (nixos-unstable) for the few fast-moving tools.
+  Everything else comes from stable.
 - **`buildFixes`** (`overlays/build-fixes.nix`) is applied to both stable and `pkgs.unstable`.
   It patches packages that fail to build in the pinned nixpkgs (see below).
-- **`nixpkgs.config.allowUnfree`**: Steam, Resolve, VS Code, Plex, Obsidian, etc. are unfree.
-- **`permittedInsecurePackages = [ "openssl-1.1.1w" ]`**: needed only by Sublime Text 4 (see DESIGN §4).
+- **`localPackages`** (`overlays/packages.nix`) adds the packages in `pkgs/` as `pkgs.<name>`.
+- **`nixpkgsConfig`**, used for both stable and `pkgs.unstable` so they can't drift apart:
+  - `allowUnfree`: Steam, Resolve, VS Code, Plex, Obsidian, etc. are unfree.
+  - `permittedInsecurePackages = [ "openssl-1.1.1w" ]`: needed only by Sublime Text 4 (see DESIGN §4).
 - **home-manager block:** `useGlobalPkgs` (same pkgs as the system), `useUserPackages` (user
   packages installed through the system profile), `backupFileExtension`, and `sharedModules` loading
   plasma-manager and nix-flatpak's HM module for the user.
-- Output: `nixosConfigurations.desktop-olivia`.
+- Outputs:
+  - `nixosConfigurations.desktop-olivia`: the system.
+  - `packages.x86_64-linux.warp-cloudflare-gui`: `nix build .#warp-cloudflare-gui`, taken from the
+    system's package set so overlays and unfree apply.
+  - `formatter`: `nix fmt` runs nixfmt (via nixfmt-tree) on every `.nix` file except the generated
+    `hardware-configuration.nix`.
+  - `checks`: `nix flake check` runs `toplevel-eval` (instantiates every derivation of the system,
+    builds nothing) and `lint` (statix, deadnix, `nixfmt --check`). Takes about 15 s.
+    `toplevel-eval` uses `builtins.unsafeDiscardOutputDependency` on the `drvPath`: a plain
+    `drvPath` string depends on every output in the build closure, so the check would fetch or
+    build all of it.
+  - `devShells.default`: `nix develop` gives nixfmt-tree, statix, deadnix, nvd and nil.
 
 ## `hosts/desktop-olivia/configuration.nix`
 
 | Setting | Why |
 |---|---|
 | `networking.hostName = "desktop-olivia"` | Matches the Windows hostname. |
-| user `olivia`, **`uid = 1000`** | The CIFS and NTFS mounts map file ownership to uid 1000; pinning it keeps them in sync. |
+| user `olivia`, **`uid = 1000`** | Fixed, so files on the CIFS and NTFS mounts keep their owner. `storage.nix` reads it from here. |
 | groups `wheel networkmanager audio video docker gamemode i2c` | sudo; Wi-Fi/VPN changes; realtime audio; GPU; Docker without sudo; gamemode; DDC/CI monitor control. |
 | `shell = pkgs.fish` + `programs.fish.enable` | WezTerm's Linux config launches `fish -l`; the fish VS Code extension was installed on Windows too. |
 | `nix.settings.experimental-features` | Flakes and the `nix` command. |
-| `auto-optimise-store`, `trusted-users` | Dedupe the store; let wheel users use extra caches. |
-| **`programs.nh`** with `flake = /home/olivia/nixos-config` and `clean` | `nh os switch` = friendlier `nixos-rebuild`; automatic GC keeps 10 generations / 14 days. Replaces `nix.gc`. |
+| `auto-optimise-store` | Dedupe the store. |
+| `trusted-users` left at the default (`root`) | Not `@wheel`: a trusted user can set substituters or build hooks, which is root without sudo's password. Nothing here needs it (nh uses sudo). |
+| **`nix.channel.enable = false`** | No legacy channels. `NIX_PATH` is only `nixpkgs=flake:nixpkgs` (the pinned input), so `<nixpkgs>` and `nix shell nixpkgs#…` match the system. |
+| **`programs.nh`** with `flake = ~olivia/nixos-config` and `clean` | `nh os switch` = friendlier `nixos-rebuild`; automatic GC keeps 10 generations / 14 days. Replaces `nix.gc`. The path is built from the user's home, and home-manager's live links read it back (`osConfig.programs.nh.flake`), so the checkout location is written once. |
 | **`programs.nix-ld`** | Lets unpatched Linux binaries run: Mason-installed LSPs in LazyVim, the VS Code server, random downloaded tools. |
+| `environment.systemPackages`: wget, curl, pciutils, usbutils | No `git`/`vim`: olivia gets `gitFull` and Neovim's vim/vi aliases from home-manager, root has nano, and Nix fetches flakes without a git binary. |
 | `system.stateVersion = "26.05"` | The release this system was first installed with. **Never bump it**; it isn't an upgrade switch. |
 
 ## `hosts/desktop-olivia/disko.nix`
@@ -89,6 +110,7 @@ here) only if the hardware changes.
 | **`time.hardwareClockInLocalTime`** | Windows stores local time in the RTC (DESIGN §3). |
 | `enableRedistributableFirmware` | amdgpu, Realtek and Bluetooth firmware blobs. |
 | `zramSwap`, `fstrim`, `btrfs.autoScrub` | Compressed RAM swap; weekly TRIM for SSD health; periodic checksum scrub to catch silent corruption. |
+| `virtualisation.vmVariant…autoScrub.enable = mkForce false` | `nixos-rebuild build-vm` swaps the filesystems for a non-btrfs disk, and autoScrub's assertion would fail. Only affects the VM. |
 
 ## `modules/nixos/amd.nix`
 
@@ -98,6 +120,7 @@ here) only if the hardware changes.
 | `amdgpu.initrd.enable` | Load the GPU driver early: correct resolution from the first frame, smoother boot. |
 | `amdgpu.opencl.enable` | ROCm OpenCL, which DaVinci Resolve needs for GPU processing on AMD. |
 | **`services.lact`** | Fan curves, power limits, clocks: the AMD Software (Adrenalin) replacement. |
+| `hardware.amdgpu.overdrive.enable` | Unlocks clock/voltage control in LACT (adds `amdgpu.ppfeaturemask=0xfffd7fff` to the kernel command line), as the lact module recommends. Changes need a reboot (`nh os boot`). |
 | **`hardware.i2c`** | DDC/CI so Plasma can control the monitor's real brightness (Twinkle Tray replacement). |
 | `nvtop`, `clinfo`, `ddcutil` | GPU monitor, OpenCL check, DDC command-line tool. |
 
@@ -112,6 +135,7 @@ here) only if the hardware changes.
 | `environment.systemPackages`: `klassy`, `kdePackages.krohnkite`, `kdePackages.qtmultimedia` | KWin decoration, tiling script and the QML module the animated lock screen needs. System-wide so KWin/plasmashell find them. |
 | `programs.kdeconnect` | Was in use on Windows; this also opens its firewall ports. |
 | `partition-manager`, `printing` | KDE disk tool; CUPS printing. |
+| `services.orca`, `services.speechd`, `programs.kde-pim` = `false` | Plasma (and NixOS' graphical-desktop defaults) turn these on with `mkDefault`. Not used here: the Orca screen reader and speech-dispatcher with its voices (~1.2 GiB, ran at every login), and KDE PIM (Akonadi + a MariaDB server, for KMail/KOrganizer/Kontact). Turning them off saved ~1.3 GiB. Switch back on for a screen reader / text-to-speech or the KDE PIM apps. |
 | `services.flatpak`, `programs.appimage` (+binfmt) | Escape hatches for apps outside nixpkgs (DESIGN §8). |
 | `programs.artcraft` (`apps = photocraft, filmcraft`) | ArtCraft apps from the `artcraft` flake's module (DESIGN §4). The module also turns on `fonts.fontDir` and links `/usr/share/fonts` to the system fonts, because the apps' text tools only look there, not through fontconfig. |
 | fonts: JetBrainsMono Nerd Font, Noto (+CJK, emoji), corefonts | WezTerm's font; full Unicode coverage including Japanese/Chinese; Microsoft core fonts for websites and documents that expect them. |
@@ -144,7 +168,7 @@ here) only if the hardware changes.
 | Option | Why |
 |---|---|
 | `credentials=/etc/nixos/smb-secrets` | Password stays out of the world-readable store and the repo. |
-| `uid=1000,gid=100` | Files appear owned by olivia. |
+| `uid=`/`gid=` from `users.users.olivia.uid` / `users.groups.users.gid` | Files appear owned by olivia (1000:100). |
 | `noauto` + `x-systemd.automount` | Mount on first access, not at boot, so boot never waits for the server. |
 | `x-systemd.idle-timeout=600` | Unmount after 10 min idle; no hung mounts if the server goes away. |
 | `device-timeout` / `mount-timeout = 5s` | Fail fast instead of freezing a file manager. |
@@ -177,6 +201,7 @@ off. Used for one-time imports (SSH keys, wallpapers, Firefox profile).
 
 - Imports the other HM modules; `home.stateVersion = "26.05"` (never bump, same as the system one).
 - **`xdg.configFile` live links** for `wezterm`, `nvim`, `fastfetch` → `~/nixos-config/home/olivia/dotfiles/…` (DESIGN §6).
+  The checkout path comes from `osConfig.programs.nh.flake` (configuration.nix); `plasma.nix` uses it too.
 - `programs.fish.functions.fish_greeting = "pokemon-colorscripts -r"`, `home.sessionPath` (`~/.cargo/bin`, `~/go/bin`): as on Fedora.
 - `services.easyeffects`: background audio effects; RNNoise noise suppression for the Seiren Mini
   replaces NVIDIA Broadcast / AMD Noise Suppression.
@@ -187,6 +212,8 @@ The user package list, grouped by category, with the replaced Windows app noted 
 Notable choices:
 - `pkgsRocm.blender`: Blender with HIP (GPU rendering on AMD). The older `blender-hip` name was removed from nixpkgs.
 - `davinci-resolve`: see the codec caveat in [MIGRATION.md](MIGRATION.md).
+- `prismlauncher.override { jdks = [ jdk25 jdk21 ]; }`: Java for Minecraft 1.20.5+ only. The default
+  also bundles JDK 17 and 8 (~0.7 GiB) for 1.16 and older; add them back to the list for those versions.
 - `unstable.claude-code`: from unstable because it moves fast.
 - `inputs.claude-desktop.packages.<system>.default`: Claude Desktop (official Linux beta) from its flake (DESIGN §4).
 - "From the old Fedora install" block: Ulauncher, btop, High Tide, pokemon-colorscripts.
@@ -209,7 +236,7 @@ Notable choices:
 | `programs.neovim` + `extraPackages` | LazyVim needs a C compiler (treesitter), ripgrep/fd (search), lazygit, and LSPs; Nix provides them on Neovim's PATH. `sideloadInitLua = true` because HM 26.05 always generates `nvim/init.lua`, which can't be written into the live-linked LazyVim folder. |
 | `programs.vscode`, `package = vscode.fhs` | The FHS variant lets marketplace extensions with native binaries work. 8 extensions available in nixpkgs are declared; the rest come back through Settings Sync. |
 | `wezterm` (plain package) | The terminal. Not `programs.wezterm`, which would generate `wezterm.lua` into the live-linked config folder. Uses JetBrainsMono Nerd Font from `desktop.nix`. |
-| Dev tools | Node, Python + uv, .NET SDK (Godot C#), Godot 4 + Mono, docker-compose, tmux, mc, fastfetch, jq, gh; from Fedora: Go, rustup (cargo), lazydocker. |
+| Dev tools | Node, Python + uv, Godot 4 + Mono (brings its own .NET 8 SDK, so no separate `dotnet-sdk`), docker-compose, tmux, mc, fastfetch, jq, gh; from Fedora: Go, rustup (cargo), lazydocker. Add `dotnet-sdk` back if you need the `dotnet` CLI outside Godot (e.g. VS Code's C# extension loading a project). |
 
 ## `home/olivia/firefox.nix`
 
@@ -247,10 +274,20 @@ no switch (log: `taskbar_icon: menu clicked` → `auth_window: show`).
 
 | Setting | Why |
 |---|---|
-| `warp-cloudflare-gui` (github.com/mrmoein/warp-cloudflare-gui, pinned commit) | Small PyQt5 front end that only runs `warp-cli connect` / `disconnect` / `status` / `registration show`. Upstream ships an Ubuntu venv installer, so it's packaged here: `stdenv.mkDerivation` + `wrapQtAppsHook` (Qt platform plugins), a wrapper that `cd`s into the app (it imports `warp_gui` from the working dir), and a menu entry *Cloudflare WARP*. |
-| `qtwidgets` 1.1 (PyPI) | The animated toggle; not in nixpkgs. `colorbutton.py` falls back to a hardcoded PySide2 import when PyQt5 isn't loaded yet, which fails the import check, so `postPatch` points it at qtpy like the rest of the library. |
+| `pkgs.warp-cloudflare-gui.override { cloudflare-warp = osConfig.services.cloudflare-warp.package; }` | The app (see `pkgs/warp-cloudflare-gui` below), using the same `warp-cli` as the system's WARP daemon. |
 | `autostart/warp-cloudflare-gui.desktop` with `--hide` | Starts at login as a tray icon only. Right-click → *Connect / Disconnect*, *Hide / Show* (window with the switch), *Quit*. |
 | `autostart/com.cloudflare.WarpTaskbar.desktop` with `Hidden=true` | A user autostart file with the same name overrides the package's `/etc/xdg/autostart` entry, so `warp-taskbar` no longer starts (otherwise two WARP icons). `warp-svc` itself is untouched. |
+
+## `pkgs/warp-cloudflare-gui/package.nix`
+
+github.com/mrmoein/warp-cloudflare-gui (pinned commit, GPL-3.0). Added to the package set by
+`overlays/packages.nix`; build it on its own with `nix build .#warp-cloudflare-gui`.
+
+| Part | Why |
+|---|---|
+| The app | Small PyQt5 front end that only runs `warp-cli connect` / `disconnect` / `status` / `registration show` (through `os.popen`). Upstream ships an Ubuntu venv installer, so it's packaged here: `stdenv.mkDerivation` + `wrapQtAppsHook` (Qt platform plugins), a wrapper that `cd`s into the app (it imports `warp_gui` from the working dir), and a menu entry *Cloudflare WARP*. |
+| `PATH` = `cloudflare-warp`'s `bin` | `warp-cli` is the only program it runs. Pinned to the package instead of `/run/current-system/sw/bin`, so it doesn't depend on whatever the running system happens to have. |
+| `qtwidgets` 1.1 (PyPI) | The animated toggle; not in nixpkgs. `colorbutton.py` falls back to a hardcoded PySide2 import when PyQt5 isn't loaded yet, which fails the import check, so `postPatch` points it at qtpy like the rest of the library. |
 
 Upstream quirk: the status thread updates Qt widgets from a background thread. Harmless so far; if
 the app ever crashes, that's the likely cause (just reopen it).

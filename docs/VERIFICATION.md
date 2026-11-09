@@ -128,8 +128,9 @@ Other things checked along the way:
 ## App changes (2026-11-09)
 
 Built on the installed system with
-`nix build .#nixosConfigurations.desktop-olivia.config.system.build.toplevel` after each change. Not
-switched to yet.
+`nix build .#nixosConfigurations.desktop-olivia.config.system.build.toplevel` after each change.
+Switched to the same day: on 2026-11-09, `/run/current-system` was the exact output of that commit's
+build.
 
 | Change | Commit | Checked |
 |---|---|---|
@@ -158,7 +159,66 @@ After the switch, check by hand:
 | PhotoCraft / FilmCraft | Both open from the app menu. The text tool lists the system fonts (if not: `ls -l /usr/share/fonts` should point at `/run/current-system/sw/share/X11/fonts`). |
 | Claude Desktop | Opens on Wayland and signs in; Chat, Cowork and Code tabs load. |
 | Removed apps gone | e.g. `which gimp wine codex` finds nothing; the Meta+F shortcut no longer opens Thunar. |
-| Leftover data | Home-folder leftovers (Zen, Krita, Vesktop, Thunar; ~290 MB) were deleted on 2026-11-09. After the switch: `sudo rm -rf /var/lib/libvirt` (no VMs in it). See [OPERATIONS.md](OPERATIONS.md#leftover-data-from-removed-apps). |
+| Leftover data | ✅ Home-folder leftovers (Zen, Krita, Vesktop, Thunar; ~290 MB) and `/var/lib/libvirt` were deleted on 2026-11-09. See [OPERATIONS.md](OPERATIONS.md#leftover-data-from-removed-apps). |
+
+## Audit (2026-11-09)
+
+A read-only audit against current NixOS best practices, checked against the pinned nixpkgs, followed by
+the fixes on branch `audit-fixes`.
+
+**Before the fixes:**
+
+| Check | Result |
+|---|---|
+| `nix flake check`, full eval (`…toplevel.drvPath`) | ✅ no errors or warnings; eval ≈10 s; no import-from-derivation (`--option allow-import-from-derivation false` still evaluates) |
+| Build vs running system | ✅ HEAD's build was identical to `/run/current-system`; `systemctl --failed` empty (system and user) |
+| Clean clone | ✅ same `.drv` as the working copy; `nix store diff-closures` against the running system empty |
+| `nix flake metadata` | ✅ every input locked, no duplicate nixpkgs, lock 0–3 months old |
+| `nix-env -q`, `nix profile list` | ✅ empty (no imperative packages) |
+| `nixos-rebuild build-vm` | ❌ failed: `services.btrfs.autoScrub` assertion (the VM has no btrfs). `vmWithDisko` built. |
+| Channels | ❌ `nix.channel.enable` on, root had the ISO's `nixos` channel, and the installer's `/etc/nixos/configuration.nix` was still there: a plain `nixos-rebuild switch` without `--flake` would have built that stock config |
+| `trusted-users` | ❌ `@wheel`: a passwordless route to root |
+| Closure | 43.1 GiB, 3367 paths. Biggest: Resolve 6.5 GiB, ROCm, CEF (OBS), Proton-GE. Avoidable: orca/speech-dispatcher, Akonadi + MariaDB, Prism's JDK 8/17, a second .NET SDK. |
+| statix / deadnix / nixfmt | style warnings only; 3 unused arguments; 3 files unformatted |
+| Firewall | ✅ every open port traced to the module that opens it (LocalSend, plex-mpv-shim, Plex GDM, Steam, KDE Connect, Avahi, NetBird, WARP) |
+| `vulnix --system` | ⚠️ not run: the NVD feed download timed out |
+
+**After the fixes** (each commit built with `nix build --no-link`): `nix flake check` runs eval + lint
+in ≈15 s and passes; the lint check was confirmed to fail on a file with an unused argument;
+`build-vm` builds; `nix.nixPath` = `["nixpkgs=flake:nixpkgs"]`; `trusted-users = root`; kernel
+command line has `amdgpu.ppfeaturemask=0xfffd7fff`; closure **40.6 GiB**. The CIFS/NTFS fstab entries
+still carry `uid=1000,gid=100`. warp-cloudflare-gui's wrapper `PATH` is now cloudflare-warp's own
+`bin`.
+
+**One-time steps before applying them** (outside the repo, need root):
+
+```sh
+sudo rm /etc/nixos/configuration.nix /etc/nixos/hardware-configuration.nix   # keep smb-secrets
+sudo nix-channel --remove nixos     # before the switch: nix-channel goes away with channels off
+nh os boot && reboot                # overdrive needs a reboot
+```
+
+**After the reboot, check by hand:**
+
+| Area | How |
+|---|---|
+| LACT | The GPU page shows clock/voltage controls; `cat /proc/cmdline` has `amdgpu.ppfeaturemask`. |
+| WARP tray | Connect/Disconnect still work (its `warp-cli` now comes from the package, not the system PATH). |
+| Channels | `echo $NIX_PATH` → `nixpkgs=flake:nixpkgs`; `nix-shell -p hello` works. |
+| Plasma | Logs in normally without Akonadi and Orca; the calendar widget still shows dates. |
+| Prism Launcher | Minecraft 1.20.5+ instances start. Older ones need `jdk17` / `jdk8` back (OPERATIONS). |
+| Godot C# / VS Code | Godot-mono builds C# projects with its own SDK. If VS Code's C# extension can't load a project, add `dotnet-sdk` back in `dev.nix`. |
+| Root password | `sudo passwd -S root` shows `P` (set). Keep it: it's the emergency-mode login (DESIGN §9). |
+
+**Left as they are, on purpose:** the `docker` group (root-equivalent, kept for sudo-less Docker;
+DESIGN §9); blanket `allowUnfree` (DESIGN §4); `mutableUsers = true`; no `system.autoUpgrade`
+(DESIGN §10); the `ntfs` entry in `supportedFilesystems`; `gamescope.capSysNice` (reported to break
+gamescope started from inside Steam; test a game with a gamescope launch option, and set it to
+`false` if it fails).
+
+**Due in December 2026:** NixOS 26.05 is supported until about the end of December, a month after
+26.11 comes out. Upgrade with the steps in [OPERATIONS.md](OPERATIONS.md) ("Upgrade to the next
+NixOS release"), using `nh os boot`, and re-test `overlays/build-fixes.nix`.
 
 ## Checked on the installed system (2026-11-08)
 

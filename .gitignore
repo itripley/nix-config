@@ -7,3 +7,5 @@ home/olivia/dotfiles/wezterm/backdrops/*
 # republished here: copy it in by hand (see home/olivia/themes/README.md)
 home/olivia/themes/art/*
 !home/olivia/themes/art/.gitkeep
+# `nixos-rebuild build-vm` disk image
+*.qcow2

@@ -12,9 +12,10 @@ Generated from an inventory of the Windows machine (hardware, apps, dotfiles, ne
 | Unraid | `//192.168.1.65/{appdata,downloads,files}` → `/mnt/unraid/*` (automount) |
 
 ```
-flake.nix                      inputs + nixosConfigurations.desktop-olivia
+flake.nix                      inputs + nixosConfigurations.desktop-olivia (+ packages, formatter, checks, devShells)
 hosts/desktop-olivia/          configuration.nix, disko.nix, hardware-configuration.nix (generated at install)
-overlays/build-fixes.nix       workarounds for packages that fail to build upstream
+overlays/                      build-fixes.nix (upstream build workarounds), packages.nix (adds pkgs/)
+pkgs/                          packages written for this repo (warp-cloudflare-gui)
 modules/nixos/                 boot, amd, desktop, audio, networking, storage, gaming, services
 home/olivia/                   home-manager: apps, dev (git/ssh/nvim/vscode), firefox, plasma, flatpak
 home/olivia/dotfiles/          wezterm, nvim (LazyVim), fastfetch, firefox userChrome — copied from Windows
@@ -77,6 +78,8 @@ sudo nix --experimental-features "nix-command flakes" run github:nix-community/d
 # 3. Hardware config for this machine (overwrites the committed one; normally identical)
 sudo nixos-generate-config --no-filesystems --root /mnt
 cp /mnt/etc/nixos/hardware-configuration.nix hosts/desktop-olivia/
+# The generated stock config isn't used; left there, a plain `nixos-rebuild` without --flake would build it
+sudo rm /mnt/etc/nixos/configuration.nix /mnt/etc/nixos/hardware-configuration.nix
 git add -A
 
 # 4. SMB credentials for the Unraid shares (not stored in the repo)
@@ -84,7 +87,8 @@ sudo install -m 600 /dev/null /mnt/etc/nixos/smb-secrets
 printf 'username=YOUR_USER\npassword=YOUR_PASS\n' | sudo tee /mnt/etc/nixos/smb-secrets >/dev/null
 
 # 5. Install
-sudo nixos-install --flake .#desktop-olivia
+# --no-channel-copy: the flake pins nixpkgs, so don't copy the ISO's channel for root
+sudo nixos-install --flake .#desktop-olivia --no-channel-copy
 sudo nixos-enter --root /mnt -c 'passwd olivia'
 
 # 6. Keep the repo where the config expects it (dotfile links + `nh` point here)
@@ -132,6 +136,8 @@ reboot
 nh os switch          # rebuild + activate (alias for nixos-rebuild switch --flake ~/nixos-config)
 nh os switch --update # update flake inputs, then rebuild
 nh clean all          # GC old generations (also runs automatically)
+nix flake check       # evaluate the whole system + lint (~15 s; CI runs it too)
+nix fmt               # format the .nix files
 ```
 
 Edit `home/olivia/apps.nix` to add/remove apps. Search packages at https://search.nixos.org.

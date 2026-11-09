@@ -59,7 +59,10 @@ one package set per channel instead of several copies. `flake.lock` pins exact r
 
 **Unfree / insecure:** `allowUnfree = true` (Steam, Resolve, VS Code, Plex, …). One insecure package
 is permitted, `openssl-1.1.1w`, because **Sublime Text 4 still links the end-of-life OpenSSL 1.1**.
-It's scoped by exact name; remove it together with `sublime4` if you stop using Sublime.
+It's scoped by exact name; remove it together with `sublime4` if you stop using Sublime. Both
+settings live in one `nixpkgsConfig` in `flake.nix`, used for stable and `pkgs.unstable` alike. A
+blanket `allowUnfree` rather than an `allowUnfreePredicate` list is deliberate: about 20 apps are
+unfree, and on a single-user desktop the list would just be upkeep.
 
 ## 5. home-manager as a NixOS module
 
@@ -124,6 +127,15 @@ The Nix store is **world-readable**, and this repo may be pushed somewhere. So:
 - The Firefox profile (logins, cookies) is copied by a script, never committed.
 - WezTerm wallpapers are gitignored. They're third-party art, not secrets, but shouldn't be republished.
 
+**Root-equivalent access** (checked in the 2026-11-09 audit):
+- `nix.settings.trusted-users` is left at `root` only. Trusting `@wheel` would let anything running
+  as olivia become root without sudo's password (by setting a substituter or build hook).
+- The `docker` group is root-equivalent too (it can mount `/` into a container). It's **kept on
+  purpose**, so Docker works without sudo. Rootless Docker (`virtualisation.docker.rootless`) is the
+  alternative if that trade-off ever stops being worth it.
+- The root password set by `nixos-install` is kept: `systemd-boot.editor = false` blocks
+  `init=/bin/sh`, so root's password is the way into emergency mode short of the USB installer.
+
 ## 10. Repo hygiene
 
 - `.gitattributes` forces **LF line endings**. The repo is edited on Windows but run on Linux,
@@ -133,3 +145,14 @@ The Nix store is **world-readable**, and this repo may be pushed somewhere. So:
   checked before the real hardware scan existed. The install replaced it with the generated one.
 - Upstream build failures are fixed in `overlays/build-fixes.nix`, not by commenting packages out,
   so the app list in `apps.nix` stays the source of truth.
+- Packages written for this repo live in `pkgs/<name>/package.nix` and reach the package set through
+  `overlays/packages.nix`. That way they build on their own (`nix build .#<name>`) and can be
+  overridden like any nixpkgs package.
+- **Checks instead of full CI builds.** `nix flake check` evaluates the whole system and lints the
+  repo (statix, deadnix, nixfmt) in about 15 s. GitHub Actions runs the same on every push. CI
+  doesn't build the system: it's 40+ GiB, and unfree apps like Resolve aren't in the binary cache.
+  `nix fmt` formats everything except the generated `hardware-configuration.nix`. statix's
+  "repeated keys" warning is off (`statix.toml`), so each setting stays next to its own comment.
+- **No `system.autoUpgrade`.** Updates are manual (`nh os switch --update`, then commit
+  `flake.lock`), so a broken upstream change never lands unattended on a desktop that's also used
+  for work.
