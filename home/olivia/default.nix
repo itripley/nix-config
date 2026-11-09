@@ -1,9 +1,9 @@
-{ config, ... }:
+{ config, osConfig, ... }:
 let
   # Live symlinks into the checkout (not the read-only store), so LazyVim can
   # write lazy-lock.json and edits apply without a rebuild.
-  # Requires the repo to be cloned at ~/nixos-config.
-  dotfiles = "${config.home.homeDirectory}/nixos-config/home/olivia/dotfiles";
+  # The checkout is programs.nh.flake (configuration.nix): ~/nixos-config.
+  dotfiles = "${osConfig.programs.nh.flake}/home/olivia/dotfiles";
   link = path: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${path}";
 in
 {

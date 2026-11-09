@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -17,7 +17,7 @@
 
   users.users.olivia = {
     isNormalUser = true;
-    uid = 1000; # storage.nix mounts SMB/NTFS as uid 1000
+    uid = 1000; # fixed, so files on the SMB/NTFS mounts (storage.nix) keep their owner
     description = "Olivia";
     shell = pkgs.fish;
     extraGroups = [
@@ -48,7 +48,8 @@
   # `nh os switch` / `nh os boot` — nicer nixos-rebuild, plus automatic GC
   programs.nh = {
     enable = true;
-    flake = "/home/olivia/nixos-config";
+    # The checkout. Also where home-manager's live dotfile links point (osConfig.programs.nh.flake)
+    flake = "${config.users.users.olivia.home}/nixos-config";
     clean = {
       enable = true;
       extraArgs = "--keep 10 --keep-since 14d";
@@ -58,9 +59,9 @@
   # Lets unpatched binaries run (Mason LSPs in LazyVim, VS Code server, downloaded tools)
   programs.nix-ld.enable = true;
 
+  # git and an editor come from home-manager for olivia (gitFull, neovim with vim/vi aliases);
+  # root has nano. Nix fetches flakes without a git binary.
   environment.systemPackages = with pkgs; [
-    git
-    vim
     wget
     curl
     pciutils

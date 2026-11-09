@@ -1,9 +1,14 @@
 # KDE Plasma look and behaviour, carried over from the old Fedora 43 install.
 # Theme files live in ./themes (see themes/README.md).
-{ config, pkgs, ... }:
+{
+  config,
+  osConfig,
+  pkgs,
+  ...
+}:
 let
   # Live links into the checkout for the gitignored artwork (same idea as default.nix)
-  themes = "${config.home.homeDirectory}/nixos-config/home/olivia/themes";
+  themes = "${osConfig.programs.nh.flake}/home/olivia/themes";
   art = path: config.lib.file.mkOutOfStoreSymlink "${themes}/art/${path}";
   artPath = path: "${themes}/art/${path}";
 in

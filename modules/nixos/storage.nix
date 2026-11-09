@@ -1,5 +1,11 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 let
+  # Files on SMB/NTFS mounts show up as owned by olivia (configuration.nix) and group users
+  owner = [
+    "uid=${toString config.users.users.olivia.uid}"
+    "gid=${toString config.users.groups.users.gid}"
+  ];
+
   # Same shares Windows maps as X:, Y:, Z:. Credentials live outside the repo:
   #   /etc/nixos/smb-secrets  (chmod 600)
   #     username=...
@@ -7,10 +13,8 @@ let
   unraidShare = share: {
     device = "//192.168.1.65/${share}";
     fsType = "cifs";
-    options = [
+    options = owner ++ [
       "credentials=/etc/nixos/smb-secrets"
-      "uid=1000"
-      "gid=100"
       "noauto"
       "nofail"
       "_netdev"
@@ -33,10 +37,8 @@ in
   fileSystems."/mnt/windows" = {
     device = "/dev/disk/by-partuuid/62cd18cb-2a2f-4de3-9849-fc529fea7536";
     fsType = "ntfs3";
-    options = [
+    options = owner ++ [
       "ro"
-      "uid=1000"
-      "gid=100"
       "noauto"
       "nofail"
       "x-systemd.automount"

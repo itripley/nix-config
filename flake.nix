@@ -52,12 +52,22 @@
     let
       # Workarounds for packages that don't build in the pinned nixpkgs
       buildFixes = import ./overlays/build-fixes.nix;
+      # Packages defined in this repo (pkgs/)
+      localPackages = import ./overlays/packages.nix;
+
+      # One nixpkgs config for both package sets (stable and pkgs.unstable)
+      nixpkgsConfig = {
+        allowUnfree = true;
+        # Only needed by Sublime Text 4 (still links the EOL OpenSSL 1.1).
+        # Remove together with sublime4 in home/olivia/apps.nix.
+        permittedInsecurePackages = [ "openssl-1.1.1w" ];
+      };
 
       # Fast-moving tools (AI CLIs etc.) come from unstable as pkgs.unstable.<name>
       unstableOverlay = _final: prev: {
         unstable = import nixpkgs-unstable {
           inherit (prev.stdenv.hostPlatform) system;
-          config.allowUnfree = true;
+          config = nixpkgsConfig;
           overlays = [ buildFixes ];
         };
       };
@@ -75,12 +85,10 @@
           {
             nixpkgs.overlays = [
               buildFixes
+              localPackages
               unstableOverlay
             ];
-            nixpkgs.config.allowUnfree = true;
-            # Only needed by Sublime Text 4 (still links the EOL OpenSSL 1.1).
-            # Remove together with sublime4 in home/olivia/apps.nix.
-            nixpkgs.config.permittedInsecurePackages = [ "openssl-1.1.1w" ];
+            nixpkgs.config = nixpkgsConfig;
           }
           disko.nixosModules.disko
           inputs.artcraft.nixosModules.default
@@ -101,6 +109,12 @@
             };
           }
         ];
+      };
+
+      # `nix build .#warp-cloudflare-gui`: the repo's own packages, from the system's package set
+      # (overlays + unfree config applied)
+      packages.${system} = {
+        inherit (self.nixosConfigurations.desktop-olivia.pkgs) warp-cloudflare-gui;
       };
 
       # `nix fmt`: nixfmt over every .nix file except the generated one

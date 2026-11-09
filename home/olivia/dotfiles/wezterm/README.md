@@ -12,7 +12,7 @@
   </a>
 </p>
 
-![screenshot](./.github/screenshots/wezterm.gif)
+<!-- screenshot removed from this copy (upstream: KevinSilvester/wezterm-config) -->
 
 ---
 
