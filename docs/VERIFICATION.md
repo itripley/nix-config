@@ -158,7 +158,7 @@ After the switch, check by hand:
 | PhotoCraft / FilmCraft | Both open from the app menu. The text tool lists the system fonts (if not: `ls -l /usr/share/fonts` should point at `/run/current-system/sw/share/X11/fonts`). |
 | Claude Desktop | Opens on Wayland and signs in; Chat, Cowork and Code tabs load. |
 | Removed apps gone | e.g. `which gimp wine codex` finds nothing; the Meta+F shortcut no longer opens Thunar. |
-| Leftover data | ~290 MB of settings from Zen, Krita, Vesktop and Thunar stay in `~`, plus `/var/lib/libvirt`. The list is in [OPERATIONS.md](OPERATIONS.md#leftover-data-from-removed-apps); delete only what you don't need. |
+| Leftover data | Home-folder leftovers (Zen, Krita, Vesktop, Thunar; ~290 MB) were deleted on 2026-11-09. After the switch: `sudo rm -rf /var/lib/libvirt` (no VMs in it). See [OPERATIONS.md](OPERATIONS.md#leftover-data-from-removed-apps). |
 
 ## Checked on the installed system (2026-11-08)
 

@@ -142,17 +142,20 @@ the next switch puts the configured value back.
 
 ## Leftover data from removed apps
 
-`nh os switch` removes the programs, not what they stored in your home folder. Checked on
-2026-11-09, these are left over from the cleanup. Look before deleting:
+`nh os switch` removes the programs, not what they stored in your home folder. After the 2026-11-09
+cleanup, the leftovers were checked on disk and deleted the same day:
 
-| App | Path | Size |
-|---|---|---|
-| Zen | `~/.config/zen` (profile), `~/.cache/zen` | 98 MB, 100 MB |
-| Krita | `~/.local/share/krita`, `~/.config/kritarc`, `~/.config/kritadisplayrc`, `~/.local/share/krita*.log` | 91 MB |
-| Vesktop | `~/.config/vesktop` | 2 MB |
-| Thunar | `~/.config/Thunar` (copied from Fedora) | 16 KB |
-| libvirt (GNOME Boxes) | `/var/lib/libvirt` (system; holds `qemu/`, `secrets/`, network config) | root-only; `sudo du -sh /var/lib/libvirt` |
+| App | Deleted |
+|---|---|
+| Zen | `~/.config/zen` (profile, 98 MB), `~/.cache/zen` (100 MB) |
+| Krita | `~/.local/share/krita` (91 MB), `~/.config/kritarc`, `~/.config/kritadisplayrc`, `~/.local/share/krita*.log` |
+| Vesktop | `~/.config/vesktop` |
+| Thunar | `~/.config/Thunar` |
 
-Nothing was found for Wine/Bottles (`~/.wine`), Signal, Element, Ente, LM Studio, codex, opencode,
-GIMP, Kdenlive, VCV Rack or Renoise, or for any Flatpak (`~/.var/app`). `flatpak list --app` was
-already empty, so nix-flatpak has nothing left to uninstall.
+Nothing was found for the other removed apps, and `flatpak list --app` was already empty.
+
+`/var/lib/libvirt` (GNOME Boxes) holds only libvirt's default files, with no VMs. It needs root, so
+delete it after `nh os switch` (which stops libvirtd for good): `sudo rm -rf /var/lib/libvirt`.
+
+The next time an app is removed, look for its data in `~/.config/<app>`, `~/.local/share/<app>`,
+`~/.cache/<app>` and `~/.var/app/<id>` (Flatpaks).
