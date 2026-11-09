@@ -116,13 +116,12 @@ reboot
 - **WARP:** `warp-cli registration new`, then `warp-cli connect` / `disconnect` (or the *Cloudflare Warp*
   tray icon from `home/olivia/warp-gui.nix`; Cloudflare's own tray app is Zero Trust only). Don't run it at the
   same time as NetBird.
-- **Other logins:** Steam, Heroic, Bitwarden, Signal (re-link), VS Code Settings Sync (brings back the
+- **Other logins:** Steam, Heroic, Bitwarden, VS Code Settings Sync (brings back the
   remaining extensions).
 - **Fedora theme artwork** (gitignored): with the Fedora drive plugged in, run the copy commands in
   [home/olivia/themes/README.md](home/olivia/themes/README.md), then log out and back in.
-- **Ulauncher and Thunar settings** (app state, not in the repo):
-  `F=/run/media/olivia/fedora/home/olivi; cp -rn $F/.config/ulauncher ~/.config/; mkdir -p ~/.local/share/ulauncher && cp -rn $F/.local/share/ulauncher/extensions ~/.local/share/ulauncher/; cp -rn $F/.config/Thunar ~/.config/`
-  (then change Thunar's "Open Terminal Here" action to `wezterm start --cwd %f`).
+- **Ulauncher settings** (app state, not in the repo):
+  `F=/run/media/olivia/fedora/home/olivi; cp -rn $F/.config/ulauncher ~/.config/; mkdir -p ~/.local/share/ulauncher && cp -rn $F/.local/share/ulauncher/extensions ~/.local/share/ulauncher/`
 - **Push from NixOS:** `gh auth login` once, then `git push` works over HTTPS.
 - **PrivadoVPN:** no Linux app — download its WireGuard/OpenVPN configs and import them in
   System Settings → Wi-Fi & Networking.

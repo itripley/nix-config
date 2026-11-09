@@ -72,7 +72,7 @@ Zero warnings, zero errors against `flake.lock`. Pinned revisions:
 | plasma-manager | | `a19a2a02` |
 | disko | | `cedd626e` |
 | nix-flatpak | | `02656785` |
-| zen-browser | | `5f45f55b` |
+| zen-browser (removed 2026-11-09) | | `5f45f55b` |
 | serein (added 2026-11-09) | main | `c028eee6` |
 | artcraft (added 2026-11-09) | main | `6a3de1d2` |
 
@@ -151,7 +151,6 @@ Other things checked along the way:
 | Fedora theme (after `nh os switch` + re-login) | Catppuccin colors, Klassy borders, Lain splash, Bocchi cursor, per-screen wallpapers, animated lock screen (Meta+L). |
 | Krohnkite | New windows tile; Meta+H/J/K focus, Meta+Shift+H/J/K/L move. If not, System Settings → Window Management → KWin Scripts → Krohnkite. |
 | Ulauncher | Meta+Space opens it; Alt+Shift switches pt/us. |
-| GNOME Boxes | Needs the `libvirtd` group, so a re-login after the switch. |
 | `github-artlivia` deploy key | Re-add the public key on GitHub, then `git ls-remote git@github-artlivia:itripley/artlivia.git`. |
 
 After any edit, build before switching: `nh os build` (or `nh os switch`, which stops on errors

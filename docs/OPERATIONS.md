@@ -45,7 +45,6 @@ Set in `home/olivia/plasma.nix` (Krohnkite, launchers, window binds) and `module
 | **Alt+Shift** | switch keyboard layout pt ↔ us | moved from Win+Space |
 | Alt+Space | KRunner | KDE default |
 | Meta+Return | WezTerm | Fedora |
-| Meta+F | Thunar | Fedora |
 | Meta+H / J / K | Krohnkite: focus left / down / up | Fedora |
 | Meta+Shift+H / J / K / L | Krohnkite: move window left / down / up / right | Fedora |
 | Meta+Ctrl+H / L | Krohnkite: shrink / grow width | Fedora |
@@ -125,10 +124,9 @@ the next switch puts the configured value back.
 | Sound only goes to one device / bus silent | Virtual sink routing | `wpctl status`; route apps in the Plasma volume applet or qpwgraph. Game/Music/Chat follow the default output. |
 | Mic noisy | EasyEffects not applied | Open EasyEffects → Input → add the *Noise Reduction* (RNNoise) effect on the Seiren Mini. |
 | DAW crackles | Quantum too small | Raise the buffer in the app, or `default.clock.quantum` in `audio.nix`. |
-| Resolve can't import a clip | Free Resolve on Linux lacks H.264/H.265/AAC decode | `ffmpeg -i in.mp4 -c:v dnxhd -profile:v dnxhr_hq -c:a pcm_s16le out.mov`, or edit in Kdenlive. |
+| Resolve can't import a clip | Free Resolve on Linux lacks H.264/H.265/AAC decode | `ffmpeg -i in.mp4 -c:v dnxhd -profile:v dnxhr_hq -c:a pcm_s16le out.mov`. |
 | Ollama runs on CPU | ROCm not picked up | `journalctl -u ollama`; `ollama ps` shows the processor. |
 | A game won't start | Proton compatibility / anti-cheat | Check protondb.com; try Proton-GE (Steam → Properties → Compatibility). Kernel anti-cheat titles → Windows. |
-| Windows VST plugin missing in DAW | yabridge not synced | `yabridgectl add "<plugin dir in wine prefix>" && yabridgectl sync`. |
 | Mason LSP binary "not found"/won't run | Unpatched binary | `programs.nix-ld` should cover it; otherwise add the LSP to `programs.neovim.extraPackages` in `dev.nix`. |
 | Firefox add-ons missing after migration | Add-on DB not reconciled | See [FIREFOX.md](FIREFOX.md#testing-done-and-not-done). Re-run the script (it backs up first) or reinstall from Firefox Sync's add-on list. |
 | Bitwarden extension can't reach the desktop app | Integration off | Desktop app: *Allow browser integration*; extension: enable *Unlock with desktop app*. |

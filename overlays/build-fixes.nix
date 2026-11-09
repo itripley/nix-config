@@ -38,13 +38,4 @@ final: prev: {
       rm test/recipes/30-test_afalg.t
     '';
   });
-
-  # codex: nixpkgs' cargo setup hook (cargoUseSystemLibs) now forces every *-sys crate
-  # onto system libraries (AWS_LC_SYS_USE_SYSTEM=1, ZSTD_SYS_USE_PKG_CONFIG=1, ...), but
-  # codex's buildInputs were never updated for it: aws-lc-sys panics (no usable system
-  # AWS-LC), then zstd-sys (no libzstd.pc). Opt codex out of that hook so its crates
-  # build their vendored C libraries, as they did before the hook existed.
-  codex = prev.codex.overrideAttrs {
-    dontCargoUseSystemLibs = true;
-  };
 }

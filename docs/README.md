@@ -27,7 +27,7 @@ Installation steps are in the top-level [README](../README.md).
   WARP registered, tray toggles for both, and the old **Fedora** setup (theme, Krohnkite, Ulauncher,
   apps; [FEDORA.md](FEDORA.md)).
 - Open: the `github-artlivia` deploy key is rejected by GitHub; a few hand checks
-  ([VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand)); remaining app logins (Steam, Signal, …).
+  ([VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand)); remaining app logins (Steam, Bitwarden, …).
 
 ## History
 
@@ -42,6 +42,7 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-09 | Old Fedora setup brought over: theme, Krohnkite, Ulauncher (layout switch → Alt+Shift), apps | `0ef7162`, [FEDORA.md](FEDORA.md) |
 | 2026-11-09 | Serein (native Discord client) added as a flake input | DESIGN §4 |
 | 2026-11-09 | PhotoCraft and FilmCraft (ArtCraft) added through the artcraft-nix flake's module | DESIGN §4 |
+| 2026-11-09 | 43 apps removed (Zen, the JDownloader/Stremio Flatpaks, most chat, image, audio and Wine tools, codex, opencode, …), plus what only they used: Zen input, Thunar shortcut, Vesktop autostart, libvirtd, codex build fix | MODULES `apps.nix` |
 | 2026-11-09 | WARP tray: Cloudflare's Zero Trust-only `warp-taskbar` replaced by warp-cloudflare-gui (consumer on/off) | `cc26af0` |
 
 ## Conventions

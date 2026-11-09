@@ -93,7 +93,6 @@ in
       };
       # App launchers from Fedora
       "services/org.wezfurlong.wezterm.desktop"."_launch" = "Meta+Return";
-      "services/thunar.desktop"."_launch" = "Meta+F";
     };
 
     # Wayland apps can't grab global keys themselves; KDE calls ulauncher-toggle instead

@@ -103,3 +103,7 @@ installed) to `wezterm start --cwd %f`.
 | Affinity (Wine) | `home/olivi/.AffinityLinux` | its own Wine build and prefix; reinstall rather than copy |
 | Display scale | Fedora: 1.25 (main) / 1.2 (second) | NixOS currently 1.1 / 1. Set in System Settings → Display; not managed by the config. |
 | Default text editor | Fedora: Sublime for text/JSON/YAML/Markdown | Set in System Settings → Default Applications. Declaring it with `xdg.mimeApps` would make `mimeapps.list` read-only for the GUI. |
+
+**2026-11-09:** Zen, Thunar (and its Meta+F shortcut), w3m, Ente, GNOME Boxes (and libvirtd),
+distrobox, DistroShelf, Wine, winetricks and the Vesktop autostart were removed again. The tables above
+record the migration as it was done.

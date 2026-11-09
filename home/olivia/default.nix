@@ -25,11 +25,6 @@ in
     enable = true; # WezTerm's Linux launch config starts `fish -l`
     functions.fish_greeting = "pokemon-colorscripts -r"; # Fedora's greeting
   };
-  # Started at login on Fedora. Links single files: ~/.config/autostart stays writable.
-  xdg.autostart = {
-    enable = true;
-    entries = [ "${pkgs.vesktop}/share/applications/vesktop.desktop" ];
-  };
 
   # Fedora had these on PATH (cargo installs, go installs)
   home.sessionPath = [

@@ -10,15 +10,15 @@ Legend: **same** = the same app runs natively · **alt** = Linux replacement · 
 | Windows | NixOS | |
 |---|---|---|
 | Firefox | same | whole profile migrated, see [FIREFOX.md](FIREFOX.md) |
-| Zen, Chromium | same | Zen from the zen-browser flake |
+| Chromium | same | Zen was installed from its flake until 2026-11-09 |
 | Helium | AppImage | not packaged; download the AppImage and run it directly |
-| Helium PWAs (Immich, Kavita, Open WebUI, Paper, TweetDeck, FileBrowser Quantum) | reinstall | open each site and "Install app" from Chromium/Zen |
-| Signal, Vesktop, Legcord, Element, Cinny, Dissent | same | |
+| Helium PWAs (Immich, Kavita, Open WebUI, Paper, TweetDeck, FileBrowser Quantum) | reinstall | open each site and "Install app" from Chromium |
+| Legcord | same | Signal, Vesktop, Element, Cinny and Dissent removed 2026-11-09 |
 | (new) Serein | native Discord client | from its own flake (`serein` input); see DESIGN §4 |
 | Bitwarden, Obsidian, Sublime Text, Termius | same | |
 | VS Code (+43 extensions) | same | FHS build; 8 extensions declared, the rest via Settings Sync |
 | Notion, ChatGPT, Claude desktop | web | no official Linux apps |
-| Figma / Figma Agent | alt: figma-linux | |
+| Figma / Figma Agent | web | figma-linux removed 2026-11-09 |
 | Scrivener | alt: Obsidian | or keep writing in Windows |
 
 ## Firefox
@@ -30,21 +30,21 @@ history, open tabs) moves over. See [FIREFOX.md](FIREFOX.md) for what, how and w
 
 | Windows | NixOS | |
 |---|---|---|
-| Blender, GIMP, Kdenlive, OBS, Audacity | same | Blender is the HIP build for the 7800 XT |
-| DaVinci Resolve | same | ⚠ free Resolve on Linux can't decode H.264/H.265/AAC — transcode with ffmpeg (DNxHR/ProRes + PCM) or cut in Kdenlive |
-| Photoshop, Clip Studio Paint | alt: Krita (+ GIMP), PhotoCraft | PhotoCraft from the `artcraft` flake (DESIGN §4), early alpha |
-| Premiere Pro, Media Encoder, Avid Media Composer | alt: Resolve / Kdenlive / ffmpeg, FilmCraft | FilmCraft from the `artcraft` flake (DESIGN §4), early alpha |
-| paint.net | alt: Pinta | |
-| XnView MP, LosslessCut, MediaInfo, MakeMKV | same | |
+| Blender, OBS | same | Blender is the HIP build for the 7800 XT. GIMP, Kdenlive, Audacity removed 2026-11-09 |
+| DaVinci Resolve | same | ⚠ free Resolve on Linux can't decode H.264/H.265/AAC — transcode with ffmpeg (DNxHR/ProRes + PCM) |
+| Photoshop, Clip Studio Paint | alt: PhotoCraft | from the `artcraft` flake (DESIGN §4), early alpha. Krita and GIMP removed 2026-11-09 |
+| Premiere Pro, Media Encoder, Avid Media Composer | alt: Resolve / ffmpeg, FilmCraft | FilmCraft from the `artcraft` flake (DESIGN §4), early alpha |
+| paint.net | none | Pinta removed 2026-11-09 |
+| XnView MP, LosslessCut, MediaInfo, MakeMKV | none | removed 2026-11-09 |
 | Cavalry, Eagle, chaiNNer, Booru Tagger | Windows / AppImage | chaiNNer ships an AppImage |
 
 ## Music & audio
 
 | Windows | NixOS | |
 |---|---|---|
-| Renoise, VCV Rack, Cardinal, plugdata | same | JACK through PipeWire, 256-sample quantum (min 64) |
-| FL Studio | alt: Renoise | FL itself stays on Windows |
-| Windows VST plugins | yabridge | `yabridgectl add ~/.wine/drive_c/Program\ Files/Common\ Files/VST3 && yabridgectl sync` |
+| Renoise, VCV Rack, Cardinal, plugdata | none | removed 2026-11-09. PipeWire still has JACK and a 256-sample quantum (min 64) |
+| FL Studio | Windows | Renoise removed 2026-11-09 |
+| Windows VST plugins | none | yabridge and Wine removed 2026-11-09 |
 | Voicemeeter | alt: PipeWire virtual sinks **Game / Music / Chat** + qpwgraph | route apps per sink in the Plasma volume applet |
 | NVIDIA Broadcast, AMD Noise Suppression | alt: EasyEffects (RNNoise) | for the Razer Seiren Mini |
 | EarTrumpet, Volume2 | alt: Plasma volume applet | per-app volume is built in |
@@ -58,17 +58,17 @@ history, open tabs) moves over. See [FIREFOX.md](FIREFOX.md) for what, how and w
 | MPC-BE, madVR, LAV Filters | alt: mpv | |
 | Plex, Plexamp, plex-mpv-shim | same | firewall opened for shim (3000/tcp, GDM 32410–32414/udp); set `allow_http` |
 | TIDAL | alt: tidal-hifi | |
-| Feishin, Pear Desktop | same | |
-| Stremio, JDownloader 2 | flatpak | declared in `home/olivia/flatpak.nix` |
-| qBittorrent, get_iplayer, ffmpeg | same | |
+| Pear Desktop | same | Feishin removed 2026-11-09 |
+| Stremio, JDownloader 2 | none | were Flatpaks in `home/olivia/flatpak.nix`; removed 2026-11-09 |
+| qBittorrent, ffmpeg | same | get_iplayer removed 2026-11-09 |
 | Seanime | AppImage | |
-| CDisplayEx | alt: YACReader | |
+| CDisplayEx | none | YACReader removed 2026-11-09 |
 
 ## Gaming
 
 | Windows | NixOS | |
 |---|---|---|
-| Steam | same | Proton + Proton-GE, gamescope session, gamemode, MangoHud |
+| Steam | same | Proton + Proton-GE, gamescope session, gamemode (MangoHud removed 2026-11-09) |
 | Epic, GOG Galaxy, Amazon Games | alt: Heroic | |
 | Ubisoft Connect, EA app | alt: Lutris | |
 | Prism Launcher, Tabletop Simulator | same | TTS has a native Steam build |
@@ -87,19 +87,19 @@ history, open tabs) moves over. See [FIREFOX.md](FIREFOX.md) for what, how and w
 | QuickLook | alt: Dolphin preview panel | |
 | ShareX | alt: Spectacle (built in) + Flameshot | |
 | TeraCopy, File Pilot, Files (UWP) | alt: Dolphin | |
-| WinDirStat | alt: Filelight | |
-| Rufus, balenaEtcher | alt: Impression | |
+| WinDirStat | none | Filelight removed 2026-11-09 |
+| Rufus, balenaEtcher | none | Impression removed 2026-11-09 |
 | 7-Zip, NanaZip | alt: 7zz + Ark | |
 | Twinkle Tray | alt: Plasma brightness via DDC/CI | `hardware.i2c` enabled |
 | AMD Software | alt: LACT | |
 | OpenRGB | same | system service |
 | KDE Connect, LocalSend, croc | same | |
-| ActivityWatch | same | window tracking on Wayland is limited |
+| ActivityWatch | none | removed 2026-11-09 |
 | gsudo | sudo | |
 | Bonjour | alt: Avahi | |
 | Docker Desktop | alt: Docker engine | `docker` group |
-| Ollama, LM Studio | same | Ollama with ROCm |
-| claude-code, codex, opencode | same | from nixos-unstable |
+| Ollama | same | with ROCm. LM Studio removed 2026-11-09 |
+| claude-code | same | from nixos-unstable. codex, opencode removed 2026-11-09 |
 | Godot 4 / Godot Mono, Node, Python, Git, ripgrep, tmux, mc | same | |
 | Visual Studio Build Tools, Java 8 | alt: gcc/clang via nix shells | Prism Launcher brings its own JDKs |
 | WezTerm | same | `wezterm` in `dev.nix` (plain package; the config is live-linked) |

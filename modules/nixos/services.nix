@@ -2,10 +2,6 @@
 {
   virtualisation.docker.enable = true;
 
-  # VMs for GNOME Boxes (used on Fedora); olivia is in the libvirtd group
-  virtualisation.libvirtd.enable = true;
-  virtualisation.spiceUSBRedirection.enable = true;
-
   # Local LLMs on the 7800 XT (gfx1101 is a supported ROCm target)
   services.ollama = {
     enable = true;

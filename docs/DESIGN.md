@@ -45,13 +45,12 @@ just a CLI environment).
 | Input | Why |
 |---|---|
 | `nixpkgs` → **nixos-26.05** (stable) | Fewer surprises for a first NixOS system. Stable still gets Firefox and security updates. |
-| `nixpkgs-unstable`, exposed as `pkgs.unstable.*` | Only for fast-moving tools where a release-branch version is too old: `claude-code`, `codex`, `opencode`. |
+| `nixpkgs-unstable`, exposed as `pkgs.unstable.*` | Only for fast-moving tools where a release-branch version is too old: `claude-code`. |
 | `home-manager` (release-26.05) | User-level config (apps, dotfiles, Firefox, Plasma) in the same repo, applied in the same rebuild. |
 | `plasma-manager` | Declares KDE settings (theme, keyboard, shortcuts) that would otherwise live in hand-edited `~/.config` files. |
 | `disko` | See §2. |
-| `nix-flatpak` | Declarative Flatpaks for the few apps that aren't in nixpkgs (JDownloader, Stremio). |
-| `zen-browser` flake | Zen isn't in nixpkgs. |
-| `serein` flake ([ViceVerse-cz/Serein](https://github.com/ViceVerse-cz/Serein)) | Native Rust Discord client, not in nixpkgs. Its own flake targets nixos-unstable, so its `nixpkgs` follows our `nixpkgs-unstable` (same channel, no extra copy). Built from source: not in any binary cache. No release tags, so `flake.lock` pins a commit; `nix flake update serein` moves it. Needs the same `dontCargoUseSystemLibs` override as codex (VERIFICATION #15). |
+| `nix-flatpak` | Declarative Flatpaks for apps that aren't in nixpkgs. The list is empty since 2026-11-09 (JDownloader and Stremio removed); kept so new ones are one line. |
+| `serein` flake ([ViceVerse-cz/Serein](https://github.com/ViceVerse-cz/Serein)) | Native Rust Discord client, not in nixpkgs. Its own flake targets nixos-unstable, so its `nixpkgs` follows our `nixpkgs-unstable` (same channel, no extra copy). Built from source: not in any binary cache. No release tags, so `flake.lock` pins a commit; `nix flake update serein` moves it. Needs a `dontCargoUseSystemLibs` override (VERIFICATION #15, the same failure codex had). |
 | `artcraft` flake ([ipeglin/artcraft-nix](https://github.com/ipeglin/artcraft-nix)) | Unofficial packaging of the ArtCraft apps (storytold), not in nixpkgs. Repackages the upstream release AppImages (autoPatchelf, no FHS sandbox), pinned by upstream's sha256, with GitHub/GitLab mirrors as fallback. Its NixOS module builds against our `pkgs`; `nixpkgs` follows ours only so the lock has no extra copy. Only PhotoCraft and FilmCraft are enabled (`desktop.nix`). New releases arrive with `nix flake update artcraft`. |
 
 Every input except nix-flatpak follows our `nixpkgs` (Serein follows `nixpkgs-unstable`), so there's

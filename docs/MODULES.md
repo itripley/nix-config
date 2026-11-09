@@ -67,10 +67,8 @@ package, so nothing else gets rebuilt:
 |---|---|---|
 | `vscode` 1.144 (and `vscode.fhs`) | nixpkgs' `postPatch` deletes `node_modules/@vscode/ripgrep/bin/rg`, which VS Code 1.144 no longer ships | link nixpkgs' ripgrep at the new `@vscode/ripgrep-universal` locations instead. Has an `assert` that fails if nixpkgs changes that snippet. |
 | `openssl_1_1` (only for `sublime4`) | `test_afalg` fails on Linux 7.x (it exercises the running kernel's AF_ALG socket) | delete only that test |
-| `codex` (unstable) | nixpkgs' new `cargoUseSystemLibs` hook forces every `*-sys` crate onto system libraries, but codex's inputs weren't updated: `aws-lc-sys` panics, then `zstd-sys` | `dontCargoUseSystemLibs = true`: the crates build their vendored C libraries, as before the hook |
 
-Because these packages fail on Hydra too, there's no binary cache for them: `codex` compiles from
-source (Rust) on every version bump. After `nh os switch --update`, try removing each fix; if the
+(The `codex` fix went with codex on 2026-11-09.) After `nh os switch --update`, try removing each fix; if the
 build still passes, the fix is no longer needed.
 
 ## `hosts/desktop-olivia/hardware-configuration.nix`
@@ -122,7 +120,7 @@ here) only if the hardware changes.
 
 | Setting | Why |
 |---|---|
-| PipeWire with ALSA (+32-bit), PulseAudio and **JACK** | One audio server for everything; JACK for Renoise, Cardinal, VCV Rack and plugdata. |
+| PipeWire with ALSA (+32-bit), PulseAudio and **JACK** | One audio server for everything; JACK stays on for any JACK app (it was for Renoise, Cardinal, VCV Rack and plugdata, removed 2026-11-09). |
 | `security.rtkit` | Realtime scheduling for audio threads, which prevents dropouts. |
 | **Low-latency clock:** rate 48000 (44.1k/96k allowed), quantum 256, min 64, max 2048 | 256 samples ≈ 5.3 ms is safe for daily use; apps like a DAW can request down to 64. Allowed rates avoid resampling 44.1 kHz music. |
 | **Virtual sinks Game / Music / Chat** | The Voicemeeter replacement. Each is a `libpipewire-module-loopback`: an output device apps can be assigned to, which forwards to the real default output. Loopbacks were chosen over plain null-sinks because **a null-sink is silent** unless something routes it onward. Each bus gets its own volume slider in Plasma; use qpwgraph for custom routing. |
@@ -172,7 +170,6 @@ off. Used for one-time imports (SSH keys, wallpapers, Firefox profile).
 |---|---|
 | Docker | Replaces Docker Desktop. The `docker` group allows use without sudo. |
 | **Ollama with `ollama-rocm`** | Local LLMs on the 7800 XT (gfx1101 is a supported ROCm target, no override needed). Was a startup app on Windows. |
-| `virtualisation.libvirtd` + `spiceUSBRedirection`, `libvirtd` group | GNOME Boxes VMs (Fedora ran `virtqemud`). |
 | OpenRGB (`motherboard = "amd"`) | Same RGB control. Loads the AMD SMBus driver (Windows needed PawnIO for this). |
 | Avahi + nss-mdns | `.local` name resolution and service discovery (replaces Apple Bonjour). |
 
@@ -181,7 +178,6 @@ off. Used for one-time imports (SSH keys, wallpapers, Firefox profile).
 - Imports the other HM modules; `home.stateVersion = "26.05"` (never bump, same as the system one).
 - **`xdg.configFile` live links** for `wezterm`, `nvim`, `fastfetch` → `~/nixos-config/home/olivia/dotfiles/…` (DESIGN §6).
 - `programs.fish.functions.fish_greeting = "pokemon-colorscripts -r"`, `home.sessionPath` (`~/.cargo/bin`, `~/go/bin`): as on Fedora.
-- `xdg.autostart.entries`: Vesktop at login (Fedora). `readOnly` stays off, so other apps can still add their own autostart entries.
 - `services.easyeffects`: background audio effects; RNNoise noise suppression for the Seiren Mini
   replaces NVIDIA Broadcast / AMD Noise Suppression.
 
@@ -191,14 +187,14 @@ The user package list, grouped by category, with the replaced Windows app noted 
 Notable choices:
 - `pkgsRocm.blender`: Blender with HIP (GPU rendering on AMD). The older `blender-hip` name was removed from nixpkgs.
 - `davinci-resolve`: see the codec caveat in [MIGRATION.md](MIGRATION.md).
-- `yabridge` / `yabridgectl`: run Windows VST plugins in Linux DAWs through Wine.
-- `unstable.claude-code`, `unstable.codex`, `unstable.opencode`: from unstable because they move fast.
-- "From the old Fedora install" block: Ulauncher, Thunar, btop, w3m, Ente, High Tide, GNOME Boxes,
-  distrobox + DistroShelf, Warehouse, pokemon-colorscripts; Wine + winetricks next to Bottles. See
-  [FEDORA.md](FEDORA.md).
-- `unstable.ente-desktop`: stable's 1.7.22 is pinned to Electron 41, which is EOL and marked insecure
-  (nixpkgs refuses to evaluate it); unstable's 1.7.27 uses a supported Electron.
-- `wineWow64Packages.stable`: `wineWowPackages` is deprecated in 26.05.
+- `unstable.claude-code`: from unstable because it moves fast.
+- "From the old Fedora install" block: Ulauncher, btop, High Tide, Warehouse, pokemon-colorscripts.
+  See [FEDORA.md](FEDORA.md).
+- Removed on 2026-11-09: Zen, Thunar, w3m, Ente, GNOME Boxes, distrobox, DistroShelf, Signal, Vesktop,
+  Element, Cinny, Dissent, figma-linux, Krita, GIMP, Pinta, Kdenlive, LosslessCut, XnView MP,
+  Audacity, Renoise, VCV Rack, Cardinal, plugdata, yabridge, Feishin, MakeMKV, MediaInfo, get_iplayer,
+  MangoHud, Bottles, Wine, winetricks, Filelight, Impression, YACReader, ActivityWatch, unrar,
+  innoextract, LM Studio, codex, opencode.
 - No `netbird-ui` here: the NetBird module provides it (wrapped for the daemon socket).
 - `inputs.serein.packages.<system>.default`: Serein, a native Rust Discord client, from its own flake
   (DESIGN §4). Compiles locally on first build and on each `nix flake update serein`.
@@ -234,13 +230,13 @@ The look and behaviour of the old Fedora install ([FEDORA.md](FEDORA.md) has the
 | `configFile.kdeglobals.General` | WezTerm as KDE's terminal. |
 | `input.keyboard` | pt+us, **Alt+Shift** switches (Meta+Space is Ulauncher). |
 | `shortcuts.kwin` | Krohnkite on Meta+H/J/K/L (focus), +Shift (move), +Ctrl (resize), Meta+M monocle, Meta+S float, Meta+I increase. Focus Right is unbound because Meta+L locks the screen (same as Fedora). The old Alt+H/J/K/L window binds are set back to KDE's defaults explicitly, because plasma-manager doesn't reset keys that are removed. Alt+Q close and Alt+M minimize stay from Windows. |
-| `shortcuts."services/…"` | Meta+Return WezTerm, Meta+F Thunar. |
+| `shortcuts."services/…"` | Meta+Return WezTerm. |
 | `hotkeys.commands.ulauncher-toggle` + `systemd.user.services.ulauncher` | Wayland apps can't grab global keys, so KDE binds Meta+Space to `ulauncher-toggle`. Ulauncher runs hidden from login with `GDK_BACKEND=x11` (as on Fedora) so it can position its window. |
 
 ## `home/olivia/flatpak.nix`
 
-Flathub apps installed and auto-updated weekly by nix-flatpak: JDownloader 2 and Stremio (not usable
-from nixpkgs).
+Flathub apps installed and auto-updated weekly by nix-flatpak. The list is empty (JDownloader 2 and
+Stremio removed 2026-11-09); nix-flatpak uninstalls what it installed before.
 
 ## `home/olivia/warp-gui.nix`
 
