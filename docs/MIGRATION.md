@@ -15,8 +15,9 @@ Legend: **same** = the same app runs natively · **alt** = Linux replacement · 
 | Helium PWAs (Immich, Kavita, Open WebUI, Paper, TweetDeck, FileBrowser Quantum) | reinstall | open each site and "Install app" from Chromium |
 | Legcord | same | Signal, Vesktop, Element, Cinny and Dissent removed 2026-11-09 |
 | (new) Serein | native Discord client | from its own flake (`serein` input); see DESIGN §4 |
-| Bitwarden, Obsidian, Sublime Text, Termius | same | |
-| VS Code (+43 extensions) | same | FHS build; 8 extensions declared, the rest via Settings Sync |
+| Bitwarden, Sublime Text, Termius | same | |
+| Obsidian (weblivia vault) | same | plugins, themes and settings declared; notes via LiveSync (MODULES `obsidian.nix`) |
+| VS Code (+42 extensions) | same | FHS build; all extensions declared at the Windows versions (`pkgs/vscode-marketplace`), settings via Settings Sync |
 | Claude desktop | same | official Linux beta, from the `claude-desktop` flake (DESIGN §4) |
 | Notion, ChatGPT | web | no official Linux apps |
 | Figma / Figma Agent | web | figma-linux removed 2026-11-09 |
@@ -46,7 +47,7 @@ history, open tabs) moves over. See [FIREFOX.md](FIREFOX.md) for what, how and w
 | Renoise, VCV Rack, Cardinal, plugdata | none | removed 2026-11-09. PipeWire still has JACK and a 256-sample quantum (min 64) |
 | FL Studio | Windows | Renoise removed 2026-11-09 |
 | Windows VST plugins | none | yabridge and Wine removed 2026-11-09 |
-| Voicemeeter | alt: PipeWire virtual sinks **Game / Music / Chat** + qpwgraph | route apps per sink in the Plasma volume applet |
+| Voicemeeter | alt: PipeWire virtual sinks **Game / Music / Chat** + qpwgraph | route apps per sink in the Plasma volume applet. linuxmeeter (a Voicemeeter-style mixer) was tried and uninstalled on 2026-11-09 |
 | NVIDIA Broadcast, AMD Noise Suppression | alt: EasyEffects (RNNoise) | for the Razer Seiren Mini |
 | EarTrumpet, Volume2 | alt: Plasma volume applet | per-app volume is built in |
 | iZotope Trash, FakinTheFunk | Windows | |
@@ -83,7 +84,7 @@ history, open tabs) moves over. See [FIREFOX.md](FIREFOX.md) for what, how and w
 | scoop, Chocolatey, winget, UniGetUI | nix | `home/olivia/apps.nix` + `nh os switch` |
 | PowerToys, AquaSnap, TranslucentTB | Plasma / KWin built-ins | KWin tiling, window rules, KRunner |
 | komorebi + whkd | Krohnkite (from the Fedora setup) | Meta+H/J/K/L focus, Meta+Shift move, Meta+Ctrl resize; Alt+Q close and Alt+M minimize kept. See [FEDORA.md](FEDORA.md). |
-| Raycast | alt: Ulauncher (Meta+Space, from the Fedora setup) and KRunner (Alt+Space) | Ulauncher extensions: file search, kill process, Bitwarden, terminal runner |
+| Raycast | alt: Vicinae (Meta+Space; Raycast-like, runs Raycast extensions) and KRunner (Alt+Space) | Built-in file search, clipboard history, calculator, emoji; more from its extension store |
 | Everything | alt: FSearch | |
 | QuickLook | alt: Dolphin preview panel | |
 | ShareX | alt: Spectacle (built in) + Flameshot | |

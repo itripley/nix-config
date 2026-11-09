@@ -15,10 +15,10 @@ Generated from an inventory of the Windows machine (hardware, apps, dotfiles, ne
 flake.nix                      inputs + nixosConfigurations.desktop-olivia (+ packages, formatter, checks, devShells)
 hosts/desktop-olivia/          configuration.nix, disko.nix, hardware-configuration.nix (generated at install)
 overlays/                      build-fixes.nix (upstream build workarounds), packages.nix (adds pkgs/)
-pkgs/                          packages written for this repo (warp-cloudflare-gui)
+pkgs/                          packages written for this repo (warp-cloudflare-gui, obsidian-plugins, vscode-marketplace)
 modules/nixos/                 boot, amd, desktop, audio, networking, storage, gaming, services
-home/olivia/                   home-manager: apps, dev (git/ssh/nvim/vscode), firefox, plasma, flatpak
-home/olivia/dotfiles/          wezterm, nvim (LazyVim), fastfetch, firefox userChrome — copied from Windows
+home/olivia/                   home-manager: apps, dev (git/ssh/nvim/vscode), firefox, plasma, flatpak, warp-gui, obsidian
+home/olivia/dotfiles/          wezterm, nvim (LazyVim), fastfetch, firefox userChrome — copied from Windows; fonts/ (gitignored)
 home/olivia/themes/            Plasma theme from the old Fedora install (artwork in art/, gitignored)
 scripts/                       verify.ps1 (check from Windows), migrate-firefox-profile.sh (run on NixOS)
 docs/                          full documentation: what, how and why
@@ -120,12 +120,14 @@ reboot
 - **WARP:** `warp-cli registration new`, then `warp-cli connect` / `disconnect` (or the *Cloudflare Warp*
   tray icon from `home/olivia/warp-gui.nix`; Cloudflare's own tray app is Zero Trust only). Don't run it at the
   same time as NetBird.
-- **Other logins:** Steam, Heroic, Bitwarden, Claude Desktop, VS Code Settings Sync (brings back the
-  remaining extensions).
+- **Other logins:** Steam, Heroic, Bitwarden, Claude Desktop, VS Code Settings Sync (settings only; the
+  extensions are declared in `dev.nix`).
+- **Obsidian:** copy the LiveSync and Paperless settings into `~/.config/obsidian-seed/` *before*
+  opening Obsidian, then switch: [docs/OPERATIONS.md](docs/OPERATIONS.md#obsidian).
+- **TX-02 font** (licensed, gitignored): copy its `.otf` files into `home/olivia/dotfiles/fonts/TX-02/`.
+  WezTerm and Obsidian use it.
 - **Fedora theme artwork** (gitignored): with the Fedora drive plugged in, run the copy commands in
   [home/olivia/themes/README.md](home/olivia/themes/README.md), then log out and back in.
-- **Ulauncher settings** (app state, not in the repo):
-  `F=/run/media/olivia/fedora/home/olivi; cp -rn $F/.config/ulauncher ~/.config/; mkdir -p ~/.local/share/ulauncher && cp -rn $F/.local/share/ulauncher/extensions ~/.local/share/ulauncher/`
 - **Push from NixOS:** `gh auth login` once, then `git push` works over HTTPS.
 - **PrivadoVPN:** no Linux app — download its WireGuard/OpenVPN configs and import them in
   System Settings → Wi-Fi & Networking.

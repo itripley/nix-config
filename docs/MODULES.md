@@ -9,6 +9,8 @@ flake.nix                         inputs, overlays, nixpkgs config, wires everyt
 overlays/build-fixes.nix          local workarounds for packages that fail to build upstream
 overlays/packages.nix             adds this repo's own packages (pkgs/) to the package set
 pkgs/warp-cloudflare-gui/         consumer WARP tray toggle (used by home/olivia/warp-gui.nix)
+pkgs/obsidian-plugins/            Obsidian plugins + themes, pinned (used by home/olivia/obsidian.nix)
+pkgs/vscode-marketplace/          VS Code extensions, pinned (used by home/olivia/dev.nix)
 flake.lock                        exact pinned revisions of every input
 statix.toml                       linter config (`nix flake check`)
 .github/workflows/check.yml       CI: `nix flake check` on every push
@@ -19,7 +21,8 @@ hosts/desktop-olivia/
 modules/nixos/                    system level (root, services, hardware)
   boot.nix  amd.nix  desktop.nix  audio.nix  networking.nix  storage.nix  gaming.nix  services.nix
 home/olivia/                      user level (home-manager)
-  default.nix  apps.nix  dev.nix  firefox.nix  plasma.nix  flatpak.nix  warp-gui.nix
+  default.nix  apps.nix  dev.nix  firefox.nix  plasma.nix  flatpak.nix  warp-gui.nix  obsidian.nix
+  obsidian/                       Obsidian seed settings and CSS snippets (obsidian.nix)
   themes/                         Plasma theme files from Fedora (art/ is gitignored)
   dotfiles/                       wezterm/ nvim/ fastfetch/ firefox/userChrome.css
 scripts/
@@ -39,13 +42,16 @@ scripts/
 - **`nixpkgsConfig`**, used for both stable and `pkgs.unstable` so they can't drift apart:
   - `allowUnfree`: Steam, Resolve, VS Code, Plex, Obsidian, etc. are unfree.
   - `permittedInsecurePackages = [ "openssl-1.1.1w" ]`: needed only by Sublime Text 4 (see DESIGN §4).
+- **NixOS modules from inputs:** disko, `artcraft` (`programs.artcraft`) and `vicinae` (the
+  input-server wrapper).
 - **home-manager block:** `useGlobalPkgs` (same pkgs as the system), `useUserPackages` (user
   packages installed through the system profile), `backupFileExtension`, and `sharedModules` loading
-  plasma-manager and nix-flatpak's HM module for the user.
+  plasma-manager, nix-flatpak's HM module and vicinae's HM module (which replaces home-manager's own
+  `programs.vicinae`).
 - Outputs:
   - `nixosConfigurations.desktop-olivia`: the system.
-  - `packages.x86_64-linux.warp-cloudflare-gui`: `nix build .#warp-cloudflare-gui`, taken from the
-    system's package set so overlays and unfree apply.
+  - `packages.x86_64-linux`: `warp-cloudflare-gui`, `obsidian-plugins`, `vscode-marketplace`
+    (`nix build .#<name>`), taken from the system's package set so overlays and unfree apply.
   - `formatter`: `nix fmt` runs nixfmt (via nixfmt-tree) on every `.nix` file except the generated
     `hardware-configuration.nix`.
   - `checks`: `nix flake check` runs `toplevel-eval` (instantiates every derivation of the system,
@@ -65,6 +71,7 @@ scripts/
 | `shell = pkgs.fish` + `programs.fish.enable` | WezTerm's Linux config launches `fish -l`; the fish VS Code extension was installed on Windows too. |
 | `nix.settings.experimental-features` | Flakes and the `nix` command. |
 | `auto-optimise-store` | Dedupe the store. |
+| `extra-substituters` / `extra-trusted-public-keys` | `vicinae.cachix.org`, so the Vicinae flake input downloads instead of compiling (DESIGN §4). |
 | `trusted-users` left at the default (`root`) | Not `@wheel`: a trusted user can set substituters or build hooks, which is root without sudo's password. Nothing here needs it (nh uses sudo). |
 | **`nix.channel.enable = false`** | No legacy channels. `NIX_PATH` is only `nixpkgs=flake:nixpkgs` (the pinned input), so `<nixpkgs>` and `nix shell nixpkgs#…` match the system. |
 | **`programs.nh`** with `flake = ~olivia/nixos-config` and `clean` | `nh os switch` = friendlier `nixos-rebuild`; automatic GC keeps 10 generations / 14 days. Replaces `nix.gc`. The path is built from the user's home, and home-manager's live links read it back (`osConfig.programs.nh.flake`), so the checkout location is written once. |
@@ -131,7 +138,7 @@ here) only if the hardware changes.
 | Plasma 6 + SDDM on Wayland | DESIGN §7. |
 | `time.timeZone = "Europe/Lisbon"` | "GMT Standard Time" covers Lisbon and London, which share the same rules. Lisbon was picked from the pt-PT keyboard; switching is a one-line change. |
 | `i18n.defaultLocale = en_US.UTF-8` | Windows UI was en-US. |
-| `xkb.layout = "pt,us"`, `grp:alt_shift_toggle` | Same layouts and order as Windows. Alt+Shift switches (Win+Space went to Ulauncher, as on Fedora). Also applies to the login screen and TTY (`console.useXkbConfig`). |
+| `xkb.layout = "pt,us"`, `grp:alt_shift_toggle` | Same layouts and order as Windows. Alt+Shift switches (Win+Space went to the launcher, as on Fedora). Also applies to the login screen and TTY (`console.useXkbConfig`). |
 | `environment.systemPackages`: `klassy`, `kdePackages.krohnkite`, `kdePackages.qtmultimedia` | KWin decoration, tiling script and the QML module the animated lock screen needs. System-wide so KWin/plasmashell find them. |
 | `programs.kdeconnect` | Was in use on Windows; this also opens its firewall ports. |
 | `partition-manager`, `printing` | KDE disk tool; CUPS printing. |
@@ -146,6 +153,7 @@ here) only if the hardware changes.
 |---|---|
 | PipeWire with ALSA (+32-bit), PulseAudio and **JACK** | One audio server for everything; JACK stays on for any JACK app (it was for Renoise, Cardinal, VCV Rack and plugdata, removed 2026-11-09). |
 | `security.rtkit` | Realtime scheduling for audio threads, which prevents dropouts. |
+| **No idle power-down of the onboard analog out:** `snd_hda_intel power_save=0 power_save_controller=N` (`boot.extraModprobeConfig`) and WirePlumber rule `51-analog-no-suspend` (`session.suspend-timeout-seconds = 0` for `alsa_output.pci-0000_0e_00.6.*`) | The speakers played static whenever nothing had played for a while (reported 2026-11-09). By default WirePlumber closes an idle output after 5 s, and the kernel then powers the Realtek ALC897 codec down after 10 s (`power_save` was 10); the undriven line-out hisses into powered speakers. Keeping the output open means the codec stays on and outputs digital silence. Only the analog out is kept open; HDMI still suspends. Costs well under a watt. |
 | **Low-latency clock:** rate 48000 (44.1k/96k allowed), quantum 256, min 64, max 2048 | 256 samples ≈ 5.3 ms is safe for daily use; apps like a DAW can request down to 64. Allowed rates avoid resampling 44.1 kHz music. |
 | **Virtual sinks Game / Music / Chat** | The Voicemeeter replacement. Each is a `libpipewire-module-loopback`: an output device apps can be assigned to, which forwards to the real default output. Loopbacks were chosen over plain null-sinks because **a null-sink is silent** unless something routes it onward. Each bus gets its own volume slider in Plasma; use qpwgraph for custom routing. |
 
@@ -201,6 +209,7 @@ off. Used for one-time imports (SSH keys, wallpapers, Firefox profile).
 
 - Imports the other HM modules; `home.stateVersion = "26.05"` (never bump, same as the system one).
 - **`xdg.configFile` live links** for `wezterm`, `nvim`, `fastfetch` → `~/nixos-config/home/olivia/dotfiles/…` (DESIGN §6).
+- **`xdg.dataFile."fonts/nixos-config"`** → live link to `home/olivia/dotfiles/fonts/` (gitignored, like the wallpapers), which fontconfig reads as part of `~/.local/share/fonts`. It holds **TX-02** (30 styles), the font for WezTerm (`dotfiles/wezterm/config/fonts.lua`, with JetBrainsMono Nerd Font as fallback for icons) and Obsidian (`obsidian.nix`). The font is licensed, so the files are copied in by hand and never committed; a new font dropped in that folder works without a rebuild.
   The checkout path comes from `osConfig.programs.nh.flake` (configuration.nix); `plasma.nix` uses it too.
 - `programs.fish.functions.fish_greeting = "pokemon-colorscripts -r"`, `home.sessionPath` (`~/.cargo/bin`, `~/go/bin`): as on Fedora.
 - `services.easyeffects`: background audio effects; RNNoise noise suppression for the Seiren Mini
@@ -216,16 +225,23 @@ Notable choices:
   also bundles JDK 17 and 8 (~0.7 GiB) for 1.16 and older; add them back to the list for those versions.
 - `unstable.claude-code`: from unstable because it moves fast.
 - `inputs.claude-desktop.packages.<system>.default`: Claude Desktop (official Linux beta) from its flake (DESIGN §4).
-- "From the old Fedora install" block: Ulauncher, btop, High Tide, pokemon-colorscripts.
+- "From the old Fedora install" block: btop, High Tide, pokemon-colorscripts.
   See [FEDORA.md](FEDORA.md).
 - Removed on 2026-11-09: Zen, Thunar, w3m, Ente, GNOME Boxes, distrobox, DistroShelf, Signal, Vesktop,
   Element, Cinny, Dissent, figma-linux, Krita, GIMP, Pinta, Kdenlive, LosslessCut, XnView MP,
   Audacity, Renoise, VCV Rack, Cardinal, plugdata, yabridge, Feishin, MakeMKV, MediaInfo, get_iplayer,
   MangoHud, Bottles, Wine, winetricks, Filelight, Impression, YACReader, ActivityWatch, unrar,
   innoextract, LM Studio, codex, opencode. Warehouse followed the same day.
+- linuxmeeter (Voicemeeter-style mixer, packaged in `pkgs/linuxmeeter`) was added and uninstalled on
+  2026-11-09, never committed. See [VERIFICATION.md](VERIFICATION.md#app-changes-2026-11-09).
 - No `netbird-ui` here: the NetBird module provides it (wrapped for the daemon socket).
+- No `obsidian` here: `obsidian.nix` installs it through `programs.obsidian`.
 - `inputs.serein.packages.<system>.default`: Serein, a native Rust Discord client, from its own flake
   (DESIGN §4). Compiles locally on first build and on each `nix flake update serein`.
+  Its `postPatch` lowers the hard-coded minimum window size (`MIN_WINDOW_SIZE` in
+  `apps/desktop/src/app_settings.rs`) from 760×520 to 400×300 logical pixels, so it can be made
+  smaller than ~836×572 px on DP-1 (1.1× scale). `--replace-fail` stops the build if upstream
+  changes that line. Below ~760 px wide Serein's layout is untested upstream (VERIFICATION #17).
 
 ## `home/olivia/dev.nix`
 
@@ -234,8 +250,8 @@ Notable choices:
 | `programs.git`, `package = gitFull`, `credential.helper = libsecret` | Email from Windows. `gitFull` includes the libsecret helper, so HTTPS credentials are stored in KWallet (the wincred equivalent). |
 | `programs.ssh.settings` | Hosts `github-artlivia` (deploy key) and `unraid` (root@192.168.1.65 with `id_unraid`), `IdentitiesOnly` so the right key is offered. `AddKeysToAgent` for all hosts. Uses HM's new `settings` format (upstream OpenSSH directive names); the old `matchBlocks` is deprecated. `enableDefaultConfig = false` opts out of HM's legacy defaults. |
 | `programs.neovim` + `extraPackages` | LazyVim needs a C compiler (treesitter), ripgrep/fd (search), lazygit, and LSPs; Nix provides them on Neovim's PATH. `sideloadInitLua = true` because HM 26.05 always generates `nvim/init.lua`, which can't be written into the live-linked LazyVim folder. |
-| `programs.vscode`, `package = vscode.fhs` | The FHS variant lets marketplace extensions with native binaries work. 8 extensions available in nixpkgs are declared; the rest come back through Settings Sync. |
-| `wezterm` (plain package) | The terminal. Not `programs.wezterm`, which would generate `wezterm.lua` into the live-linked config folder. Uses JetBrainsMono Nerd Font from `desktop.nix`. |
+| `programs.vscode`, `package = vscode.fhs` | The FHS variant lets marketplace extensions with native binaries work (C#, C# Dev Kit, Python, debugpy, Claude Code ship Linux binaries). **All 42 extensions from Windows** plus nix-ide are declared, from `pkgs/vscode-marketplace` at the Windows versions; settings still come through Settings Sync (`settings.json` isn't managed). The extensions dir stays mutable (home-manager's default), so an extension installed or auto-updated from VS Code works alongside the declared ones; a fresh install always gets the declared set. Custom CSS and JS (`be5invis.vscode-custom-css`) and Custom UI Font patch VS Code's own `workbench.html` / `workbench.desktop.main.css`, which are read-only in the store, so they're installed but can't apply. |
+| `wezterm` (plain package) | The terminal. Not `programs.wezterm`, which would generate `wezterm.lua` into the live-linked config folder. Font: TX-02 (`default.nix`), with JetBrainsMono Nerd Font from `desktop.nix` as the icon fallback. |
 | Dev tools | Node, Python + uv, Godot 4 + Mono (brings its own .NET 8 SDK, so no separate `dotnet-sdk`), docker-compose, tmux, mc, fastfetch, jq, gh; from Fedora: Go, rustup (cargo), lazydocker. Add `dotnet-sdk` back if you need the `dotnet` CLI outside Godot (e.g. VS Code's C# extension loading a project). |
 
 ## `home/olivia/firefox.nix`
@@ -256,10 +272,11 @@ The look and behaviour of the old Fedora install ([FEDORA.md](FEDORA.md) has the
 | `configFile.klassyrc`, `breezerc` | Klassy button/corner/outline settings, no shadows. |
 | `configFile.kscreenlockerrc` | Lock screen plays `themes/art/lockscreen.gif` through Smart Video Wallpaper Reborn. |
 | `configFile.kdeglobals.General` | WezTerm as KDE's terminal. |
-| `input.keyboard` | pt+us, **Alt+Shift** switches (Meta+Space is Ulauncher). |
+| `input.keyboard` | pt+us, **Alt+Shift** switches (Meta+Space is Vicinae). |
 | `shortcuts.kwin` | Krohnkite on Meta+H/J/K/L (focus), +Shift (move), +Ctrl (resize), Meta+M monocle, Meta+S float, Meta+I increase. Focus Right is unbound because Meta+L locks the screen (same as Fedora). The old Alt+H/J/K/L window binds are set back to KDE's defaults explicitly, because plasma-manager doesn't reset keys that are removed. Alt+Q close and Alt+M minimize stay from Windows. |
 | `shortcuts."services/…"` | Meta+Return WezTerm. |
-| `hotkeys.commands.ulauncher-toggle` + `systemd.user.services.ulauncher` | Wayland apps can't grab global keys, so KDE binds Meta+Space to `ulauncher-toggle`. Ulauncher runs hidden from login with `GDK_BACKEND=x11` (as on Fedora) so it can position its window. |
+| `hotkeys.commands.vicinae-*` + `programs.vicinae` | Vicinae replaced Fedora's Ulauncher, set up per [its KDE quickstart](https://docs.vicinae.com/quickstart/kde). Wayland apps can't grab global keys, so KDE binds Meta+Space to `vicinae toggle` and Meta+V to its clipboard history (Klipper's Meta+V popup is unbound). Home Manager's `programs.vicinae.systemd` runs `vicinae server` from login. Module and package come from the `vicinae` flake input (DESIGN §4), whose NixOS module also adds the input-server wrapper for pasting and snippets. `settings` (Catppuccin Macchiato theme, window opacity 0.85 so KWin's blur shows) goes into a store file that the wrapper passes as `VICINAE_OVERRIDES`, applied over `settings.json`, so Vicinae's own settings screen still saves; values set in Nix win. |
+| `configFile.kwinrc.Windows.FocusStealingPreventionLevel = 1` | KDE's default ("Low"), pinned: a higher level can stop the Vicinae window from taking focus. |
 
 ## `home/olivia/flatpak.nix`
 
@@ -291,6 +308,55 @@ github.com/mrmoein/warp-cloudflare-gui (pinned commit, GPL-3.0). Added to the pa
 
 Upstream quirk: the status thread updates Qt widgets from a background thread. Harmless so far; if
 the app ever crashes, that's the likely cause (just reopen it).
+
+## `home/olivia/obsidian.nix`
+
+Obsidian and the **weblivia** vault at `~/Documents/obsidian/weblivia`, set up like the Windows one
+(`C:\Users\olivi\Desktop\olivia\obsidian\weblivia`). The notes themselves come down through
+Self-hosted LiveSync; nothing in `.obsidian/` is synced by LiveSync (its hidden-file and
+customization sync are off on Windows), so this file supplies all of it. First-run steps are in
+[OPERATIONS.md](OPERATIONS.md#obsidian).
+
+| Setting | Why |
+|---|---|
+| `programs.obsidian` (home-manager) | Installs `pkgs.obsidian` and registers the vault in `~/.config/obsidian/obsidian.json` (merged, so Obsidian's own entries stay). |
+| `settings.app`, `appearance`, `corePlugins` (with `daily-notes` and `templates` settings) | Copied from the Windows `app.json`, `appearance.json`, `core-plugins.json`, `daily-notes.json`, `templates.json`. These become **read-only store links**: like `plasma.nix`, changes made in Obsidian's settings don't stick (they error or revert); make them here. `TX-02` is the Windows font; it comes from the gitignored `dotfiles/fonts/` (licensed, linked by `default.nix`). |
+| `communityPlugins` | All 19 plugins installed on Windows, from `pkgs/obsidian-plugins`, in the same order. Enabled as on Windows, except **obsidian-git**, which is installed but off: the vault here has no `.git` (LiveSync doesn't carry it), and the versioned backup already runs on Windows. Off on Windows too: current-view, dream-journal, fold-properties-by-default, obsidian-importer. Not carried over: `realclaudian` (listed as enabled on Windows but not installed there) and `github-gitless-sync` (deleted on Windows). Each plugin folder is a real directory with links to `main.js`/`manifest.json`/`styles.css`, so plugins can still write their `data.json`. |
+| `themes` | All 6 installed themes; Minimal active. |
+| `cssSnippets` | `obsidian/snippets/vault-colors.css` and `hide-properties-in-reading-mode.css`, from the vault. |
+| `home.activation.obsidianSeed` | Copies files into `.obsidian/` **only if they don't exist yet**, because plugins rewrite their `data.json` and Obsidian rewrites `types.json`/`graph.json`. First from `~/.config/obsidian-seed/` (mode 600; same layout as `.obsidian/`, placed by hand, never in the repo), then from `home/olivia/obsidian/seed/` (mode 644). Warns on every switch until LiveSync has settings. |
+| `obsidian/seed/` | The Windows plugin `data.json` files that hold no secrets, plus `types.json` and `graph.json`. `update-time-on-edit`'s `fileHashMap` is emptied (it's a cache keyed by note paths, which shouldn't be in a public repo). Not here: `obsidian-livesync` (CouchDB URL/login and E2EE passphrase) and `paperless` (server URL and API token). |
+
+LiveSync's `data.json` encrypts the connection and passphrase with its "Default" config passphrase,
+which is the fixed string `*` plus a built-in salt (`getPassphrase` in the plugin). That's why the
+Windows file decrypts on another machine as-is, and also why it has to be treated as plain-text
+credentials (DESIGN §9).
+
+## `pkgs/obsidian-plugins/package.nix`
+
+Every Obsidian plugin and theme from the Windows vault, pinned in `sources.json` to the version
+installed there. Built by `nix build .#obsidian-plugins`; `.plugins.<id>` and `.themes.<name>` are
+what `obsidian.nix` uses.
+
+| Part | Why |
+|---|---|
+| `sources.json` | Per plugin: GitHub repo, version, and URL + SRI hash of each release file (`main.js`, `manifest.json`, `styles.css`), exactly what Obsidian's community browser downloads. Themes come from a pinned commit (`raw.githubusercontent.com`), found by matching the Windows `theme.css` and `manifest.json`. The Alien theme isn't in Obsidian's theme list; its source is `jabaho9523/AlienTheme`. |
+| Two URLs per release file | `github.com/…/releases/download/…` first, then the same asset through `api.github.com/…/releases/assets/<id>` (needs `Accept: application/octet-stream`, passed with `curlOptsList`). On 2026-11-09 the first one returned 504 for half the files for an hour while the API route worked. |
+| `sed` + `/* nosourcemap */` on `main.js` | Obsidian's installer strips an inline source map from `main.js` and appends that marker. Doing the same makes the store files byte-identical to a GUI install (checked: all 65 files match the Windows vault). |
+| `passthru.manifestId` | The folder name home-manager uses. Without it the module reads `manifest.json` from the built package during evaluation (IFD). |
+
+To update a plugin, change its version and hashes in `sources.json` (see OPERATIONS).
+
+## `pkgs/vscode-marketplace/package.nix`
+
+The VS Code extensions `dev.nix` installs: `sources.json` lists publisher, name, version and VSIX hash
+for each, and `vscode-utils.extensionsFromVscodeMarketplace` builds them. Versions are the ones in
+`C:\Users\olivi\.vscode\extensions\extensions.json`; the six that are platform-specific on Windows
+(`win32-x64`: Claude Code, C#, C# Dev Kit, Python, debugpy, Python Environments) have `arch =
+"linux-x64"`, which requests the marketplace's Linux build. nix-ide (Linux only) is at the version
+nixpkgs had. Marketplace rather than nixpkgs' `vscode-extensions`: nixpkgs has only 12 of the 42,
+most older than on Windows (C# Dev Kit 3.10 vs 3.40), and the FHS build runs the marketplace
+binaries as they are. `nix build .#vscode-marketplace` fetches and unpacks all of them.
 
 ## `scripts/verify.ps1`
 

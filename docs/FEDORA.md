@@ -21,8 +21,8 @@ The old Linux install (Fedora 43 KDE Plasma, home `olivi`) is on the 119 GB driv
 |---|---|---|---|
 | Desktop look | Catppuccin Macchiato, Klassy, Lain splash, Bocchi cursor, cube/translucency/kinetic effects | Breeze Dark (from Windows) | **Fedora look** |
 | Tiling keys | Krohnkite on Meta+H/J/K/L (+Shift move, +Ctrl resize) | Windows komorebi binds on Alt+H/J/K/L and Alt+Shift+H/J/K/L | **Krohnkite on Meta**. The Alt binds are reset to KDE defaults; Alt+Q close and Alt+M minimize are kept. |
-| Super+Space | Ulauncher | switch keyboard layout (as on Windows) | **Ulauncher**. Layout switch moved to **Alt+Shift**. |
-| Default browser | Zen | Firefox (Windows profile migrated) | **Firefox** stays. Zen is installed; its Fedora profile was not copied. |
+| Super+Space | Ulauncher | switch keyboard layout (as on Windows) | **Ulauncher**, later replaced by **Vicinae** on the same key. Layout switch moved to **Alt+Shift**. |
+| Default browser | Zen | Firefox (Windows profile migrated) | **Firefox** stays. Zen was installed until 2026-11-09; its Fedora profile was not copied. |
 | Tailscale | installed and enabled | NetBird | **not added** (NetBird replaced it) |
 | NoiseTorch | installed | EasyEffects (RNNoise) | **not added**: two noise filters would stack |
 | chezmoi | managed `itripley/dotfiles` | this repo live-links wezterm/nvim/fastfetch | **not added**. The three configs are byte-identical in both places, and `chezmoi apply` would write into this repo through the live links. |
@@ -64,7 +64,7 @@ and video-wallpaper plugin (GPL) are code and are committed.
 |---|---|
 | wezterm, zen-browser, git, fish, neovim, lazygit, fastfetch, lutris, steam, obs-studio, docker, cloudflare-warp, dotnet-sdk | already in the config |
 | Flatpaks: Bitwarden, Tidal-hifi, Plexamp, VS Code, Vesktop, LocalSend, Prism Launcher, Plex | already in the config (as nixpkgs packages) |
-| ulauncher | `apps.nix` + `systemd.user.services.ulauncher` (`plasma.nix`), Meta+Space through `hotkeys.commands` → `ulauncher-toggle` |
+| ulauncher | replaced by Vicinae: `vicinae` flake input + `programs.vicinae` (`plasma.nix`), Meta+Space through `hotkeys.commands` → `vicinae toggle` |
 | thunar, btop, w3m, gnome-boxes, distrobox, pokemon-colorscripts | `apps.nix` |
 | ente (Ente Photos rpm) | `unstable.ente-desktop` (stable's 1.7.22 is pinned to EOL Electron 41) |
 | Flatpaks DistroShelf, Warehouse, High Tide | `distroshelf`, `warehouse`, `high-tide` from nixpkgs |
@@ -75,8 +75,8 @@ and video-wallpaper plugin (GPL) are code and are committed.
 | Vesktop at login | `xdg.autostart.entries` (`default.nix`) |
 
 Copied once into the home folder (app state, not config, so not in the repo): Ulauncher's
-settings and its 4 extensions (File Search, Process Murderer, Bitwarden Search, Terminal Runner),
-and Thunar's `accels.scm`/`uca.xml`. Thunar's "Open Terminal Here" was changed from `exo-open` (not
+settings and its 4 extensions (File Search, Process Murderer, Bitwarden Search, Terminal Runner;
+now unused, since Vicinae replaced Ulauncher), and Thunar's `accels.scm`/`uca.xml`. Thunar's "Open Terminal Here" was changed from `exo-open` (not
 installed) to `wezterm start --cwd %f`.
 
 ### Left behind
@@ -97,9 +97,9 @@ installed) to `wezterm start --cwd %f`.
 
 | What | Where on the Fedora drive | Notes |
 |---|---|---|
-| Zen browser profile (release, Zen 1.17.6b) | `home/olivi/.zen` (39 MB) | NixOS has Zen 1.24.1b, so a copy into `~/.zen` would upgrade fine. |
+| Zen browser profile (release, Zen 1.17.6b) | `home/olivi/.zen` (39 MB) | Zen was removed on 2026-11-09. (It was at 1.24.1b here, so the profile would have upgraded fine.) |
 | A second, older Zen profile **with cookies, `logins.json` and `key4.db`** | committed in the private `itripley/dotfiles` repo (`dot_config/zen/`) | Private repo, but those are saved passwords and live sessions. Consider removing them from that repo's history. |
-| GNOME Boxes VMs | `home/olivi/.local/share/gnome-boxes` (12 GB) | copy over if you want them in Boxes |
+| GNOME Boxes VMs | `home/olivi/.local/share/gnome-boxes` (12 GB) | GNOME Boxes was removed on 2026-11-09; they'd need it (and libvirtd) back |
 | Affinity (Wine) | `home/olivi/.AffinityLinux` | its own Wine build and prefix; reinstall rather than copy |
 | Display scale | Fedora: 1.25 (main) / 1.2 (second) | NixOS currently 1.1 / 1. Set in System Settings → Display; not managed by the config. |
 | Default text editor | Fedora: Sublime for text/JSON/YAML/Markdown | Set in System Settings → Default Applications. Declaring it with `xdg.mimeApps` would make `mimeapps.list` read-only for the GUI. |

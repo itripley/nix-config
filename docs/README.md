@@ -24,14 +24,25 @@ Installation steps are in the top-level [README](../README.md).
   `overlays/build-fixes.nix` ([VERIFICATION.md](VERIFICATION.md#first-real-build-2026-11-08)).
 - Done after first boot: SSH keys, WezTerm (package + wallpapers), Firefox profile migration,
   plex-mpv-shim `allow_http`, Adaptive Sync, NetBird on the self-hosted server (exit node off),
-  WARP registered, tray toggles for both, and the old **Fedora** setup (theme, Krohnkite, Ulauncher,
+  WARP registered, tray toggles for both, and the old **Fedora** setup (theme, Krohnkite, Ulauncher (now Vicinae),
   apps; [FEDORA.md](FEDORA.md)).
 - The 2026-11-09 app changes (PhotoCraft + FilmCraft, Claude Desktop, 44 apps removed) are
   **switched to**; the running system was byte-identical to that commit's build. Their hand checks
   are in [VERIFICATION.md](VERIFICATION.md#app-changes-2026-11-09).
-- **Audit fixes (2026-11-09, branch `audit-fixes`) build but are not switched to yet.** Apply them
-  with `nh os boot` and reboot (the amdgpu overdrive kernel parameter needs a reboot). Do the one-time
-  steps and checks in [VERIFICATION.md](VERIFICATION.md#audit-2026-11-09) first.
+- **Audit fixes (2026-11-09) are committed, booted and in use:** the one-time root steps were done,
+  and the kernel command line has `amdgpu.ppfeaturemask`. The hand checks are in
+  [VERIFICATION.md](VERIFICATION.md#audit-2026-11-09).
+- **Everything after the audit is switched to but not committed yet** (Vicinae, Obsidian, VS Code
+  extensions, TX-02, WezTerm tabs, the Serein patch, the idle-static fix). On 2026-11-09 the running
+  system was exactly the working tree's build. The idle-static fix still needs a **reboot** for its
+  kernel-module half (`power_save` is still 10); the WirePlumber half is live.
+- **Open: audio routing doesn't work.** As of 2026-11-09 Olivia can't get the routing she wants out of
+  the Game/Music/Chat sinks, EasyEffects, linuxmeeter (since uninstalled) and qpwgraph together. Observed state and next
+  steps: [VERIFICATION.md](VERIFICATION.md#audio-routing-not-working-2026-11-09).
+- **Obsidian (2026-11-09) works:** LiveSync pulled the vault, plugins and settings in place.
+- **Open: `vicinae.service` restart-loops.** An older Vicinae server (0.23.2, from before the flake
+  input) is still running outside the unit, so the unit's server exits with "A server is already
+  running". Log out and back in once ([OPERATIONS.md](OPERATIONS.md#troubleshooting)).
 - Open: the `github-artlivia` deploy key is rejected by GitHub; a few hand checks
   ([VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand)); remaining app logins (Steam, Bitwarden, …).
 
@@ -52,7 +63,17 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-09 | Warehouse removed | `663b28e` |
 | 2026-11-09 | Claude Desktop (official Linux beta) added from the claude-desktop-nix flake | `9be83f4`, DESIGN §4 |
 | 2026-11-09 | WARP tray: Cloudflare's Zero Trust-only `warp-taskbar` replaced by warp-cloudflare-gui (consumer on/off) | `cc26af0` |
-| 2026-11-09 | Best-practice audit. Fixes: root-only `trusted-users`, no legacy channels, `build-vm` works, LACT overdrive, `nix fmt`/`nix flake check`/`nix develop` + CI, warp-gui moved to `pkgs/`, shared nixpkgs config, no hardcoded uid/path, closure 43.1 → 40.6 GiB (orca/speechd, KDE PIM, extra JDKs, second .NET SDK) | branch `audit-fixes`, [VERIFICATION.md](VERIFICATION.md#audit-2026-11-09) |
+| 2026-11-09 | Best-practice audit. Fixes: root-only `trusted-users`, no legacy channels, `build-vm` works, LACT overdrive, `nix fmt`/`nix flake check`/`nix develop` + CI, warp-gui moved to `pkgs/`, shared nixpkgs config, no hardcoded uid/path, closure 43.1 → 40.6 GiB (orca/speechd, KDE PIM, extra JDKs, second .NET SDK) | `b96c7e4`…`18fdfd7`, [VERIFICATION.md](VERIFICATION.md#audit-2026-11-09) |
+| 2026-11-09 | linuxmeeter (Voicemeeter-style PipeWire mixer) packaged in `pkgs/` and added | never committed, [VERIFICATION.md](VERIFICATION.md#app-changes-2026-11-09) |
+| 2026-11-09 | Audio routing reported as not working; live graph recorded, not fixed yet | [VERIFICATION.md](VERIFICATION.md#audio-routing-not-working-2026-11-09) |
+| 2026-11-09 | Idle static on the speakers: HDA power saving off, analog output never suspended | `audio.nix` |
+| 2026-11-09 | linuxmeeter uninstalled (package recipe removed too; it was never committed) | [VERIFICATION.md](VERIFICATION.md#app-changes-2026-11-09) |
+| 2026-11-09 | Ulauncher replaced by Vicinae from its own flake + cachix, per its NixOS and KDE guides (Meta+Space, Meta+V clipboard, blur, focus, input server) | `plasma.nix`, DESIGN §4 |
+| 2026-11-09 | Serein: minimum window size patched from 760×520 to 400×300 (hard-coded, no setting) | `apps.nix`, [VERIFICATION.md](VERIFICATION.md#problems-found-after-first-boot-2026-11-0809) #17 |
+| 2026-11-09 | Obsidian: the weblivia vault's 19 plugins and 6 themes packaged (pinned to the Windows versions), settings and snippets declared, LiveSync settings seeded from a private file so it pulls the notes | `obsidian.nix`, `pkgs/obsidian-plugins`, [VERIFICATION.md](VERIFICATION.md#obsidian-vault-2026-11-09) |
+| 2026-11-09 | VS Code: all 42 Windows extensions (+ nix-ide) declared from the marketplace at the Windows versions, instead of 8 from nixpkgs + Settings Sync | `pkgs/vscode-marketplace`, [VERIFICATION.md](VERIFICATION.md#vs-code-extensions-2026-11-09) |
+| 2026-11-09 | TX-02 font for WezTerm and Obsidian: files in gitignored `dotfiles/fonts/`, linked into `~/.local/share/fonts` | `default.nix`, `dotfiles/wezterm/config/fonts.lua` |
+| 2026-11-09 | WezTerm: fancy tab bar on, with a close × on each tab (`show_close_tab_button_in_tabs = true`) and the title bar kept dark when unfocused; tab titles lost their rounded ends and own colours so the fancy bar draws the tabs | `dotfiles/wezterm/config/appearance.lua`, `events/tab-title.lua` |
 
 ## Conventions
 

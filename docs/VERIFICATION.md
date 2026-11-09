@@ -76,6 +76,7 @@ Zero warnings, zero errors against `flake.lock`. Pinned revisions:
 | serein (added 2026-11-09) | main | `c028eee6` |
 | claude-desktop (added 2026-11-09) | main | `b16f4856` |
 | artcraft (added 2026-11-09) | main | `6a3de1d2` |
+| vicinae (added 2026-11-09) | main | `84a0086f` |
 
 ## First real build (2026-11-08)
 
@@ -111,6 +112,7 @@ original lists builds.
 | 14 | Fedora migration: `wineWowPackages` deprecation warning | renamed in 26.05 | `wineWow64Packages.stable` | `0ef7162` |
 | 15 | Serein: `AWS_LC_SYS_USE_SYSTEM=1 requires a system-installed AWS-LC` | same as #6: its flake builds with nixpkgs-unstable, whose `cargoUseSystemLibs` hook forces system AWS-LC | `.overrideAttrs { dontCargoUseSystemLibs = true; }` where it's installed (`apps.nix`) | `5d2f60a` |
 | 16 | No WARP on/off switch in the tray | `warp-taskbar` is Zero Trust only: with a free registration each click opens a team sign-in | `home/olivia/warp-gui.nix`: packaged warp-cloudflare-gui, `warp-taskbar` autostart hidden | `cc26af0` |
+| 17 | Serein can't be resized smaller than ~836×572 px | `MIN_WINDOW_SIZE: [u32; 2] = [760, 520]` (logical px) in `apps/desktop/src/app_settings.rs`, applied with `with_min_inner_size`; no setting overrides it. Not the custom title bar: turning that off changed nothing. | `postPatch` with `substituteInPlace --replace-fail` → `[400, 300]` (`apps.nix`). A KWin minimum-size rule wouldn't work: winit clamps configures to its own minimum. ✅ patch applies and builds; the system closure has the new Serein path (nvd lists no change, same version 0.1.0). | not committed yet |
 
 Other things checked along the way:
 - Serein runs (Vulkan on the RX 7800 XT). The system `ldd` reports `GLIBC_2.43/2.44 not found` for it,
@@ -137,6 +139,7 @@ build.
 | PhotoCraft + FilmCraft (`artcraft` input, `programs.artcraft` in `desktop.nix`) | `3c298f4` | ✅ both build; `photocraft-cli --version` → 0.21.0, `filmcraft-cli --version` → 0.4.0; each ships a `.desktop` file. GUIs not opened. |
 | 43 apps removed, plus their config | `1aba8c9` | ✅ evaluates and builds; `nix flake lock` dropped zen-browser and its inputs |
 | Warehouse removed | `663b28e` | ✅ builds |
+| linuxmeeter (`pkgs/linuxmeeter`) | never committed; uninstalled the same day | ✅ builds (pinned `3245d2d`); 67 unit tests pass; wrapper sets `LV2_PATH` to lsp-plugins 1.2.29, which has all four plugins it loads (`gate_stereo`, `compressor_stereo`, `para_equalizer_x8_stereo`, `limiter_stereo`); system PipeWire 1.6.6 ships the filter-graph LV2 plugin. `nvd diff`: +linuxmeeter, +tauri-asset-gst-plugin, +9.2 MiB. App not opened. |
 | Claude Desktop (`claude-desktop` input) | `9be83f4` | ✅ builds (4.23118.0); its own loader (glibc 2.44) resolves all 89 libraries. The system `ldd` shows `GLIBC_2.43/2.44 not found`, the same false alarm as Serein. App not opened. |
 
 Things found along the way:
@@ -148,6 +151,15 @@ Things found along the way:
 - artcraft-nix's module would install all seven ArtCraft apps by default; `apps = [ … ]` limits it.
   It also sets `fonts.fontDir.enable` and a tmpfiles link `/usr/share/fonts` →
   `/run/current-system/sw/share/X11/fonts`, because the apps' text tools don't use fontconfig.
+- **linuxmeeter overlapped the existing audio setup** (moot since its uninstall later that day). Nothing clashes by name (its nodes are all
+  `lm.*`), but: (1) its virtual inputs *System / Music / Chat* sit next to the `audio.nix` loopback
+  sinks *Game / Music / Chat*, so the output list shows two "Music" and two "Chat"; (2) EasyEffects
+  sits in the mic path ahead of linuxmeeter, so any EasyEffects input effect (e.g. RNNoise) runs before
+  linuxmeeter's gate / compressor / EQ, and EasyEffects' output effects follow the default sink, which
+  linuxmeeter's *default-output takeover* changes; (3) its tray, close-to-tray and autostart toggle
+  are managed from the app, not Nix. Checked live after the switch (`wpctl status`, `pw-link -l`): no
+  stream used the old sinks; the mic went Seiren → EasyEffects → `lm.strip.1.cap`, with no effects
+  loaded in EasyEffects, so nothing was processed twice. Both kept on purpose.
 - After the removals, `flatpak.nix` has an empty list on purpose: nix-flatpak uninstalls the
   Flatpaks it installed earlier on the next activation. `flatpak list --app` was already empty on
   2026-11-09 (JDownloader and Stremio were no longer installed), so in practice there's nothing left.
@@ -164,7 +176,7 @@ After the switch, check by hand:
 ## Audit (2026-11-09)
 
 A read-only audit against current NixOS best practices, checked against the pinned nixpkgs, followed by
-the fixes on branch `audit-fixes`.
+the fixes (commits `b96c7e4`…`ad773b9`, merged into `main`).
 
 **Before the fixes:**
 
@@ -197,6 +209,10 @@ sudo rm /etc/nixos/configuration.nix /etc/nixos/hardware-configuration.nix   # k
 sudo nix-channel --remove nixos     # before the switch: nix-channel goes away with channels off
 nh os boot && reboot                # overdrive needs a reboot
 ```
+
+✅ Done on 2026-11-09: `/etc/nixos` holds only `smb-secrets`, root's channel profile is empty,
+`NIX_PATH` is `nixpkgs=flake:nixpkgs`, `trusted-users = root`, and the booted kernel command line has
+`amdgpu.ppfeaturemask=0xfffd7fff`.
 
 **After the reboot, check by hand:**
 
@@ -236,17 +252,101 @@ NixOS release"), using `nh os boot`, and re-test `overlays/build-fixes.nix`.
 | SSH | ✅ `ssh unraid` works. ❌ `github-artlivia`: GitHub rejects the deploy key (`Permission denied (publickey)`); re-add `id_ed25519_artlivia.pub` as a deploy key on `itripley/artlivia`. |
 | Firefox migration | ✅ script ran: 126 profile add-ons (22 enabled). Opening it in Firefox is still to be checked. |
 
+## Audio routing: not working (2026-11-09)
+
+**Reported by Olivia:** the audio setup is a mess, and she can't get any of the routing to work.
+The exact symptoms (which app, which device, silent or wrong output) aren't written down yet.
+Pin them down first when this is picked up.
+
+**What's stacked up.** Four tools that all change routing:
+
+| Layer | Source | What it does |
+|---|---|---|
+| Game / Music / Chat | `audio.nix` loopback sinks | Always on. Each forwards to the default output. |
+| EasyEffects | `services.easyeffects` (home/olivia/default.nix) | Always on. Takes over app output and the mic; **no effects loaded** (no presets, no RNNoise). |
+| linuxmeeter | `pkgs/linuxmeeter` (**uninstalled** later on 2026-11-09) | Only while it runs. Its own System / Music / Chat inputs, buses A1/A2 (hardware) and B1/B2 (virtual mics). |
+| qpwgraph | `apps.nix` | Hand-made wires; patchbay with Auto pin on, Exclusive off. |
+
+**Live graph read on 2026-11-09** (`wpctl`, `pw-dump`, `pw-link -l`; read only, nothing changed):
+- Defaults: output = Ryzen HD Audio analog (`alsa_output.pci-0000_0e_00.6.analog-stereo`),
+  input = Razer Seiren Mini.
+- linuxmeeter **not running** (no `lm.*` nodes). EasyEffects and qpwgraph running.
+- Output path: Plexamp, `virtual_game_out`, `virtual_music_out`, `virtual_chat_out` → `easyeffects_sink`
+  → EasyEffects (spectrum + level meter only) → Ryzen analog. So the loopback sinks feed EasyEffects,
+  not the hardware directly. That's two pass-through layers in front of the speakers.
+- Mic: Seiren suspended, nothing recording from it. EasyEffects' input chain is spectrum + level meter only.
+- linuxmeeter's saved profile (`~/.config/linuxmeeter/profiles/Default.toml`) has three settings that
+  break its routing:
+  1. The Mic strip captures `alsa_input.pci-0000_0e_00.6.analog-stereo` (motherboard line-in), not the Seiren.
+  2. A1 *Speakers* and A2 *Headphones* both target `alsa_output.pci-0000_03_00.1.hdmi-stereo`
+     (the monitor's HDMI audio), not the Ryzen jack that's the default.
+  3. The Chat strip has B1 (*Stream Mic*) on, so a Discord call on Chat + Stream Mic echoes voices back.
+
+**Idle static (also reported 2026-11-09):** the speakers play static whenever nothing has played
+for a bit. Read: `snd_hda_intel` `power_save = 10`, `power_save_controller = Y`; both ALSA outputs
+`suspended` with WirePlumber's default 5 s timeout. Fix in `audio.nix` (power saving off, analog
+out never suspended); `nix flake check` passes, `nvd diff` adds only `51-analog-no-suspend.conf`.
+Switched to on 2026-11-09: `wpctl inspect` shows `session.suspend-timeout-seconds = 0` on the analog
+out, and `/etc/modprobe.d/nixos.conf` has the new options, but `power_save` stays 10 until a reboot
+reloads `snd_hda_intel`.
+
+**Likely direction (not decided):** use one routing layer instead of four. linuxmeeter was
+uninstalled later on 2026-11-09, so its profile problems above no longer apply. What's left is the
+loopback sinks + the Plasma volume applet, with EasyEffects either given real effects or dropped
+(it currently passes everything through unchanged). An earlier attempt at the
+first option was reverted the same day at Olivia's request. A walkthrough of the current setup
+(diagrams, qpwgraph basics) was given as a separate page, not in the repo.
+
+## Obsidian vault (2026-11-09)
+
+Checked before switching:
+- All 19 plugins and 6 themes resolved to the exact versions in the Windows vault; `nix build
+  .#obsidian-plugins` built, and all 65 files are **byte-identical** to the Windows ones (after
+  `main.js` gets the same source-map strip + `/* nosourcemap */` marker Obsidian's installer adds;
+  without it, calendar and OA-file-hider differed by those 18 bytes, and dataview by its ~1 MiB
+  inline source map).
+- `nix flake check` passes; the system builds; `nvd diff` against the running system adds only the
+  Obsidian files and packages (+17.4 MiB). The generated `appearance.json` and
+  `community-plugins.json` match Windows (minus obsidian-git and the uninstalled `realclaudian`).
+- The seed step, run against a scratch folder: copies missing files (private ones at 600, repo
+  ones at 644), leaves existing `data.json` alone, skips a missing private folder.
+- No secrets in `home/olivia/obsidian/` (Paperless and LiveSync files left out; checked for
+  token/password/passphrase keys and personal paths). The repo is public.
+- `update-time-on-edit` only reacts to `modify` events; the first pull into an
+  empty vault creates files, so it shouldn't rewrite `updated:` on every note. Windows runs the
+  same pair already.
+
+After `nh os switch` (2026-11-09): LiveSync waited for *Fetch from remote* on first run (no
+local database until then); after that Olivia confirmed the vault, plugins and settings work.
+
+## VS Code extensions (2026-11-09)
+
+- All 42 Windows extensions resolved on the marketplace at their Windows versions, plus nix-ide.
+  Each downloaded VSIX's `package.json` id and version match, and the six platform-specific ones are
+  `TargetPlatform="linux-x64"` builds. `nix build .#vscode-marketplace` builds all 43.
+- `nix flake check` passes; the system builds. `nvd diff`: 42 extensions added, 5 updated to the
+  Windows versions, +583 MiB. Removed with nixpkgs' Python/debugpy/Pylance packages: `gdb`,
+  `jedi-language-server` and its Python deps; the marketplace builds bundle their own.
+- Two can't work here: Custom CSS and JS and Custom UI Font write into VS Code's install directory,
+  which is the read-only store.
+- Switched to on 2026-11-09: `~/.vscode/extensions` holds home-manager's links to the declared set.
+
 ## Still to check by hand
 
 | Area | How |
 |---|---|
+| Idle static gone | After a reboot (already switched to): leave audio paused for a minute and listen. `cat /sys/module/snd_hda_intel/parameters/power_save` → `0`; `wpctl status` shows the Ryzen output not suspended. |
 | Plasma shortcuts | System Settings → Shortcuts; adjust `plasma.nix` if a KWin action name differs. |
 | ROCm in Resolve / Blender / Ollama | Render with HIP in Blender, run a model and check `ollama ps` shows GPU. |
 | Seiren Mini + EasyEffects | Record a test clip. |
 | Firefox | Open it: add-ons, Sidebery panels, logins and tabs should all be there. |
 | Fedora theme (after `nh os switch` + re-login) | Catppuccin colors, Klassy borders, Lain splash, Bocchi cursor, per-screen wallpapers, animated lock screen (Meta+L). |
 | Krohnkite | New windows tile; Meta+H/J/K focus, Meta+Shift+H/J/K/L move. If not, System Settings → Window Management → KWin Scripts → Krohnkite. |
-| Ulauncher | Meta+Space opens it; Alt+Shift switches pt/us. |
+| Vicinae | First, `systemctl --user status vicinae` is *active* (on 2026-11-09 it restart-looped behind an old 0.23.2 server; log out/in). Then Meta+Space opens it with focus (Catppuccin colors, blurred background); Meta+V opens clipboard history, and Enter on an entry pastes it into the focused window (input server; `ls /run/wrappers/bin/vicinae-input-server`); Alt+Shift switches pt/us. |
+| Serein minimum size | Shrink the window below ~836×572 px; check the channel list, chat and composer still lay out without overlapping at narrow widths. |
+| Obsidian, Windows side | On Windows, `git status` in the vault shouldn't show a flood of notes changed by the Linux side (update-time-on-edit). |
+| VS Code extensions | *Extensions* view lists all 43, none flagged. Open a `.py` file (Pylance + interpreter), a C# project (C# Dev Kit; may need `dotnet-sdk` in `dev.nix`), and the Claude Code panel. If debugpy's *attach to process* needs `gdb`, add `gdb` to `dev.nix`. |
+| TX-02 font | ✅ `fc-list` lists 30 TX-02 files. WezTerm (restart it) shows TX-02 with Nerd icons intact in the tab bar and prompt; Obsidian's interface and notes use it. |
 | `github-artlivia` deploy key | Re-add the public key on GitHub, then `git ls-remote git@github-artlivia:itripley/artlivia.git`. |
 
 After any edit, build before switching: `nh os build` (or `nh os switch`, which stops on errors

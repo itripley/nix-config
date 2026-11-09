@@ -53,9 +53,11 @@ just a CLI environment).
 | `serein` flake ([ViceVerse-cz/Serein](https://github.com/ViceVerse-cz/Serein)) | Native Rust Discord client, not in nixpkgs. Its own flake targets nixos-unstable, so its `nixpkgs` follows our `nixpkgs-unstable` (same channel, no extra copy). Built from source: not in any binary cache. No release tags, so `flake.lock` pins a commit; `nix flake update serein` moves it. Needs a `dontCargoUseSystemLibs` override (VERIFICATION #15, the same failure codex had). |
 | `claude-desktop` flake ([tomsch/claude-desktop-nix](https://github.com/tomsch/claude-desktop-nix)) | Anthropic's official Claude Desktop Linux beta isn't in nixpkgs. The flake repackages the `.deb` from Anthropic's apt repo (`downloads.claude.ai`), pinned by hash; its CI bumps it every 6 hours after checking the repo's GPG signature. Its `nixpkgs` follows our `nixpkgs-unstable`. The wrapper runs Electron with `--no-sandbox` (Chromium's setuid sandbox can't work from the store) and Wayland flags. `nix flake update claude-desktop` picks up new versions. |
 | `artcraft` flake ([ipeglin/artcraft-nix](https://github.com/ipeglin/artcraft-nix)) | Unofficial packaging of the ArtCraft apps (storytold), not in nixpkgs. Repackages the upstream release AppImages (autoPatchelf, no FHS sandbox), pinned by upstream's sha256, with GitHub/GitLab mirrors as fallback. Its NixOS module builds against our `pkgs`; `nixpkgs` follows ours only so the lock has no extra copy. Only PhotoCraft and FilmCraft are enabled (`desktop.nix`). New releases arrive with `nix flake update artcraft`. |
+| `vicinae` flake ([vicinaehq/vicinae](https://github.com/vicinaehq/vicinae)) | The launcher's own flake, set up per [its NixOS guide](https://docs.vicinae.com/nixos). nixpkgs has the package but no NixOS module: without upstream's module the input server lacks `cap_dac_override` (a `security.wrappers` entry), so paste-to-window and snippet expansion fall back to copying. Its Home Manager module replaces home-manager's `programs.vicinae`. Its `nixpkgs` deliberately does **not** follow ours, so builds match `vicinae.cachix.org` (added to `nix.settings`); the cost is its own nixpkgs and Qt in the closure. `nix flake update vicinae` picks up new releases. |
 
-Every input except nix-flatpak follows our `nixpkgs` (Serein and Claude Desktop follow `nixpkgs-unstable`), so there's
-one package set per channel instead of several copies. `flake.lock` pins exact revisions, so evaluation is reproducible until you choose to update.
+Every input except nix-flatpak and Vicinae follows our `nixpkgs` (Serein and Claude Desktop follow
+`nixpkgs-unstable`; Vicinae keeps its own for the binary cache, see above), so there's one package set
+per channel instead of several copies. `flake.lock` pins exact revisions, so evaluation is reproducible until you choose to update.
 
 **Unfree / insecure:** `allowUnfree = true` (Steam, Resolve, VS Code, Plex, …). One insecure package
 is permitted, `openssl-1.1.1w`, because **Sublime Text 4 still links the end-of-life OpenSSL 1.1**.
@@ -95,7 +97,7 @@ Connect was already in use, and Plasma handles 165 Hz + VRR well on AMD.
 
 Carried over: pt+us layouts from Windows. The look and keys come from the old Fedora install
 ([FEDORA.md](FEDORA.md)): Catppuccin Macchiato + Klassy, Krohnkite tiling on Meta+H/J/K/L, and
-Ulauncher on Meta+Space, so layouts switch with Alt+Shift. (The first version used Breeze Dark and
+a launcher on Meta+Space (Ulauncher there, Vicinae here), so layouts switch with Alt+Shift. (The first version used Breeze Dark and
 the Windows komorebi Alt+H/J/K/L binds; Fedora's setup replaced both.)
 
 ## 8. Apps: same app first, then native replacement, then escape hatches
@@ -104,8 +106,8 @@ Order of preference for every Windows app:
 1. **The same app from nixpkgs** (most of them).
 2. **A native Linux replacement** when the app is Windows-only (e.g. Voicemeeter → PipeWire sinks).
 3. **A third-party flake** when the app has a maintained Nix packaging outside nixpkgs (Serein,
-   Claude Desktop, ArtCraft; §4). Each one is pinned in `flake.lock`, and its nixpkgs follows ours
-   (or our unstable). These flakes are outside code that runs at build time, so `nix flake update
+   Claude Desktop, ArtCraft, Vicinae; §4). Each one is pinned in `flake.lock`, and its nixpkgs follows ours
+   (or our unstable), except Vicinae's, which keeps its own to hit its binary cache. These flakes are outside code that runs at build time, so `nix flake update
    <name>` only after a look at what changed. Prefer flakes that repackage the vendor's own
    release files pinned by hash (Claude Desktop, ArtCraft) or build from source (Serein).
 4. **Flatpak** when it exists for Linux but isn't packaged in nixpkgs or a flake. (None at the moment.)
@@ -125,7 +127,12 @@ The Nix store is **world-readable**, and this repo may be pushed somewhere. So:
 - SMB credentials live in `/etc/nixos/smb-secrets` (root, mode 600), created by hand during install.
 - SSH private keys are copied from the Windows drive after install, never committed.
 - The Firefox profile (logins, cookies) is copied by a script, never committed.
-- WezTerm wallpapers are gitignored. They're third-party art, not secrets, but shouldn't be republished.
+- Obsidian's LiveSync and Paperless settings (`data.json`: CouchDB login, E2EE passphrase, API token)
+  are copied by hand into `~/.config/obsidian-seed/` and only from there into the vault. LiveSync's
+  own encryption of that file uses a fixed default passphrase, so it counts as plain text. Plugin
+  code and the other settings are in the repo, pinned by hash.
+- WezTerm wallpapers, the Plasma theme artwork (`themes/art/`) and the TX-02 font (`dotfiles/fonts/`)
+  are gitignored. They're third-party art and a licensed font, not secrets, but shouldn't be republished.
 
 **Root-equivalent access** (checked in the 2026-11-09 audit):
 - `nix.settings.trusted-users` is left at `root` only. Trusting `@wheel` would let anything running

@@ -26,16 +26,19 @@ git add -A && git commit -m "…"  # record it
 | Run an AppImage | `chmod +x Foo.AppImage && ./Foo.AppImage` (binfmt handles it). |
 | Update everything | `nh os switch --update` (updates `flake.lock`, then rebuilds). Commit the new lock. |
 | Update one input | `nix flake update home-manager`, then `nh os switch`. |
-| Update Claude Desktop / ArtCraft / Serein | `nix flake update claude-desktop` (or `artcraft`, `serein`), then `nh os switch`. Third-party flakes: glance at the input's commits first (DESIGN §8). |
+| Update Claude Desktop / ArtCraft / Serein / Vicinae | `nix flake update claude-desktop` (or `artcraft`, `serein`, `vicinae`), then `nh os switch`. Third-party flakes: glance at the input's commits first (DESIGN §8). |
 | Add another ArtCraft app | Add it to `programs.artcraft.apps` in `modules/nixos/desktop.nix`: `vectorcraft`, `designcraft`, `lightcraft`, `effectcraft`, `pdfcraft`. |
 | Pin an ArtCraft version | Use `<app>_<x>_<y>_<z>` in that list, e.g. `"photocraft_0_20_1"`; plain `<app>` is the newest in the lock. |
 | Roll back | Pick an older generation in the boot menu, or `sudo nixos-rebuild switch --rollback`. |
 | Try a risky change in a VM | `nixos-rebuild build-vm --flake .#desktop-olivia`, then `./result/bin/run-desktop-olivia-vm`. Its disk is `./desktop-olivia.qcow2` (gitignored; delete it for a fresh VM). No artwork or secrets inside. With the real btrfs layout: `nix build .#nixosConfigurations.desktop-olivia.config.system.build.vmWithDisko`, then `./result/bin/disko-vm` (disk in a temp dir). |
 | See what an update changes | `nix build .#nixosConfigurations.desktop-olivia.config.system.build.toplevel` and `nvd diff /run/current-system result` (`nvd` is in `nix develop`). `nh os switch` shows the same diff before activating. |
 | Format / lint | `nix fmt`; `nix flake check`. `nix develop` has nixfmt-tree, statix, deadnix, nvd and nil. |
-| Build a repo package alone | `nix build .#warp-cloudflare-gui` (packages in `pkgs/`). |
+| Build a repo package alone | `nix build .#warp-cloudflare-gui` (or `obsidian-plugins`, `vscode-marketplace`; the packages in `pkgs/`). |
+| Add / update an Obsidian plugin | See [Obsidian](#obsidian). |
+| Add / update a VS Code extension | Add or change `{publisher, name, version, hash}` in `pkgs/vscode-marketplace/sources.json` (`"arch": "linux-x64"` if the marketplace lists per-platform builds). Get the hash by leaving it as `""`, running `nix build .#vscode-marketplace`, and copying the `got:` value. Extensions installed from inside VS Code still work but aren't kept on a fresh install. |
 | Play Minecraft 1.16 or older | Add `jdk17` / `jdk8` to the Prism Launcher `jdks` list in `apps.nix`. |
 | Free disk space | Automatic (`programs.nh.clean`: keeps 10 generations / 14 days). Manual: `nh clean all`. |
+| Add a font for yourself | Copy the `.otf`/`.ttf` files into `home/olivia/dotfiles/fonts/<Name>/` (gitignored, linked into `~/.local/share/fonts`). No rebuild; restart the app. After a fresh clone, TX-02 has to be copied back in by hand. Packaged fonts go in `fonts.packages` in `modules/nixos/desktop.nix` instead. |
 | Edit nvim / WezTerm / fastfetch config | Edit under `home/olivia/dotfiles/…`; they're live links, so there's no rebuild. |
 | Edit Firefox `userChrome.css` | Edit `home/olivia/dotfiles/firefox/userChrome.css`, then `nh os switch`, then restart Firefox. |
 | Change time zone | `time.timeZone` in `modules/nixos/desktop.nix` (e.g. `"Europe/London"`). |
@@ -51,7 +54,8 @@ Set in `home/olivia/plasma.nix` (Krohnkite, launchers, window binds) and `module
 
 | Keys | Does | From |
 |---|---|---|
-| **Meta+Space** | Ulauncher | Fedora |
+| **Meta+Space** | Vicinae | Fedora (was Ulauncher) |
+| **Meta+V** | Vicinae clipboard history (replaces Klipper's popup) | Vicinae's KDE guide |
 | **Alt+Shift** | switch keyboard layout pt ↔ us | moved from Win+Space |
 | Alt+Space | KRunner | KDE default |
 | Meta+Return | WezTerm | Fedora |
@@ -91,9 +95,45 @@ the next switch puts the configured value back.
 
 - Files are in `home/olivia/themes/`; see its README. Artwork (`themes/art/`) is **not in git**:
   after a fresh clone, copy it from the Fedora drive with the commands in `themes/README.md`.
+  The same goes for the TX-02 font in `home/olivia/dotfiles/fonts/`.
 - Changing the wallpaper, colors or cursor in System Settings works until the next `nh os switch`,
   which re-applies `plasma.nix`. Make lasting changes in `plasma.nix`.
 - Wallpapers are per screen: the first entry in `workspace.wallpaper` is screen 0 (DP-1).
+
+## Obsidian
+
+The vault is `~/Documents/obsidian/weblivia`; `home/olivia/obsidian.nix` installs its plugins, themes
+and settings, and LiveSync pulls the notes (MODULES `obsidian.nix`).
+
+**First time (once, before opening Obsidian):** copy the two settings files that hold secrets from
+the Windows vault into the private seed folder, then switch:
+
+```sh
+w=/mnt/windows/Users/olivi/Desktop/olivia/obsidian/weblivia/.obsidian/plugins
+for p in obsidian-livesync paperless; do
+  install -D -m600 "$w/$p/data.json" ~/.config/obsidian-seed/plugins/$p/data.json
+done
+nh os switch
+```
+
+Then open Obsidian, pick **weblivia** in the vault list, and choose *Trust author and enable
+plugins*. LiveSync connects with the Windows settings and pulls the notes into the empty vault. If
+it doesn't start on its own (or asks), use LiveSync's *Fetch from remote* (in its settings,
+*Maintenance → Rebuild*): it rebuilds the local database **from** the server. Don't pick anything
+that overwrites or rebuilds the remote from this empty vault. Paperless's *Document storage path* is
+vault-relative; the Windows value pointed at an old folder, so the seed copy uses `_attachments/paperless`.
+
+If Obsidian was opened before the files were in place, LiveSync wrote its own empty `data.json` and
+the seed won't overwrite it: close Obsidian, delete
+`~/Documents/obsidian/weblivia/.obsidian/plugins/obsidian-livesync/data.json`, `nh os switch`.
+
+| Task | How |
+|---|---|
+| Change a setting under *Appearance*, *Core plugins*, *Files and links*, or enable/disable a plugin | Edit `obsidian.nix`; changes made in the GUI don't stick (read-only files). |
+| Change a plugin's own settings | In Obsidian, as usual: `data.json` is a normal file. To make it the default for a fresh vault, copy it to `home/olivia/obsidian/seed/plugins/<id>/data.json` (only if it holds no secrets). |
+| Add a plugin | Look up its repo in [community-plugins.json](https://github.com/obsidianmd/obsidian-releases/blob/master/community-plugins.json), add an entry to `pkgs/obsidian-plugins/sources.json` with the release files' URLs and hashes (`nix store prefetch-file <url>` prints the hash), then add `plugins.<id>` to `communityPlugins`. |
+| Update a plugin | Change its `version`, the tag in its URLs, and the hashes in `sources.json`; the API asset URL has a new id per release (`gh api repos/<repo>/releases/tags/<version>`). `nix build .#obsidian-plugins`. |
+| Turn on the git backup here too | Clone the vault's repo into the vault folder, then drop the `disabled` around `obsidian-git`. Two machines committing the same LiveSync'd files will conflict, which is why it's off. |
 
 ## Booting Windows
 
@@ -122,17 +162,21 @@ the next switch puts the configured value back.
 | Plex LAN casting / plex-mpv-shim can't connect | Router DNS-rebind protection on `*.plex.direct` | `cat /etc/resolv.conf` should list 1.1.1.1 first (`networking.nix`). WARP or NetBird DNS taking over can also mask or cause it. Long-term: whitelist `plex.direct` in the router. Also set `allow_http: true` in `~/.config/plex-mpv-shim/conf.json`. |
 | `netbird up` logs in to app.netbird.io | Daemon still running with old settings | `sudo systemctl restart netbird` (a switch does this automatically when `networking.nix` changes it). One-off: `netbird up --management-url https://netbird.weblivia.dev`. |
 | NetBird tray icon missing | Autostart entry not picked up yet, or hidden | Log out/in once after the switch, or run `netbird-ui`; check the tray's ^ arrow. |
-| Meta+Space does nothing | Ulauncher not running, or the KDE hotkey not loaded | `systemctl --user status ulauncher`; `systemctl --user restart ulauncher`; log out/in so KDE loads the `plasma-manager-commands` shortcut. |
-| Ulauncher extension errors | Missing dependency | The Bitwarden extension needs the `bw` CLI (`bitwarden-cli`, not installed). Ulauncher → Preferences → Extensions shows each error. |
+| Meta+Space does nothing | Vicinae server not running, or the KDE hotkey not loaded | `systemctl --user status vicinae`; `vicinae ping`; `journalctl --user -u vicinae`; log out/in so KDE loads the `plasma-manager-commands` shortcut. |
+| `vicinae.service` restart-loops: *A server is already running (pid …)* | A Vicinae server started outside the unit (e.g. an older one from before a switch) is still running | Log out and back in, or `pkill -f vicinae-server`; the unit then starts the current one. Check the running build with `readlink /proc/<pid>/exe`. |
+| Vicinae copies instead of pasting; snippets don't expand | Input server not running (needs its setcap wrapper) | `ls -l /run/wrappers/bin/vicinae-input-server` (from the vicinae NixOS module); `journalctl --user -u vicinae \| grep -i input`. |
 | Wallpaper black, cursor default, no splash | `themes/art/` empty (fresh clone) | Copy the artwork back (`home/olivia/themes/README.md`), then log out/in. |
 | Lock screen not animated | QtMultimedia / plugin not found | `ls ~/.local/share/plasma/wallpapers/`; `kdePackages.qtmultimedia` must be in `desktop.nix`; check `journalctl --user -b \| grep -i smart.video`. |
 | Windows don't tile | Krohnkite disabled | System Settings → Window Management → KWin Scripts → enable Krohnkite (should be set by `kwinrc.Plugins.krohnkiteEnabled`). |
-| Keyboard layout won't switch | Using the old key | It's **Alt+Shift** now; Win+Space opens Ulauncher. |
+| Keyboard layout won't switch | Using the old key | It's **Alt+Shift** now; Win+Space opens Vicinae. |
 | `/mnt/windows` empty or error | Windows Fast Startup / hibernation | Boot Windows, disable Fast Startup (`powercfg /h off`), shut down, retry. `journalctl -b -u mnt-windows.mount`. |
 | `/mnt/unraid/*` hangs or errors | Server down, wrong credentials | `journalctl -b -u mnt-unraid-files.mount`; check `/etc/nixos/smb-secrets`; `ping 192.168.1.65`. Times out after 5 s by design. |
 | Clock wrong after using Windows | Missing local-time RTC setting | `time.hardwareClockInLocalTime` is in `boot.nix`; check `timedatectl`. |
+| Obsidian: LiveSync says it can't decrypt, or shows no remote | Its `data.json` is missing or was made by the plugin itself | Redo the first-time steps above (delete its `data.json`, copy it from Windows, switch). |
+| Obsidian opens with no plugins | Restricted mode is still on for the vault | *Settings → Community plugins → Turn on community plugins*. |
 | Sound only goes to one device / bus silent | Virtual sink routing | `wpctl status`; route apps in the Plasma volume applet or qpwgraph. Game/Music/Chat follow the default output. |
 | Mic noisy | EasyEffects not applied | Open EasyEffects → Input → add the *Noise Reduction* (RNNoise) effect on the Seiren Mini. |
+| Static / hiss from the speakers after a few seconds of silence | Codec power-down on the onboard analog out | Fixed in `audio.nix` (2026-11-09). Check `cat /sys/module/snd_hda_intel/parameters/power_save` is `0` (needs a reboot after the switch) and `wpctl status` doesn't show the Ryzen output as suspended. If it continues with both in place, it's electrical: ground loop or speaker gain, not software. |
 | DAW crackles | Quantum too small | Raise the buffer in the app, or `default.clock.quantum` in `audio.nix`. |
 | Resolve can't import a clip | Free Resolve on Linux lacks H.264/H.265/AAC decode | `ffmpeg -i in.mp4 -c:v dnxhd -profile:v dnxhr_hq -c:a pcm_s16le out.mov`. |
 | Ollama runs on CPU | ROCm not picked up | `journalctl -u ollama`; `ollama ps` shows the processor. |
@@ -158,6 +202,7 @@ cleanup, the leftovers were checked on disk and deleted the same day:
 | Krita | `~/.local/share/krita` (91 MB), `~/.config/kritarc`, `~/.config/kritadisplayrc`, `~/.local/share/krita*.log` |
 | Vesktop | `~/.config/vesktop` |
 | Thunar | `~/.config/Thunar` |
+| linuxmeeter (uninstalled 2026-11-09) | `~/.config/linuxmeeter` (profiles, 12 KB), `~/.local/share/com.stacksloth.linuxmeeter` (web view cache, 28 KB) |
 
 Nothing was found for the other removed apps, and `flatpak list --app` was already empty.
 
