@@ -2,8 +2,7 @@
 { pkgs, inputs, ... }:
 {
   home.packages = with pkgs; [
-    # Browsers (Firefox is configured in firefox.nix)
-    chromium
+    # Browsers: Firefox in firefox.nix, Chromium below (programs.chromium)
 
     # From the old Fedora install
     btop
@@ -33,13 +32,13 @@
     # Creative: image / video / 3D
     pkgsRocm.blender # HIP render on the 7800 XT
     davinci-resolve # Premiere / Avid
-    obs-studio
+    # OBS: programs.obs-studio below
 
     # Audio / music production
     qpwgraph # PipeWire patchbay (Voicemeeter routing)
 
     # Playback & media
-    mpv # MPC-BE + madVR + LAV
+    # mpv (MPC-BE + madVR + LAV): mpv.nix
     mpc-qt
     plex-desktop
     plexamp
@@ -76,4 +75,22 @@
     # Claude Desktop (flake input): Anthropic's .deb, run with --no-sandbox (no setuid in the store)
     inputs.claude-desktop.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
+
+  # Extensions Helium had on Windows; Chromium fetches them from the Web Store
+  programs.chromium = {
+    enable = true;
+    extensions = [
+      { id = "nngceckbapebfimnlniiiahkandclblb"; } # Bitwarden
+      { id = "fcoeoabgfenejglbffodgkkbkcdhcgfn"; } # Claude
+    ];
+  };
+
+  # Image Reaction, the third Windows plugin, isn't in nixpkgs
+  programs.obs-studio = {
+    enable = true;
+    plugins = with pkgs.obs-studio-plugins; [
+      obs-backgroundremoval
+      obs-scale-to-sound
+    ];
+  };
 }

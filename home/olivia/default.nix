@@ -15,6 +15,7 @@ in
     ./flatpak.nix
     ./warp-gui.nix
     ./obsidian.nix
+    ./mpv.nix
   ];
 
   home.username = "olivia";
