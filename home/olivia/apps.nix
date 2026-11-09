@@ -6,6 +6,19 @@
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
     chromium
 
+    # From the old Fedora install
+    ulauncher # launcher on Meta+Space (started by plasma.nix)
+    thunar # file manager on Meta+F
+    btop
+    w3m # terminal browser (with images in WezTerm)
+    unstable.ente-desktop # Ente Photos (stable 1.7.22 needs EOL Electron 41)
+    high-tide # TIDAL client (was a Flatpak)
+    gnome-boxes # VMs (libvirtd in services.nix)
+    distrobox # containers via Docker
+    distroshelf # distrobox GUI (was a Flatpak)
+    warehouse # Flatpak manager GUI (was a Flatpak)
+    pokemon-colorscripts # fish greeting (default.nix)
+
     # Chat & social
     signal-desktop
     vesktop
@@ -65,6 +78,8 @@
     protonplus
     mangohud
     bottles
+    wineWow64Packages.stable # plain Wine + winetricks, as on Fedora
+    winetricks
 
     # Windows-utility replacements
     fsearch # Everything

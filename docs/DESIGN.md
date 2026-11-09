@@ -88,8 +88,10 @@ built-in replacements for many Windows utilities: KWin tiling (AquaSnap/PowerToy
 (Raycast), per-app volume (EarTrumpet), Spectacle (ShareX), DDC brightness (Twinkle Tray). KDE
 Connect was already in use, and Plasma handles 165 Hz + VRR well on AMD.
 
-Carried over: Breeze Dark (Windows was dark), pt+us layouts with **Win+Space** to switch (as on
-Windows), and the whkd/komorebi Alt+H/J/K/L muscle memory as KWin shortcuts.
+Carried over: pt+us layouts from Windows. The look and keys come from the old Fedora install
+([FEDORA.md](FEDORA.md)): Catppuccin Macchiato + Klassy, Krohnkite tiling on Meta+H/J/K/L, and
+Ulauncher on Meta+Space, so layouts switch with Alt+Shift. (The first version used Breeze Dark and
+the Windows komorebi Alt+H/J/K/L binds; Fedora's setup replaced both.)
 
 ## 8. Apps: same app first, then native replacement, then escape hatches
 

@@ -90,5 +90,9 @@
     fastfetch
     jq
     gh
+    # From Fedora
+    go
+    rustup # cargo/rustc; Fedora had cargo with ~/.cargo/bin on PATH
+    lazydocker
   ];
 }

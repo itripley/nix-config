@@ -10,6 +10,7 @@ choice was made, so the config can be maintained without re-deriving any of it.
 | [DESIGN.md](DESIGN.md) | why the overall shape is what it is: dual-boot target, disk layout, boot loader, flake inputs, stable vs unstable, home-manager, repo structure |
 | [MODULES.md](MODULES.md) | what each file and setting does, and why it's there |
 | [MIGRATION.md](MIGRATION.md) | where every Windows app went: same app, Linux replacement, or stays on Windows |
+| [FEDORA.md](FEDORA.md) | what was taken from the old Fedora 43 install (theme, tiling, apps), the conflicts with the Windows-based setup and how each was decided |
 | [FIREFOX.md](FIREFOX.md) | how the Firefox profile (extensions + their data, Sidebery, themes, userChrome) is carried over, and why it's done this way |
 | [VERIFICATION.md](VERIFICATION.md) | how the config was checked before install, what broke and how it was fixed, and what is still untested |
 | [OPERATIONS.md](OPERATIONS.md) | day-to-day use (rebuild, update, add apps, roll back) and troubleshooting |

@@ -13,11 +13,19 @@
   time.timeZone = "Europe/Lisbon";
   i18n.defaultLocale = "en_US.UTF-8";
 
-  # pt-PT first, en-US second (matches Windows); Win+Space switches layouts like on Windows
+  # pt-PT first, en-US second (matches Windows). Alt+Shift switches layouts: Win+Space
+  # opens Ulauncher, as on the old Fedora install (see home/olivia/plasma.nix).
   services.xserver.xkb = {
     layout = "pt,us";
-    options = "grp:win_space_toggle";
+    options = "grp:alt_shift_toggle";
   };
+
+  # KWin/Plasma add-ons from the Fedora setup, system-wide so KWin and plasmashell find them
+  environment.systemPackages = with pkgs; [
+    klassy # window decoration
+    kdePackages.krohnkite # tiling script
+    kdePackages.qtmultimedia # QML module for the Smart Video Wallpaper (animated lock screen)
+  ];
   console.useXkbConfig = true;
 
   programs.kdeconnect.enable = true; # opens its firewall ports

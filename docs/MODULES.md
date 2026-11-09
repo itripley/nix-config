@@ -15,6 +15,7 @@ modules/nixos/                    system level (root, services, hardware)
   boot.nix  amd.nix  desktop.nix  audio.nix  networking.nix  storage.nix  gaming.nix  services.nix
 home/olivia/                      user level (home-manager)
   default.nix  apps.nix  dev.nix  firefox.nix  plasma.nix  flatpak.nix
+  themes/                         Plasma theme files from Fedora (art/ is gitignored)
   dotfiles/                       wezterm/ nvim/ fastfetch/ firefox/userChrome.css
 scripts/
   verify.ps1                      evaluate the flake from Windows via Unraid's Docker
@@ -109,7 +110,8 @@ here) only if the hardware changes.
 | Plasma 6 + SDDM on Wayland | DESIGN §7. |
 | `time.timeZone = "Europe/Lisbon"` | "GMT Standard Time" covers Lisbon and London, which share the same rules. Lisbon was picked from the pt-PT keyboard; switching is a one-line change. |
 | `i18n.defaultLocale = en_US.UTF-8` | Windows UI was en-US. |
-| `xkb.layout = "pt,us"`, `grp:win_space_toggle` | Same layouts and order as Windows, and the same Win+Space switch. Also applies to the login screen and TTY (`console.useXkbConfig`). |
+| `xkb.layout = "pt,us"`, `grp:alt_shift_toggle` | Same layouts and order as Windows. Alt+Shift switches (Win+Space went to Ulauncher, as on Fedora). Also applies to the login screen and TTY (`console.useXkbConfig`). |
+| `environment.systemPackages`: `klassy`, `kdePackages.krohnkite`, `kdePackages.qtmultimedia` | KWin decoration, tiling script and the QML module the animated lock screen needs. System-wide so KWin/plasmashell find them. |
 | `programs.kdeconnect` | Was in use on Windows; this also opens its firewall ports. |
 | `partition-manager`, `printing` | KDE disk tool; CUPS printing. |
 | `services.flatpak`, `programs.appimage` (+binfmt) | Escape hatches for apps outside nixpkgs (DESIGN §8). |
@@ -169,6 +171,7 @@ off. Used for one-time imports (SSH keys, wallpapers, Firefox profile).
 |---|---|
 | Docker | Replaces Docker Desktop. The `docker` group allows use without sudo. |
 | **Ollama with `ollama-rocm`** | Local LLMs on the 7800 XT (gfx1101 is a supported ROCm target, no override needed). Was a startup app on Windows. |
+| `virtualisation.libvirtd` + `spiceUSBRedirection`, `libvirtd` group | GNOME Boxes VMs (Fedora ran `virtqemud`). |
 | OpenRGB (`motherboard = "amd"`) | Same RGB control. Loads the AMD SMBus driver (Windows needed PawnIO for this). |
 | Avahi + nss-mdns | `.local` name resolution and service discovery (replaces Apple Bonjour). |
 
@@ -176,6 +179,8 @@ off. Used for one-time imports (SSH keys, wallpapers, Firefox profile).
 
 - Imports the other HM modules; `home.stateVersion = "26.05"` (never bump, same as the system one).
 - **`xdg.configFile` live links** for `wezterm`, `nvim`, `fastfetch` → `~/nixos-config/home/olivia/dotfiles/…` (DESIGN §6).
+- `programs.fish.functions.fish_greeting = "pokemon-colorscripts -r"`, `home.sessionPath` (`~/.cargo/bin`, `~/go/bin`): as on Fedora.
+- `xdg.autostart.entries`: Vesktop at login (Fedora). `readOnly` stays off, so other apps can still add their own autostart entries.
 - `services.easyeffects`: background audio effects; RNNoise noise suppression for the Seiren Mini
   replaces NVIDIA Broadcast / AMD Noise Suppression.
 
@@ -207,10 +212,20 @@ declares Bitwarden's native-messaging manifest. Add-ons are deliberately not dec
 
 ## `home/olivia/plasma.nix`
 
-Breeze Dark look-and-feel, pt+us layouts with Win+Space, and KWin shortcuts mirroring `whkdrc`:
-Alt+H/J/K/L focus window left/down/up/right, Alt+Shift+H/J/K/L quick-tile, Alt+Q close, Alt+M minimize.
-Note: Alt+letter shortcuts override app menu accelerators (e.g. Alt+H for a Help menu), the same as
-whkd did on Windows.
+The look and behaviour of the old Fedora install ([FEDORA.md](FEDORA.md) has the full mapping):
+
+| Setting | Why |
+|---|---|
+| `xdg.dataFile` for `themes/` | Color scheme, kinetic effect and video-wallpaper plugin are copied from the repo into `~/.local/share`. The gitignored artwork (Lain splash, Bocchi cursor) is live-linked from `themes/art/`. |
+| `workspace.*` | Catppuccin Macchiato, Breeze Plasma style (`default`), breeze-dark icons, Bocchi cursor, Lain splash, Klassy decoration, a wallpaper per screen. No `lookAndFeel`: Fedora had none, and applying one would override the pieces. |
+| `kwin.virtualDesktops`, `configFile.kwinrc` | 3 desktops; Krohnkite enabled with Fedora's gaps; cube (skybox from `themes/art/`), translucency; tiling padding. |
+| `configFile.klassyrc`, `breezerc` | Klassy button/corner/outline settings, no shadows. |
+| `configFile.kscreenlockerrc` | Lock screen plays `themes/art/lockscreen.gif` through Smart Video Wallpaper Reborn. |
+| `configFile.kdeglobals.General` | WezTerm as KDE's terminal. |
+| `input.keyboard` | pt+us, **Alt+Shift** switches (Meta+Space is Ulauncher). |
+| `shortcuts.kwin` | Krohnkite on Meta+H/J/K/L (focus), +Shift (move), +Ctrl (resize), Meta+M monocle, Meta+S float, Meta+I increase. Focus Right is unbound because Meta+L locks the screen (same as Fedora). The old Alt+H/J/K/L window binds are set back to KDE's defaults explicitly, because plasma-manager doesn't reset keys that are removed. Alt+Q close and Alt+M minimize stay from Windows. |
+| `shortcuts."services/…"` | Meta+Return WezTerm, Meta+F Thunar. |
+| `hotkeys.commands.ulauncher-toggle` + `systemd.user.services.ulauncher` | Wayland apps can't grab global keys, so KDE binds Meta+Space to `ulauncher-toggle`. Ulauncher runs hidden from login with `GDK_BACKEND=x11` (as on Fedora) so it can position its window. |
 
 ## `home/olivia/flatpak.nix`
 

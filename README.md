@@ -6,7 +6,7 @@ Generated from an inventory of the Windows machine (hardware, apps, dotfiles, ne
 | | |
 |---|---|
 | CPU / GPU | Ryzen 7 7700X / Radeon RX 7800 XT (amdgpu + ROCm, LACT) |
-| Desktop | KDE Plasma 6 (Wayland), Breeze Dark, pt + us layouts |
+| Desktop | KDE Plasma 6 (Wayland), Catppuccin Macchiato + Klassy, Krohnkite tiling, pt + us layouts (Alt+Shift) |
 | NixOS disk | Samsung 850 EVO 500GB — btrfs, own ESP, systemd-boot |
 | Windows disk | Fanxiang S770 1TB — untouched, mounted read-only at `/mnt/windows` |
 | Unraid | `//192.168.1.65/{appdata,downloads,files}` → `/mnt/unraid/*` (automount) |
@@ -18,6 +18,7 @@ overlays/build-fixes.nix       workarounds for packages that fail to build upstr
 modules/nixos/                 boot, amd, desktop, audio, networking, storage, gaming, services
 home/olivia/                   home-manager: apps, dev (git/ssh/nvim/vscode), firefox, plasma, flatpak
 home/olivia/dotfiles/          wezterm, nvim (LazyVim), fastfetch, firefox userChrome — copied from Windows
+home/olivia/themes/            Plasma theme from the old Fedora install (artwork in art/, gitignored)
 scripts/                       verify.ps1 (check from Windows), migrate-firefox-profile.sh (run on NixOS)
 docs/                          full documentation: what, how and why
 ```
@@ -32,6 +33,7 @@ docs/                          full documentation: what, how and why
 | [docs/MODULES.md](docs/MODULES.md) | every file and setting, what it does and why |
 | [docs/MIGRATION.md](docs/MIGRATION.md) | every Windows app and where it went |
 | [docs/FIREFOX.md](docs/FIREFOX.md) | the Firefox profile migration |
+| [docs/FEDORA.md](docs/FEDORA.md) | what came over from the old Fedora install, and the conflicts |
 | [docs/VERIFICATION.md](docs/VERIFICATION.md) | how it was checked, what was fixed, what's untested |
 | [docs/OPERATIONS.md](docs/OPERATIONS.md) | day-to-day use and troubleshooting |
 

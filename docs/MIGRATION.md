@@ -80,7 +80,7 @@ history, open tabs) moves over. See [FIREFOX.md](FIREFOX.md) for what, how and w
 |---|---|---|
 | scoop, Chocolatey, winget, UniGetUI | nix | `home/olivia/apps.nix` + `nh os switch` |
 | PowerToys, AquaSnap, TranslucentTB | Plasma / KWin built-ins | KWin tiling, window rules, KRunner |
-| komorebi + whkd | KWin shortcuts | Alt+H/J/K/L focus, Alt+Shift+H/J/K/L tile, Alt+Q close, Alt+M minimize |
+| komorebi + whkd | Krohnkite (from the Fedora setup) | Meta+H/J/K/L focus, Meta+Shift move, Meta+Ctrl resize; Alt+Q close and Alt+M minimize kept. See [FEDORA.md](FEDORA.md). |
 | Raycast | alt: KRunner | Alt+Space / Meta |
 | Everything | alt: FSearch | |
 | QuickLook | alt: Dolphin preview panel | |

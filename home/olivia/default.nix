@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 let
   # Live symlinks into the checkout (not the read-only store), so LazyVim can
   # write lazy-lock.json and edits apply without a rebuild.
@@ -20,7 +20,21 @@ in
   home.stateVersion = "26.05";
   programs.home-manager.enable = true;
 
-  programs.fish.enable = true; # WezTerm's Linux launch config starts `fish -l`
+  programs.fish = {
+    enable = true; # WezTerm's Linux launch config starts `fish -l`
+    functions.fish_greeting = "pokemon-colorscripts -r"; # Fedora's greeting
+  };
+  # Started at login on Fedora. Links single files: ~/.config/autostart stays writable.
+  xdg.autostart = {
+    enable = true;
+    entries = [ "${pkgs.vesktop}/share/applications/vesktop.desktop" ];
+  };
+
+  # Fedora had these on PATH (cargo installs, go installs)
+  home.sessionPath = [
+    "$HOME/.cargo/bin"
+    "$HOME/go/bin"
+  ];
 
   xdg.configFile = {
     "wezterm".source = link "wezterm"; # wallpapers go in wezterm/backdrops (gitignored)

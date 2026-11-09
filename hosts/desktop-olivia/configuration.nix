@@ -26,6 +26,7 @@
       "audio"
       "video"
       "docker"
+      "libvirtd"
       "gamemode"
       "i2c"
     ];
