@@ -30,12 +30,25 @@ in
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
 
+  # Idle hiss/static on the onboard analog out: keep the codec powered (applies after a reboot)
+  boot.extraModprobeConfig = ''
+    options snd_hda_intel power_save=0 power_save_controller=N
+  '';
+
   services.pipewire = {
     enable = true;
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    jack.enable = true; # Renoise / Cardinal / VCV Rack via JACK
+    jack.enable = true; # for JACK apps (DAWs, synths)
+
+    # Same static: never suspend the onboard analog out when it goes quiet
+    wireplumber.extraConfig."51-analog-no-suspend"."monitor.alsa.rules" = [
+      {
+        matches = [ { "node.name" = "~alsa_output.pci-0000_0e_00.6.*"; } ];
+        actions.update-props."session.suspend-timeout-seconds" = 0;
+      }
+    ];
 
     extraConfig.pipewire = {
       # Low enough for music production, can go to 64 when an app asks for it
