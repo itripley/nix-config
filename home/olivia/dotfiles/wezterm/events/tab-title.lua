@@ -41,8 +41,6 @@ local nf = wezterm.nerdfonts
 
 local M = {}
 
-local GLYPH_SCIRCLE_LEFT = nf.ple_left_half_circle_thick --[[  ]]
-local GLYPH_SCIRCLE_RIGHT = nf.ple_right_half_circle_thick --[[  ]]
 local GLYPH_CIRCLE = nf.fa_circle --[[  ]]
 local GLYPH_ADMIN = nf.md_shield_half_full --[[ 󰞀 ]]
 local GLYPH_LINUX = nf.cod_terminal_linux --[[  ]]
@@ -77,34 +75,31 @@ local GLYPH_UNSEEN_NUMBERED_CIRCLE = {
 }
 
 local TITLE_INSET = {
-   DEFAULT = 6,
-   ICON = 8,
+   DEFAULT = 4,
+   ICON = 6,
 }
 
 local RENDER_VARIANTS = {
-   { 'scircle_left', 'title', 'padding', 'scircle_right' },
-   { 'scircle_left', 'title', 'unseen_output', 'padding', 'scircle_right' },
-   { 'scircle_left', 'admin', 'title', 'padding', 'scircle_right' },
-   { 'scircle_left', 'admin', 'title', 'unseen_output', 'padding', 'scircle_right' },
-   { 'scircle_left', 'wsl', 'title', 'padding', 'scircle_right' },
-   { 'scircle_left', 'wsl', 'title', 'unseen_output', 'padding', 'scircle_right' },
+   { 'title', 'padding' },
+   { 'title', 'unseen_output', 'padding' },
+   { 'admin', 'title', 'padding' },
+   { 'admin', 'title', 'unseen_output', 'padding' },
+   { 'wsl', 'title', 'padding' },
+   { 'wsl', 'title', 'unseen_output', 'padding' },
 }
 
 
 ---@type table<string, Cells.SegmentColors>
 -- stylua: ignore
 local colors = {
-   text_default          = { bg = '#45475A', fg = '#1C1B19' },
-   text_hover            = { bg = '#5D87A3', fg = '#1C1B19' },
-   text_active           = { bg = '#74c7ec', fg = '#11111B' },
+   -- tab and text colours come from the fancy tab bar (colors.tab_bar)
+   text_default          = {},
+   text_hover            = {},
+   text_active           = {},
 
-   unseen_output_default = { bg = '#45475A', fg = '#FFA066' },
-   unseen_output_hover   = { bg = '#5D87A3', fg = '#FFA066' },
-   unseen_output_active  = { bg = '#74c7ec', fg = '#FFA066' },
-
-   scircle_default       = { bg = 'rgba(0, 0, 0, 0.4)', fg = '#45475A' },
-   scircle_hover         = { bg = 'rgba(0, 0, 0, 0.4)', fg = '#5D87A3' },
-   scircle_active        = { bg = 'rgba(0, 0, 0, 0.4)', fg = '#74C7EC' },
+   unseen_output_default = { fg = '#FFA066' },
+   unseen_output_hover   = { fg = '#FFA066' },
+   unseen_output_active  = { fg = '#FFA066' },
 }
 
 ---
@@ -235,13 +230,11 @@ end
 function Tab:create_cells()
    local attr = self.cells.attr
    self.cells
-      :add_segment('scircle_left', GLYPH_SCIRCLE_LEFT)
       :add_segment('admin', ' ' .. GLYPH_ADMIN)
       :add_segment('wsl', ' ' .. GLYPH_LINUX)
       :add_segment('title', ' ', nil, attr(attr.intensity('Bold')))
       :add_segment('unseen_output', ' ' .. GLYPH_CIRCLE)
       :add_segment('padding', ' ')
-      :add_segment('scircle_right', GLYPH_SCIRCLE_RIGHT)
 end
 
 ---@param title string
@@ -277,13 +270,11 @@ function Tab:update_cells(event_opts, is_active, hover)
    end
 
    self.cells
-      :update_segment_colors('scircle_left', colors['scircle_' .. tab_state])
       :update_segment_colors('admin', colors['text_' .. tab_state])
       :update_segment_colors('wsl', colors['text_' .. tab_state])
       :update_segment_colors('title', colors['text_' .. tab_state])
       :update_segment_colors('unseen_output', colors['unseen_output_' .. tab_state])
       :update_segment_colors('padding', colors['text_' .. tab_state])
-      :update_segment_colors('scircle_right', colors['scircle_' .. tab_state])
 end
 
 ---@return FormatItem[] (ref: https://wezfurlong.org/wezterm/config/lua/wezterm/format.html)

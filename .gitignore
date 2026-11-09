@@ -3,6 +3,10 @@ result-*
 # Wallpapers are third-party art — copy them into the checkout by hand
 home/olivia/dotfiles/wezterm/backdrops/*
 !home/olivia/dotfiles/wezterm/backdrops/.gitkeep
+# Fonts are licensed, not republished: copy the files in by hand (linked into
+# ~/.local/share/fonts by home/olivia/default.nix)
+home/olivia/dotfiles/fonts/*
+!home/olivia/dotfiles/fonts/.gitkeep
 # Theme artwork (splash, cursor, wallpapers, lock-screen GIF) is third-party art, not
 # republished here: copy it in by hand (see home/olivia/themes/README.md)
 home/olivia/themes/art/*

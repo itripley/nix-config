@@ -39,6 +39,9 @@ in
     "fastfetch".source = link "fastfetch";
   };
 
+  # Licensed fonts (TX-02 for WezTerm and Obsidian), kept out of git: dotfiles/fonts is gitignored
+  xdg.dataFile."fonts/nixos-config".source = link "fonts";
+
   # Mic noise suppression (RNNoise) and EQ: replaces NVIDIA Broadcast / AMD Noise Suppression
   services.easyeffects.enable = true;
 }
