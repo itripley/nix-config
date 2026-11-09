@@ -40,6 +40,7 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-08 | NetBird pointed at the self-hosted server, restarted on config changes, exit node deselected | `8628c39`, `93865f2` |
 | 2026-11-09 | NetBird tray app autostarts (WARP's already did) | `7644365` |
 | 2026-11-09 | Old Fedora setup brought over: theme, Krohnkite, Ulauncher (layout switch → Alt+Shift), apps | `0ef7162`, [FEDORA.md](FEDORA.md) |
+| 2026-11-09 | WARP tray: Cloudflare's Zero Trust-only `warp-taskbar` replaced by warp-cloudflare-gui (consumer on/off) | `cc26af0` |
 
 ## Conventions
 

@@ -106,7 +106,7 @@ original lists builds.
 | 12 | No graphical VPN toggle for NetBird | WARP's `warp-taskbar` autostarts from its package; NetBird's tray app doesn't, and a second plain `netbird-ui` in `apps.nix` duplicated the menu entry | `makeAutostartItem` for the module's wrapped `netbird-ui`; dropped the duplicate | `7644365` |
 | 13 | Fedora migration: `electron-41.10.7` refused as insecure | stable `ente-desktop` 1.7.22 is pinned to an EOL Electron | `unstable.ente-desktop` (1.7.27) | `0ef7162` |
 | 14 | Fedora migration: `wineWowPackages` deprecation warning | renamed in 26.05 | `wineWow64Packages.stable` | `0ef7162` |
-| 15 | No WARP on/off switch in the tray | `warp-taskbar` is Zero Trust only: with a free registration each click opens a team sign-in | `home/olivia/warp-gui.nix`: packaged warp-cloudflare-gui, `warp-taskbar` autostart hidden | (uncommitted) |
+| 15 | No WARP on/off switch in the tray | `warp-taskbar` is Zero Trust only: with a free registration each click opens a team sign-in | `home/olivia/warp-gui.nix`: packaged warp-cloudflare-gui, `warp-taskbar` autostart hidden | `cc26af0` |
 
 Other things checked along the way:
 - The NetBird tray app (`netbird-ui`) and the CLI both default to the module's socket
