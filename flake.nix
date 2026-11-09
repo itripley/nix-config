@@ -121,7 +121,11 @@
       # `nix build .#warp-cloudflare-gui`: the repo's own packages, from the system's package set
       # (overlays + unfree config applied)
       packages.${system} = {
-        inherit (self.nixosConfigurations.desktop-olivia.pkgs) warp-cloudflare-gui;
+        inherit (self.nixosConfigurations.desktop-olivia.pkgs)
+          warp-cloudflare-gui
+          obsidian-plugins
+          vscode-marketplace
+          ;
       };
 
       # `nix fmt`: nixfmt over every .nix file except the generated one

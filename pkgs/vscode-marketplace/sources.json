@@ -1,0 +1,266 @@
+[
+  {
+    "publisher": "aaron-bond",
+    "name": "better-comments",
+    "version": "3.2.0",
+    "hash": "sha256-JhzzgfgzsTz5Ieht4oy3EszzlL6eXxXYvxtFHT1nfUA="
+  },
+  {
+    "publisher": "AdvancedCommunity",
+    "name": "translation-sidebar",
+    "version": "1.0.5",
+    "hash": "sha256-PclUTWi53q+WaHNchFo3kNAtEu5ocbXPuo5ngr8Vh3Y="
+  },
+  {
+    "publisher": "animsh",
+    "name": "vs-code-custom-ui-font",
+    "version": "1.0.2",
+    "hash": "sha256-DvPzK3IfWO5GWyRNeExzIkAubzRbszFSIkzXz8fk7fI="
+  },
+  {
+    "publisher": "Anthropic",
+    "name": "claude-code",
+    "version": "2.1.306",
+    "hash": "sha256-0Bdt87fn5ZSjiq/XTyGazTyAyJEuenKJ4pkrMv2aMdw=",
+    "arch": "linux-x64"
+  },
+  {
+    "publisher": "ArtTemiy",
+    "name": "FileManager",
+    "version": "1.0.0",
+    "hash": "sha256-0+XCp1tb5/tfzm9CMhieJR4AZPH3xIEaKHKkJdBp9Ms="
+  },
+  {
+    "publisher": "be5invis",
+    "name": "vscode-custom-css",
+    "version": "7.5.0",
+    "hash": "sha256-6oLxGAvrtI69ZMnKmV/wU8jbKPgs4RgQ9KL1FgQER0Q="
+  },
+  {
+    "publisher": "benbusby",
+    "name": "earthbound-themes",
+    "version": "1.3.0",
+    "hash": "sha256-jhnzuQpDr2Ktjh0s8coMwIoyajI+JCrYD5W0Vn2Kuak="
+  },
+  {
+    "publisher": "bmalehorn",
+    "name": "vscode-fish",
+    "version": "1.0.49",
+    "hash": "sha256-oG0KOvQZ2E5FroXaUT6lGw1zDSQ/bisHLMMkygbGqQE="
+  },
+  {
+    "publisher": "brunnerh",
+    "name": "file-properties-viewer",
+    "version": "1.3.1",
+    "hash": "sha256-qi8+gIxEQar+0dv+QOJse6FkxlVrC4e0Gck25IWPBdM="
+  },
+  {
+    "publisher": "dotiful",
+    "name": "dotfiles-syntax-highlighting",
+    "version": "0.1.0",
+    "hash": "sha256-NGIG5X/cHqA9mdaTv1Pmca19pBtqUaM8GxeEftE96l0="
+  },
+  {
+    "publisher": "EnlightenedSolutionsLLC",
+    "name": "dotfile-toggle",
+    "version": "0.0.3",
+    "hash": "sha256-/+6uJeMdI6pEM2V0Hb4L9yly3q+RG6aLth2HahkqTIw="
+  },
+  {
+    "publisher": "george-alisson",
+    "name": "html-preview-vscode",
+    "version": "0.2.5",
+    "hash": "sha256-1kjhNLFRUashPYko5F7p8gNwe+heT4wKAPZiJsTqgdg="
+  },
+  {
+    "publisher": "icrawl",
+    "name": "discord-vscode",
+    "version": "5.9.2",
+    "hash": "sha256-43ZAwaApQBqNzq25Uy/AmkQqprU7QlgJVVimfCaiu9k="
+  },
+  {
+    "publisher": "jnoortheen",
+    "name": "nix-ide",
+    "version": "0.5.9",
+    "hash": "sha256-hPOcp6Yksgfu1+In21/gJ3MthV8JUV5WaRpYHvo5GGk="
+  },
+  {
+    "publisher": "kiddyu",
+    "name": "vsc-mikutap",
+    "version": "0.0.1",
+    "hash": "sha256-OlIwbN5RZSltXXi/bITBJmfb1/jKIcREZQo80wZ6CAM="
+  },
+  {
+    "publisher": "KubrickCode",
+    "name": "quick-command-buttons",
+    "version": "0.12.0",
+    "hash": "sha256-MSzEYqoGkaVIBLZjCqaCH4sgQM0rdbBQB6pA+kqZjRM="
+  },
+  {
+    "publisher": "maciejdems",
+    "name": "add-to-gitignore",
+    "version": "1.1.0",
+    "hash": "sha256-7f2iCZ2w/lqMR/ynkPYhWsu0l8lPlWB00DkDrze4VL0="
+  },
+  {
+    "publisher": "MadCatPX",
+    "name": "explorer-exclude-manager",
+    "version": "1.4.1",
+    "hash": "sha256-4QEa0HQj1y+DmZ0W5d4erYWT9Vc3jzUtrhAr5BiRn3Q="
+  },
+  {
+    "publisher": "mkxml",
+    "name": "vscode-filesize",
+    "version": "3.2.2",
+    "hash": "sha256-RVhgCt/zY155oeL7EbVBokNFFBB9xvGL3j3zySdjGRg="
+  },
+  {
+    "publisher": "ms-azuretools",
+    "name": "vscode-containers",
+    "version": "2.5.3",
+    "hash": "sha256-QP74EdzkPqGjH1c9h8eESMubpvMDyLmC9eW4HcA9CBc="
+  },
+  {
+    "publisher": "ms-dotnettools",
+    "name": "csdevkit",
+    "version": "3.40.215",
+    "hash": "sha256-OaFmVFk9lNjqHwLwhnPUebqmX56brjkUwQW8hh6okUs=",
+    "arch": "linux-x64"
+  },
+  {
+    "publisher": "ms-dotnettools",
+    "name": "csharp",
+    "version": "2.160.4",
+    "hash": "sha256-NnINb4ywaINKqNagJK6XampTqhBb3ztT/crNe0YV0fg=",
+    "arch": "linux-x64"
+  },
+  {
+    "publisher": "ms-dotnettools",
+    "name": "vscode-dotnet-runtime",
+    "version": "3.2.0",
+    "hash": "sha256-DvoaWpG8qFNjGl9xVRqBvymucGm9UQ9VOMx+X7EvBUA="
+  },
+  {
+    "publisher": "ms-python",
+    "name": "debugpy",
+    "version": "2026.6.0",
+    "hash": "sha256-OuQX94vOF5krng77oWCkOoWotpW9OH4VDU3yTjZsewE=",
+    "arch": "linux-x64"
+  },
+  {
+    "publisher": "ms-python",
+    "name": "python",
+    "version": "2026.10.0",
+    "hash": "sha256-moTecxtiLuRA4L2XmWX2p1d6+ki+psPUJX2IZe/HR4A=",
+    "arch": "linux-x64"
+  },
+  {
+    "publisher": "ms-python",
+    "name": "vscode-pylance",
+    "version": "2026.4.1",
+    "hash": "sha256-PmydC6DGaA5u8o0a9cbhOETjmoceVATL+qrttc0NjPs="
+  },
+  {
+    "publisher": "ms-python",
+    "name": "vscode-python-envs",
+    "version": "1.40.0",
+    "hash": "sha256-cGPxee4ppqKmOdRLkhYBiXv6YCP7IcEfKuArofOPT3g=",
+    "arch": "linux-x64"
+  },
+  {
+    "publisher": "ms-vscode-remote",
+    "name": "remote-containers",
+    "version": "0.469.0",
+    "hash": "sha256-kvmQlazS+Zuubx67b8kvy4P8U3b5WQqRd/GCxW+0gsI="
+  },
+  {
+    "publisher": "ms-vscode",
+    "name": "live-server",
+    "version": "0.4.20",
+    "hash": "sha256-g+UuTmSKwX/ZgmHMOUHNEFuoeVoqU/F/1FAEcDcKOaY="
+  },
+  {
+    "publisher": "ms-vscode",
+    "name": "mono-debug",
+    "version": "0.16.3",
+    "hash": "sha256-6IU8aP4FQVbEMZAgssGiyqM+PAbwipxou5Wk3Q2mjZg="
+  },
+  {
+    "publisher": "Nauxscript",
+    "name": "vscode-wezterm-quickstart",
+    "version": "0.1.1",
+    "hash": "sha256-1QaZqdICl6JVNNlmJa/J82p5vMiGdkXnndJG2vyPjcE="
+  },
+  {
+    "publisher": "neikeq",
+    "name": "godot-csharp-vscode",
+    "version": "0.2.1",
+    "hash": "sha256-sLsP+4deo/O8NjHGGXVdSOPWQPALypW/H0oZOMMM9RE="
+  },
+  {
+    "publisher": "nnw-2",
+    "name": "hatsune-miku-theme",
+    "version": "1.1.7",
+    "hash": "sha256-z66fQ217E0uadguR7CDTAFxtleseaH71Cgv/2KFUfOs="
+  },
+  {
+    "publisher": "npaz",
+    "name": "vs-code-window-manager",
+    "version": "1.1.1",
+    "hash": "sha256-/x2d9/jxVvcMVBmBOrP58ROuLBtvmBWbi09Vyywi/gI="
+  },
+  {
+    "publisher": "Platinumaniac",
+    "name": "platpixelicons",
+    "version": "2.0.0",
+    "hash": "sha256-FVryd11C9Yeuez57+iVyHnpABtF8bB1PIkPNyJgSoPQ="
+  },
+  {
+    "publisher": "RenatoCesarF",
+    "name": "8-bits-sounds",
+    "version": "0.4.2",
+    "hash": "sha256-ynFeaqro85N5Jc3K3/2DDO4BeFURiLsYS3Y035nqm/g="
+  },
+  {
+    "publisher": "RyutaSuzuki",
+    "name": "yaruki-sound-zundamon",
+    "version": "0.0.2",
+    "hash": "sha256-l9bxyIoSypCO1yIoOLVURXg55tsuv6c8N/2d21eiW50="
+  },
+  {
+    "publisher": "sanchodelniglo",
+    "name": "gameboy-classic-theme",
+    "version": "0.0.2",
+    "hash": "sha256-3uAbr0VvHPLhmIF0ZwHkKhGlvw5Ibcc2Uha41VhyM5c="
+  },
+  {
+    "publisher": "sanpi-cule",
+    "name": "translate-description",
+    "version": "0.1.4",
+    "hash": "sha256-QDiBeGC5R14s36cHUu9cgSCO+g8ZG91fJPK5qymBnA8="
+  },
+  {
+    "publisher": "saurabh",
+    "name": "terminal-manager",
+    "version": "1.0.6",
+    "hash": "sha256-EBZUfV0qTL2caCsHctU5SmMHg6Nqrl2VQq2/52M5Imw="
+  },
+  {
+    "publisher": "talhabalaj",
+    "name": "actual-font-changer",
+    "version": "0.0.10",
+    "hash": "sha256-79S1dEcsV0aETWZrOrcYV7TUHpKaE6xo6Ev3dT7XnQk="
+  },
+  {
+    "publisher": "tonybaloney",
+    "name": "vscode-pets",
+    "version": "1.36.0",
+    "hash": "sha256-KwM143K58E85c8WKAaHN+tlAeUUO+0sR+byjS71Zj3g="
+  },
+  {
+    "publisher": "vladstudio",
+    "name": "vscode-reveal-in-wezterm",
+    "version": "0.0.1",
+    "hash": "sha256-XxdDPwle8wGnqFXt1UB7tvHed3T0NKA28kRnXh9SQO8="
+  }
+]

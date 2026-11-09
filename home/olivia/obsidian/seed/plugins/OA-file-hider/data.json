@@ -1,0 +1,14 @@
+{
+  "hidden": true,
+  "hiddenList": [
+    "wiki/notes/memos/_knomo-system",
+    "_attachments",
+    "_templates",
+    "wiki/notes/memos/daily",
+    "wiki/index.md",
+    "wiki/overview.md",
+    "wiki/log.md",
+    "wiki/hot.md",
+    "CLAUDE.md"
+  ]
+}

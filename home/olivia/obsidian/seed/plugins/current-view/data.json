@@ -1,0 +1,31 @@
+{
+  "debounceTimeout": 300,
+  "customFrontmatterKey": "current view",
+  "ignoreAlreadyOpen": false,
+  "ignoreForceViewAll": false,
+  "folderRules": [
+    {
+      "path": "/wiki",
+      "mode": "current view: reading"
+    }
+  ],
+  "explicitFileRules": [],
+  "filePatterns": [
+    {
+      "pattern": "",
+      "mode": ""
+    }
+  ],
+  "tagRules": [
+    {
+      "tag": "",
+      "mode": ""
+    }
+  ],
+  "showExplorerIcons": false,
+  "showLockNotifications": true,
+  "iconReading": "book-open",
+  "iconLive": "pen-tool",
+  "iconSource": "code",
+  "frontmatterChangeReload": "notify"
+}

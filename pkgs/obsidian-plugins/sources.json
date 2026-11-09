@@ -1,0 +1,599 @@
+{
+  "plugins": {
+    "calendar": {
+      "repo": "liamcain/obsidian-calendar-plugin",
+      "version": "1.5.10",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/liamcain/obsidian-calendar-plugin/releases/download/1.5.10/main.js",
+            "https://api.github.com/repos/liamcain/obsidian-calendar-plugin/releases/assets/34334808"
+          ],
+          "hash": "sha256-f7M56c+f2+WoAforirhbNmtbN3f70ZPLyHKLwncR0SU="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/liamcain/obsidian-calendar-plugin/releases/download/1.5.10/manifest.json",
+            "https://api.github.com/repos/liamcain/obsidian-calendar-plugin/releases/assets/34334809"
+          ],
+          "hash": "sha256-8+lYEzhkhRK6oS1bRYSQ9/02eRj3vba9hhcc5Xvn0Is="
+        }
+      }
+    },
+    "cmdr": {
+      "repo": "jsmorabito/obsidian-commander",
+      "version": "0.5.10",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/jsmorabito/obsidian-commander/releases/download/0.5.10/main.js",
+            "https://api.github.com/repos/jsmorabito/obsidian-commander/releases/assets/533953285"
+          ],
+          "hash": "sha256-keW2IXGi/OwCadBhidY5tN3wBwScq5HTswjEqTU0IIM="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/jsmorabito/obsidian-commander/releases/download/0.5.10/manifest.json",
+            "https://api.github.com/repos/jsmorabito/obsidian-commander/releases/assets/533953284"
+          ],
+          "hash": "sha256-XH1wtaxdqfTE60ZxT7npxj54g9llFfnGt7joqvOa6g0="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/jsmorabito/obsidian-commander/releases/download/0.5.10/styles.css",
+            "https://api.github.com/repos/jsmorabito/obsidian-commander/releases/assets/533953286"
+          ],
+          "hash": "sha256-V1vkadiBjq4aqxyj5RxKcEfWvCNmNonTEax/AUBJIDY="
+        }
+      }
+    },
+    "current-view": {
+      "repo": "luceast/obsidian-current-view",
+      "version": "1.6.3",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/LucEast/obsidian-current-view/releases/download/1.6.3/main.js",
+            "https://api.github.com/repos/LucEast/obsidian-current-view/releases/assets/482649252"
+          ],
+          "hash": "sha256-mbSP85C8FWZoYEVrCLclI14ffhxe8sam0A0+pM/AMdo="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/LucEast/obsidian-current-view/releases/download/1.6.3/manifest.json",
+            "https://api.github.com/repos/LucEast/obsidian-current-view/releases/assets/482649105"
+          ],
+          "hash": "sha256-CEF+2neQFZDsRCeGzI1KWtEaLKdvkNJdR9HZxWo5pKs="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/LucEast/obsidian-current-view/releases/download/1.6.3/styles.css",
+            "https://api.github.com/repos/LucEast/obsidian-current-view/releases/assets/482649112"
+          ],
+          "hash": "sha256-ilQ5Q/ow+Zj0+ijy5H8ZOJyYrB3e0YC5kCLpKrGFg3U="
+        }
+      }
+    },
+    "dataview": {
+      "repo": "blacksmithgu/obsidian-dataview",
+      "version": "0.5.68",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/blacksmithgu/obsidian-dataview/releases/download/0.5.68/main.js",
+            "https://api.github.com/repos/blacksmithgu/obsidian-dataview/releases/assets/237769337"
+          ],
+          "hash": "sha256-eU6ert5zkgu41UsO2k9d4hgtaYzGOHdFAPJPFLzU2gs="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/blacksmithgu/obsidian-dataview/releases/download/0.5.68/manifest.json",
+            "https://api.github.com/repos/blacksmithgu/obsidian-dataview/releases/assets/237769482"
+          ],
+          "hash": "sha256-kjXbRxEtqBuFWRx57LmuJXTl5yIHBW6XZHL5BhYoYYU="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/blacksmithgu/obsidian-dataview/releases/download/0.5.68/styles.css",
+            "https://api.github.com/repos/blacksmithgu/obsidian-dataview/releases/assets/237769411"
+          ],
+          "hash": "sha256-MwbdkDLgD5ibpyM6N/0lW8TT9DQM7mYXYulS8/aqHek="
+        }
+      }
+    },
+    "dream-journal": {
+      "repo": "eharris128/obsidian-dream-journal",
+      "version": "0.0.6",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/eharris128/obsidian-dream-journal/releases/download/0.0.6/main.js",
+            "https://api.github.com/repos/eharris128/obsidian-dream-journal/releases/assets/441871522"
+          ],
+          "hash": "sha256-RZbsCJ8nJA0rcixltIn/v00dkFOupWu1MEAScQkRhPc="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/eharris128/obsidian-dream-journal/releases/download/0.0.6/manifest.json",
+            "https://api.github.com/repos/eharris128/obsidian-dream-journal/releases/assets/441871525"
+          ],
+          "hash": "sha256-egImRzSOAzz5bg5Q2OEd6G8D2KLqBf9COKSNckPWTiA="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/eharris128/obsidian-dream-journal/releases/download/0.0.6/styles.css",
+            "https://api.github.com/repos/eharris128/obsidian-dream-journal/releases/assets/441871524"
+          ],
+          "hash": "sha256-8jbQWHVZa8HHjyVHbIIsZYHkQ4G1yjGZ24hO2plTSro="
+        }
+      }
+    },
+    "fold-properties-by-default": {
+      "repo": "tbergeron/obsidian-fold-properties-by-default",
+      "version": "1.0.13",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/tbergeron/obsidian-fold-properties-by-default/releases/download/1.0.13/main.js",
+            "https://api.github.com/repos/tbergeron/obsidian-fold-properties-by-default/releases/assets/531086249"
+          ],
+          "hash": "sha256-plXtiGIPnVi4BdXnAmU3s6D+hc6c0cYJ0cSoOGrBepE="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/tbergeron/obsidian-fold-properties-by-default/releases/download/1.0.13/manifest.json",
+            "https://api.github.com/repos/tbergeron/obsidian-fold-properties-by-default/releases/assets/531086268"
+          ],
+          "hash": "sha256-UCxsEzxMaxP9S7fMDISF0xzeHR26nHBtbPbuNzEph0Q="
+        }
+      }
+    },
+    "knomo": {
+      "repo": "banyanso/knomo",
+      "version": "1.1.4",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/BanyanSo/knomo/releases/download/1.1.4/main.js",
+            "https://api.github.com/repos/BanyanSo/knomo/releases/assets/466834790"
+          ],
+          "hash": "sha256-LlWYXm3G3MNDEqXfpTPsURDFQNreaPkBFUv3wHI326U="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/BanyanSo/knomo/releases/download/1.1.4/manifest.json",
+            "https://api.github.com/repos/BanyanSo/knomo/releases/assets/466834789"
+          ],
+          "hash": "sha256-/6t3fm7JHtsp9/VsHwAgrZVZ/epkff3zCBopA6Ca2Qo="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/BanyanSo/knomo/releases/download/1.1.4/styles.css",
+            "https://api.github.com/repos/BanyanSo/knomo/releases/assets/466834788"
+          ],
+          "hash": "sha256-qQKJXMYSfBT9U/ZJk6ZU6AzbACzI4L8ly0quBOruDJM="
+        }
+      }
+    },
+    "metadata-menu": {
+      "repo": "mdelobelle/metadatamenu",
+      "version": "0.8.12",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/mdelobelle/metadatamenu/releases/download/0.8.12/main.js",
+            "https://api.github.com/repos/mdelobelle/metadatamenu/releases/assets/354114197"
+          ],
+          "hash": "sha256-pMN9nzkxpyqBFcNMoiYSH41vPRwdH+rvEXnwURPPPG0="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/mdelobelle/metadatamenu/releases/download/0.8.12/manifest.json",
+            "https://api.github.com/repos/mdelobelle/metadatamenu/releases/assets/354114196"
+          ],
+          "hash": "sha256-XlU+QTLI1tn3mS/sLNtXDMEIofMtruTUwkwBfGyaL70="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/mdelobelle/metadatamenu/releases/download/0.8.12/styles.css",
+            "https://api.github.com/repos/mdelobelle/metadatamenu/releases/assets/354114195"
+          ],
+          "hash": "sha256-sI92S7CK6OoGwd7yf5ei2ha0zBkgu7YYqq4tzHz0888="
+        }
+      }
+    },
+    "OA-file-hider": {
+      "repo": "eldritch-oliver/file-hider",
+      "version": "1.1.1",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/Eldritch-Oliver/file-hider/releases/download/1.1.1/main.js",
+            "https://api.github.com/repos/Eldritch-Oliver/file-hider/releases/assets/94859360"
+          ],
+          "hash": "sha256-jUWgKcTw9wfJ/BgSmxhUFXhTD2BvxF/mk6u5fxHkFfc="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/Eldritch-Oliver/file-hider/releases/download/1.1.1/manifest.json",
+            "https://api.github.com/repos/Eldritch-Oliver/file-hider/releases/assets/94859515"
+          ],
+          "hash": "sha256-5DiPhQrnNCRYJfzo+TPG512EFMg9Z/l/GACPXgZ6BQo="
+        }
+      }
+    },
+    "obsidian-advanced-uri": {
+      "repo": "vinzent03/obsidian-advanced-uri",
+      "version": "2.0.0",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/Vinzent03/obsidian-advanced-uri/releases/download/2.0.0/main.js",
+            "https://api.github.com/repos/Vinzent03/obsidian-advanced-uri/releases/assets/489812295"
+          ],
+          "hash": "sha256-QoFnWlxWI2LYJ78zD3r32SgnYVFxSunt4YzxLXBVb68="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/Vinzent03/obsidian-advanced-uri/releases/download/2.0.0/manifest.json",
+            "https://api.github.com/repos/Vinzent03/obsidian-advanced-uri/releases/assets/489812293"
+          ],
+          "hash": "sha256-Dz07v/rHGSiM60RuDkC54OzzhZuaSpYQbXLvbthqzG8="
+        }
+      }
+    },
+    "obsidian-banners": {
+      "repo": "noatpad/obsidian-banners",
+      "version": "1.3.3",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/noatpad/obsidian-banners/releases/download/1.3.3/main.js",
+            "https://api.github.com/repos/noatpad/obsidian-banners/releases/assets/63141696"
+          ],
+          "hash": "sha256-l+OYTdDKk4g5fBUOubs0qjwW+J9LgY8dJvbyzVQF/Xg="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/noatpad/obsidian-banners/releases/download/1.3.3/manifest.json",
+            "https://api.github.com/repos/noatpad/obsidian-banners/releases/assets/63141694"
+          ],
+          "hash": "sha256-ZGuNqcXMgjEDQEi4boJ8Jx2NpCBjKXddNpPCZWEBGS0="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/noatpad/obsidian-banners/releases/download/1.3.3/styles.css",
+            "https://api.github.com/repos/noatpad/obsidian-banners/releases/assets/63141695"
+          ],
+          "hash": "sha256-FFdQTx7ErwCQp19JogHDE0aU1eAGg3xOey0VaoICakQ="
+        }
+      }
+    },
+    "obsidian-excalidraw-plugin": {
+      "repo": "zsviczian/obsidian-excalidraw-plugin",
+      "version": "2.25.0",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/zsviczian/obsidian-excalidraw-plugin/releases/download/2.25.0/main.js",
+            "https://api.github.com/repos/zsviczian/obsidian-excalidraw-plugin/releases/assets/463575361"
+          ],
+          "hash": "sha256-Mpg6nSNZhUtHUfNnHb6epErtm5BmjxXLdzJe7Ezn9KM="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/zsviczian/obsidian-excalidraw-plugin/releases/download/2.25.0/manifest.json",
+            "https://api.github.com/repos/zsviczian/obsidian-excalidraw-plugin/releases/assets/463575362"
+          ],
+          "hash": "sha256-sAr3vdgxAPpwxXltEJ+EkD9KCkjWzy+xAWkzcMMZQtM="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/zsviczian/obsidian-excalidraw-plugin/releases/download/2.25.0/styles.css",
+            "https://api.github.com/repos/zsviczian/obsidian-excalidraw-plugin/releases/assets/463575363"
+          ],
+          "hash": "sha256-aLs/hXRVuT4JuMsLBgqWQSZg0WkuDnnA0a0rn4HFhPU="
+        }
+      }
+    },
+    "obsidian-git": {
+      "repo": "vinzent03/obsidian-git",
+      "version": "2.38.5",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/Vinzent03/obsidian-git/releases/download/2.38.5/main.js",
+            "https://api.github.com/repos/Vinzent03/obsidian-git/releases/assets/447607209"
+          ],
+          "hash": "sha256-u0YYGzZxWz93ahwkZ/zbvi4jxO/nux2b8wJwDUK2AZ8="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/Vinzent03/obsidian-git/releases/download/2.38.5/manifest.json",
+            "https://api.github.com/repos/Vinzent03/obsidian-git/releases/assets/447607212"
+          ],
+          "hash": "sha256-qqfMsQ9jfPNhoLZZL5M3k5b5uqlDAAr8pCrULrVSZRY="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/Vinzent03/obsidian-git/releases/download/2.38.5/styles.css",
+            "https://api.github.com/repos/Vinzent03/obsidian-git/releases/assets/447607214"
+          ],
+          "hash": "sha256-9auT9NW03RvR5XeGTFx5CH9639RIrDRuBInlhHzmki0="
+        }
+      }
+    },
+    "obsidian-importer": {
+      "repo": "obsidianmd/obsidian-importer",
+      "version": "1.8.12",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/obsidianmd/obsidian-importer/releases/download/1.8.12/main.js",
+            "https://api.github.com/repos/obsidianmd/obsidian-importer/releases/assets/432307492"
+          ],
+          "hash": "sha256-b9spVnNifBbTsgRxxYULwboHPjMqC7QjBHeBtb5cbhI="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/obsidianmd/obsidian-importer/releases/download/1.8.12/manifest.json",
+            "https://api.github.com/repos/obsidianmd/obsidian-importer/releases/assets/432307494"
+          ],
+          "hash": "sha256-UJVB7h/eb/VEukCSiZzP9zzFJc1Qf60ZI9ZS8S3KiKQ="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/obsidianmd/obsidian-importer/releases/download/1.8.12/styles.css",
+            "https://api.github.com/repos/obsidianmd/obsidian-importer/releases/assets/432307493"
+          ],
+          "hash": "sha256-ARkzdIh0b+cFL3+YQbkt9xUPTi9ky8joJEP6iBKjL+A="
+        }
+      }
+    },
+    "obsidian-livesync": {
+      "repo": "vrtmrz/obsidian-livesync",
+      "version": "1.0.30",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/vrtmrz/obsidian-livesync/releases/download/1.0.30/main.js",
+            "https://api.github.com/repos/vrtmrz/obsidian-livesync/releases/assets/572346847"
+          ],
+          "hash": "sha256-WyBQ7kEFmu7yrRMff6TdiBlMWhX6QCxBQxI3UwirTwQ="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/vrtmrz/obsidian-livesync/releases/download/1.0.30/manifest.json",
+            "https://api.github.com/repos/vrtmrz/obsidian-livesync/releases/assets/572346846"
+          ],
+          "hash": "sha256-8kPExcweWbJtEMCs2sjetSn70+Eg5JBFHRON/lbx4RM="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/vrtmrz/obsidian-livesync/releases/download/1.0.30/styles.css",
+            "https://api.github.com/repos/vrtmrz/obsidian-livesync/releases/assets/572346845"
+          ],
+          "hash": "sha256-S6AL70F+6Y2aYt2f67eS3GVVlJz8no4GlFCtaZqyufA="
+        }
+      }
+    },
+    "paperless": {
+      "repo": "talal-a/obsidian-paperless",
+      "version": "0.2.0",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/Talal-A/obsidian-paperless/releases/download/0.2.0/main.js",
+            "https://api.github.com/repos/Talal-A/obsidian-paperless/releases/assets/345027333"
+          ],
+          "hash": "sha256-1K1AJCa161uFSnpMlhk1hqi9uTNv+nSVMv6bBHB3gqE="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/Talal-A/obsidian-paperless/releases/download/0.2.0/manifest.json",
+            "https://api.github.com/repos/Talal-A/obsidian-paperless/releases/assets/345027335"
+          ],
+          "hash": "sha256-Gb4Db67Gk3uV1YWpryRWYVSSC9BBDN3bH9uigUUoj08="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/Talal-A/obsidian-paperless/releases/download/0.2.0/styles.css",
+            "https://api.github.com/repos/Talal-A/obsidian-paperless/releases/assets/345027332"
+          ],
+          "hash": "sha256-pYEcnBCuYzxUMqNfRv+tVrUdflKgCXSW0O282PN6ssk="
+        }
+      }
+    },
+    "pdf-plus": {
+      "repo": "ryotaushio/obsidian-pdf-plus",
+      "version": "0.40.31",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/RyotaUshio/obsidian-pdf-plus/releases/download/0.40.31/main.js",
+            "https://api.github.com/repos/RyotaUshio/obsidian-pdf-plus/releases/assets/287746160"
+          ],
+          "hash": "sha256-P9OVygFf+BLfikjnXaDsenq1pvWUBtN1RwiYsfcqrJM="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/RyotaUshio/obsidian-pdf-plus/releases/download/0.40.31/manifest.json",
+            "https://api.github.com/repos/RyotaUshio/obsidian-pdf-plus/releases/assets/287746161"
+          ],
+          "hash": "sha256-3KUBZbdDFs2yt2ySCEN0mXvnlJ0hazHvzswrgv9KCGw="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/RyotaUshio/obsidian-pdf-plus/releases/download/0.40.31/styles.css",
+            "https://api.github.com/repos/RyotaUshio/obsidian-pdf-plus/releases/assets/287746162"
+          ],
+          "hash": "sha256-TZRNbqeqWB/c2DZ8nYqwnzfFqMWU4zZUd5X3ny7eQGY="
+        }
+      }
+    },
+    "templater-obsidian": {
+      "repo": "silentvoid13/Templater",
+      "version": "2.20.6",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/SilentVoid13/Templater/releases/download/2.20.6/main.js",
+            "https://api.github.com/repos/SilentVoid13/Templater/releases/assets/455240529"
+          ],
+          "hash": "sha256-4DSEfJFTC7UtE2cf6r8QVVHItRznR0d0XZxskQY8uHI="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/SilentVoid13/Templater/releases/download/2.20.6/manifest.json",
+            "https://api.github.com/repos/SilentVoid13/Templater/releases/assets/455240528"
+          ],
+          "hash": "sha256-MOvCNcmxyZpg3y8b59VzQdTxWHmLbBl8xSWYkC5ViWI="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/SilentVoid13/Templater/releases/download/2.20.6/styles.css",
+            "https://api.github.com/repos/SilentVoid13/Templater/releases/assets/455240526"
+          ],
+          "hash": "sha256-fYW80Snp84qJMkVb3wXJYpzkZqsSNtyTO3t66lU1DAQ="
+        }
+      }
+    },
+    "update-time-on-edit": {
+      "repo": "beaussan/update-time-on-edit-obsidian",
+      "version": "2.4.0",
+      "files": {
+        "main.js": {
+          "urls": [
+            "https://github.com/beaussan/update-time-on-edit-obsidian/releases/download/2.4.0/main.js",
+            "https://api.github.com/repos/beaussan/update-time-on-edit-obsidian/releases/assets/128197216"
+          ],
+          "hash": "sha256-PjttXGXJ4VKg8awJZZEs07OOUbbYQXBbj4daTWfoZvk="
+        },
+        "manifest.json": {
+          "urls": [
+            "https://github.com/beaussan/update-time-on-edit-obsidian/releases/download/2.4.0/manifest.json",
+            "https://api.github.com/repos/beaussan/update-time-on-edit-obsidian/releases/assets/128197218"
+          ],
+          "hash": "sha256-mh8G554SK1PsEWVNJNLrg6i/n4HM4aS2GSlAtNrPxeE="
+        },
+        "styles.css": {
+          "urls": [
+            "https://github.com/beaussan/update-time-on-edit-obsidian/releases/download/2.4.0/styles.css",
+            "https://api.github.com/repos/beaussan/update-time-on-edit-obsidian/releases/assets/128197219"
+          ],
+          "hash": "sha256-TXEGs8RfyeETwKCw5SNDyENGA9+INbh+NDaEt+B9Z/M="
+        }
+      }
+    }
+  },
+  "themes": {
+    "Alien": {
+      "repo": "jabaho9523/AlienTheme",
+      "version": "1.0.4",
+      "files": {
+        "theme.css": {
+          "hash": "sha256-TPCmV4e3yiOPiXLfrP4NyaleJSuaUmVDJwKgaj3isjg=",
+          "urls": [
+            "https://raw.githubusercontent.com/jabaho9523/AlienTheme/a4249c66b11350aaebcba99189a468ab6ad8814d/theme.css"
+          ]
+        },
+        "manifest.json": {
+          "hash": "sha256-z1f5gnzFslaP62JmhH8r88MOdSE1oA/L7BPRUBRbT48=",
+          "urls": [
+            "https://raw.githubusercontent.com/jabaho9523/AlienTheme/a4249c66b11350aaebcba99189a468ab6ad8814d/manifest.json"
+          ]
+        }
+      }
+    },
+    "Elysian": {
+      "repo": "matothetomato/Elysian",
+      "version": "1.2.2",
+      "files": {
+        "theme.css": {
+          "hash": "sha256-mCJjyjVkftyPWKN477WDEu4Ds50hw3BPp2ZGkHdRjSA=",
+          "urls": [
+            "https://raw.githubusercontent.com/matothetomato/Elysian/49c4a3d0ca713a19d868f78f11705b9e775ec91a/theme.css"
+          ]
+        },
+        "manifest.json": {
+          "hash": "sha256-d/P3ve1DfpSQP/5a2d63r4U4poN+6jhN4SVT8yZsNlM=",
+          "urls": [
+            "https://raw.githubusercontent.com/matothetomato/Elysian/49c4a3d0ca713a19d868f78f11705b9e775ec91a/manifest.json"
+          ]
+        }
+      }
+    },
+    "Minimal": {
+      "repo": "kepano/obsidian-minimal",
+      "version": "8.2.1",
+      "files": {
+        "theme.css": {
+          "hash": "sha256-T+2X6yNFHs30ECwdHBfG9rViUqOJh5KqNJtzxDAH+dE=",
+          "urls": [
+            "https://raw.githubusercontent.com/kepano/obsidian-minimal/b365a7d4ac6d5d72d0fe27c1723c7156b8998616/theme.css"
+          ]
+        },
+        "manifest.json": {
+          "hash": "sha256-ufinOxXXSMokjEymOOmxl1ctB00iaSBrmpGnUsWBzEU=",
+          "urls": [
+            "https://raw.githubusercontent.com/kepano/obsidian-minimal/b365a7d4ac6d5d72d0fe27c1723c7156b8998616/manifest.json"
+          ]
+        }
+      }
+    },
+    "Nier": {
+      "repo": "exloseur3d/nier-theme",
+      "version": "0.1.17",
+      "files": {
+        "theme.css": {
+          "hash": "sha256-BdwUd5lUXgUzhjhS/2Xp4Aj3fM/MoF+6AqaJc3dmXd0=",
+          "urls": [
+            "https://raw.githubusercontent.com/exloseur3d/nier-theme/507df157a1c021c76b3067fb552dacfd03b1d716/theme.css"
+          ]
+        },
+        "manifest.json": {
+          "hash": "sha256-q2XkBnA8QalMFf10Y1aTYKcWDSHyQI+M+iThC0bHBuI=",
+          "urls": [
+            "https://raw.githubusercontent.com/exloseur3d/nier-theme/507df157a1c021c76b3067fb552dacfd03b1d716/manifest.json"
+          ]
+        }
+      }
+    },
+    "Obsidian gruvbox": {
+      "repo": "insanum/obsidian_gruvbox",
+      "version": "0.2.1",
+      "files": {
+        "theme.css": {
+          "hash": "sha256-dsgp1q9ysBWuVQ5zRwsi0D7WQJidu4AA2+Wnw5e6VUk=",
+          "urls": [
+            "https://raw.githubusercontent.com/insanum/obsidian_gruvbox/bec6c083415980155aefc1a0d26c7cfe68fd85eb/theme.css"
+          ]
+        },
+        "manifest.json": {
+          "hash": "sha256-465FTTuZZAeFq1rbFCbNLqcqmgEAuc420d6IvxnD0y8=",
+          "urls": [
+            "https://raw.githubusercontent.com/insanum/obsidian_gruvbox/bec6c083415980155aefc1a0d26c7cfe68fd85eb/manifest.json"
+          ]
+        }
+      }
+    },
+    "Tom's Theme": {
+      "repo": "tomkaygames/Tom-s-Theme",
+      "version": "1.0.2",
+      "files": {
+        "theme.css": {
+          "hash": "sha256-gT5fploOgMK/fPfclb1MZTbrtD1BRgOWQ55uJJ5UIps=",
+          "urls": [
+            "https://raw.githubusercontent.com/tomkaygames/Tom-s-Theme/127489b0f7fee8376b0bf3c7c5d8e17635b7dc90/theme.css"
+          ]
+        },
+        "manifest.json": {
+          "hash": "sha256-S28W+i54XoyNweqp+Kpi8YWIRFcoAIVBgONaJD/EuH8=",
+          "urls": [
+            "https://raw.githubusercontent.com/tomkaygames/Tom-s-Theme/127489b0f7fee8376b0bf3c7c5d8e17635b7dc90/manifest.json"
+          ]
+        }
+      }
+    }
+  }
+}

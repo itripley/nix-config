@@ -20,7 +20,7 @@
 
     # Productivity
     bitwarden-desktop
-    obsidian
+    # Obsidian: obsidian.nix (programs.obsidian, with the vault's plugins)
     sublime4
     termius
 

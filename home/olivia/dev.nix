@@ -58,20 +58,11 @@
   };
 
   # FHS build so marketplace extensions with native binaries work.
-  # The rest of your 43 extensions come back through Settings Sync.
+  # All extensions from Windows plus nix-ide, pinned in pkgs/vscode-marketplace/sources.json.
   programs.vscode = {
     enable = true;
     package = pkgs.vscode.fhs;
-    profiles.default.extensions = with pkgs.vscode-extensions; [
-      ms-python.python
-      ms-python.vscode-pylance
-      ms-python.debugpy
-      ms-dotnettools.csharp
-      ms-vscode-remote.remote-containers
-      aaron-bond.better-comments
-      bmalehorn.vscode-fish
-      jnoortheen.nix-ide
-    ];
+    profiles.default.extensions = pkgs.vscode-marketplace.extensions;
   };
 
   home.packages = with pkgs; [

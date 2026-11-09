@@ -1,0 +1,22 @@
+{
+  "settings": {
+    "settingsVersion": 2,
+    "dailyHeading": "## Memos",
+    "dailyInsertPosition": "top",
+    "memoTimeFormat": "HH:mm:ss",
+    "monthlyMemoFolder": "wiki/notes/memos",
+    "monthlyMemoFileFormat": "Memos-YYYY-MM.md",
+    "monthlyDateHeadingFormat": "## [[YYYY-MM-DD]]",
+    "monthlyDateOrder": "asc",
+    "legacyDailyHeadings": [],
+    "mobileCompactMode": "auto",
+    "syncDebounceMs": 1000,
+    "desktopSidebarWidth": 248,
+    "desktopSidebarCollapsed": false,
+    "excludeMonthlyMemosFromObsidian": false,
+    "managedObsidianExcludeRuleOwned": false,
+    "managedSystemFolderExcludeRule": "wiki/notes/memos/_knomo-system/",
+    "managedSystemFolderExcludeRuleOwned": true,
+    "pinnedTags": []
+  }
+}
