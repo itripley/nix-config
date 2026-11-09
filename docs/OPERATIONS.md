@@ -34,6 +34,55 @@ git add -A && git commit -m "…"  # record it
 | A package fails to build | Read the log (`nix log /nix/store/…drv`). Fix it in `overlays/build-fixes.nix` rather than commenting the app out; see that file for examples. To unblock a rebuild right away, comment the app out, then put it back once fixed. |
 | Upgrade to the next NixOS release | Change `nixos-26.05` / `release-26.05` in `flake.nix`, `nh os switch --update`. **Don't** touch `stateVersion`. |
 
+## Keyboard shortcuts
+
+Set in `home/olivia/plasma.nix` (Krohnkite, launchers, window binds) and `modules/nixos/desktop.nix`
+(layout switch). Everything else is KDE's default.
+
+| Keys | Does | From |
+|---|---|---|
+| **Meta+Space** | Ulauncher | Fedora |
+| **Alt+Shift** | switch keyboard layout pt ↔ us | moved from Win+Space |
+| Alt+Space | KRunner | KDE default |
+| Meta+Return | WezTerm | Fedora |
+| Meta+F | Thunar | Fedora |
+| Meta+H / J / K | Krohnkite: focus left / down / up | Fedora |
+| Meta+Shift+H / J / K / L | Krohnkite: move window left / down / up / right | Fedora |
+| Meta+Ctrl+H / L | Krohnkite: shrink / grow width | Fedora |
+| Meta+Ctrl+K / J | Krohnkite: shrink / grow height | Fedora |
+| Meta+M | Krohnkite: monocle layout | Fedora |
+| Meta+S / Meta+Shift+F | Krohnkite: float window / float all | Fedora |
+| Meta+I | Krohnkite: increase master windows | Fedora |
+| Meta+, / Meta+\\ / Meta+\| | Krohnkite: focus previous / next layout / previous layout | Krohnkite defaults |
+| Meta+L | lock screen (so Krohnkite "focus right" is unbound) | KDE default |
+| Meta+arrows | quick-tile | KDE default (restored) |
+| Meta+Alt+arrows | focus window in that direction | KDE default (restored) |
+| Alt+Q / Alt+M | close / minimize window | Windows (whkd) |
+
+To change one, edit `plasma.nix` and `nh os switch`. A key changed in System Settings works too, but
+the next switch puts the configured value back.
+
+## VPNs: NetBird and WARP
+
+- **Tray toggles:** both tray apps start at login (check under the tray's ^ arrow; right-click the
+  tray → *Configure System Tray* → *Always shown*). NetBird: *Connect* / *Disconnect*, and the
+  networks menu. WARP's own tray app (`warp-taskbar`) is built for Zero Trust teams: with the free registration it may only offer a team sign-in instead of an on/off switch. Use `warp-cli connect` / `warp-cli disconnect` for consumer WARP.
+- **Use one at a time.** Both change routing and DNS.
+- **NetBird is self-hosted** at `https://netbird.weblivia.dev` (set in `networking.nix`). CLI:
+  `netbird up`, `netbird down`, `netbird status`, `netbird networks list`.
+- **Exit node:** the server offers *Exit Node (unraid)*. It's deselected on this machine (else all
+  traffic goes through the Unraid peer). To use it on purpose: `netbird networks select "Exit Node (unraid)"`;
+  undo with `deselect`. On a fresh install, deselect it again (see the README).
+- **WARP:** `warp-cli status`, `warp-cli connect` / `disconnect`. Registered with a free account.
+
+## Theme (from the Fedora install)
+
+- Files are in `home/olivia/themes/`; see its README. Artwork (`themes/art/`) is **not in git**:
+  after a fresh clone, copy it from the Fedora drive with the commands in `themes/README.md`.
+- Changing the wallpaper, colors or cursor in System Settings works until the next `nh os switch`,
+  which re-applies `plasma.nix`. Make lasting changes in `plasma.nix`.
+- Wallpapers are per screen: the first entry in `workspace.wallpaper` is screen 0 (DP-1).
+
 ## Booting Windows
 
 - **Now:** press **F8** at power-on (ASUS boot menu) and pick Windows Boot Manager.
@@ -59,6 +108,14 @@ git add -A && git commit -m "…"  # record it
 |---|---|---|
 | No internet while NetBird is connected | NetBird auto-selected the server's **Exit Node (unraid)** (`0.0.0.0/0`); if that peer isn't reachable, everything goes into the tunnel and fails (`write: required key not available` in `journalctl -u netbird`) | `netbird networks deselect "Exit Node (unraid)" "Exit Node (unraid)-v6"` (kept across restarts). Check with `netbird networks list`. To stop new devices auto-selecting it, turn off *auto apply* for that route in the NetBird dashboard. |
 | Plex LAN casting / plex-mpv-shim can't connect | Router DNS-rebind protection on `*.plex.direct` | `cat /etc/resolv.conf` should list 1.1.1.1 first (`networking.nix`). WARP or NetBird DNS taking over can also mask or cause it. Long-term: whitelist `plex.direct` in the router. Also set `allow_http: true` in `~/.config/plex-mpv-shim/conf.json`. |
+| `netbird up` logs in to app.netbird.io | Daemon still running with old settings | `sudo systemctl restart netbird` (a switch does this automatically when `networking.nix` changes it). One-off: `netbird up --management-url https://netbird.weblivia.dev`. |
+| NetBird tray icon missing | Autostart entry not picked up yet, or hidden | Log out/in once after the switch, or run `netbird-ui`; check the tray's ^ arrow. |
+| Meta+Space does nothing | Ulauncher not running, or the KDE hotkey not loaded | `systemctl --user status ulauncher`; `systemctl --user restart ulauncher`; log out/in so KDE loads the `plasma-manager-commands` shortcut. |
+| Ulauncher extension errors | Missing dependency | The Bitwarden extension needs the `bw` CLI (`bitwarden-cli`, not installed). Ulauncher → Preferences → Extensions shows each error. |
+| Wallpaper black, cursor default, no splash | `themes/art/` empty (fresh clone) | Copy the artwork back (`home/olivia/themes/README.md`), then log out/in. |
+| Lock screen not animated | QtMultimedia / plugin not found | `ls ~/.local/share/plasma/wallpapers/`; `kdePackages.qtmultimedia` must be in `desktop.nix`; check `journalctl --user -b \| grep -i smart.video`. |
+| Windows don't tile | Krohnkite disabled | System Settings → Window Management → KWin Scripts → enable Krohnkite (should be set by `kwinrc.Plugins.krohnkiteEnabled`). |
+| Keyboard layout won't switch | Using the old key | It's **Alt+Shift** now; Win+Space opens Ulauncher. |
 | `/mnt/windows` empty or error | Windows Fast Startup / hibernation | Boot Windows, disable Fast Startup (`powercfg /h off`), shut down, retry. `journalctl -b -u mnt-windows.mount`. |
 | `/mnt/unraid/*` hangs or errors | Server down, wrong credentials | `journalctl -b -u mnt-unraid-files.mount`; check `/etc/nixos/smb-secrets`; `ping 192.168.1.65`. Times out after 5 s by design. |
 | Clock wrong after using Windows | Missing local-time RTC setting | `time.hardwareClockInLocalTime` is in `boot.nix`; check `timedatectl`. |

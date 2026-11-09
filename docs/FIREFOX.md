@@ -130,7 +130,12 @@ Sidebery/extension storage are all portable files, copied as-is.
   add-on records were kept, paths rewritten, enabled/disabled state identical, Sidebery data copied,
   excluded files skipped, HM links intact, permissions 700/600, backup made. A newer-version profile
   was correctly refused.
-- ❌ **Not tested:** real Firefox opening the migrated profile. That can only happen on the install.
+- ✅ **Ran on the install (2026-11-08).** Windows and NixOS both had Firefox 159.0.1, and Windows had
+  closed Firefox cleanly (`sessionstore.jsonlz4` written at shutdown). Output: `126 profile add-ons
+  (22 enabled) carried over`. The fresh profile Firefox had created on first launch was moved to
+  `~/.config/mozilla/firefox/9ylnf32e.default-release.before-migration-20261108-222716`
+  (delete it once the migrated profile is confirmed good).
+- ❓ **Still to confirm by eye:** add-ons, Sidebery panels, logins and open tabs after opening Firefox.
   If add-ons show as missing, they're all in Firefox Sync's add-on list to reinstall from, though
-  without their settings. The pre-migration backup and the untouched Windows original mean the copy
-  can always be redone.
+  without their settings. The backup and the untouched Windows original mean the copy can always be
+  redone.

@@ -34,8 +34,8 @@ docs/                          full documentation: what, how and why
 | [docs/MIGRATION.md](docs/MIGRATION.md) | every Windows app and where it went |
 | [docs/FIREFOX.md](docs/FIREFOX.md) | the Firefox profile migration |
 | [docs/FEDORA.md](docs/FEDORA.md) | what came over from the old Fedora install, and the conflicts |
-| [docs/VERIFICATION.md](docs/VERIFICATION.md) | how it was checked, what was fixed, what's untested |
-| [docs/OPERATIONS.md](docs/OPERATIONS.md) | day-to-day use and troubleshooting |
+| [docs/VERIFICATION.md](docs/VERIFICATION.md) | how it was checked, what broke and was fixed (before and after install), what to check by hand |
+| [docs/OPERATIONS.md](docs/OPERATIONS.md) | day-to-day use, keyboard shortcuts, VPN toggles, theme, troubleshooting |
 
 ## Before you start (in Windows)
 
@@ -74,7 +74,7 @@ ls -l /dev/disk/by-id/ | grep Samsung
 sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- \
   --mode destroy,format,mount hosts/desktop-olivia/disko.nix
 
-# 3. Real hardware config (replaces the placeholder)
+# 3. Hardware config for this machine (overwrites the committed one; normally identical)
 sudo nixos-generate-config --no-filesystems --root /mnt
 cp /mnt/etc/nixos/hardware-configuration.nix hosts/desktop-olivia/
 git add -A
@@ -109,8 +109,21 @@ reboot
 - **plex-mpv-shim:** run it once, then set `"allow_http": true` in `~/.config/plex-mpv-shim/conf.json`
   (Plex desktop casts use plain HTTP).
 - **Monitor:** System Settings → Display → set 2560×1440 @ 165 Hz and Adaptive Sync "Automatic" if not picked.
-- **Services that need a login:** `netbird up` (logs in to the self-hosted server set in `networking.nix`; add `--setup-key <key>` if SSO isn't set up), `warp-cli registration new && warp-cli connect`, Steam, Heroic,
-  Bitwarden, Signal (re-link), VS Code Settings Sync (brings back the remaining extensions).
+- **NetBird** (self-hosted, `networking.nix`): `netbird up` (add `--setup-key <key>` if SSO isn't
+  set up), then **turn off the server's exit node** or the internet stops working while connected:
+  `netbird networks deselect "Exit Node (unraid)" "Exit Node (unraid)-v6"`. Check with
+  `netbird status` and `netbird networks list`.
+- **WARP:** `warp-cli registration new`, then `warp-cli connect` / `disconnect` (its tray app targets
+  Zero Trust teams and may not show a switch for the free account). Don't run it at the
+  same time as NetBird.
+- **Other logins:** Steam, Heroic, Bitwarden, Signal (re-link), VS Code Settings Sync (brings back the
+  remaining extensions).
+- **Fedora theme artwork** (gitignored): with the Fedora drive plugged in, run the copy commands in
+  [home/olivia/themes/README.md](home/olivia/themes/README.md), then log out and back in.
+- **Ulauncher and Thunar settings** (app state, not in the repo):
+  `F=/run/media/olivia/fedora/home/olivi; cp -rn $F/.config/ulauncher ~/.config/; mkdir -p ~/.local/share/ulauncher && cp -rn $F/.local/share/ulauncher/extensions ~/.local/share/ulauncher/; cp -rn $F/.config/Thunar ~/.config/`
+  (then change Thunar's "Open Terminal Here" action to `wezterm start --cwd %f`).
+- **Push from NixOS:** `gh auth login` once, then `git push` works over HTTPS.
 - **PrivadoVPN:** no Linux app — download its WireGuard/OpenVPN configs and import them in
   System Settings → Wi-Fi & Networking.
 
@@ -124,3 +137,4 @@ nh clean all          # GC old generations (also runs automatically)
 
 Edit `home/olivia/apps.nix` to add/remove apps. Search packages at https://search.nixos.org.
 nvim / wezterm / fastfetch configs are live symlinks into this repo — edit them in place, no rebuild needed.
+Keyboard shortcuts, VPN toggles and theme notes: [docs/OPERATIONS.md](docs/OPERATIONS.md).

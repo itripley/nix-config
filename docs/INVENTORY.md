@@ -24,6 +24,7 @@ nothing on Windows was changed to gather it.
 | Fanxiang S770 1TB | NVMe | GPT: `C:` NTFS 931 GB (partition GUID `62cd18cb-2a2f-4de3-9849-fc529fea7536`) + 100 MB EFI system partition | **Windows; never touched.** Mounted read-only at `/mnt/windows` |
 | Samsung SSD 850 EVO 500GB, serial `S3R3NF0J901761H` | SATA | **MBR, two partitions Windows can't read** (457 GB + 8.8 GB), likely an old Linux install + swap | **NixOS target; fully erased by disko** |
 | PHILIPS Portable SSD 233 GB | USB | shows as "RAW" in Windows, because it holds a flashed NixOS ISO (Windows can't read the ISO's hybrid layout) | **the NixOS installer**; not part of the installed system |
+| SanDisk 119 GB (`sdc`, seen on NixOS) | USB | GPT: 600 MB EFI + 2 GB ext4 `/boot` + 117 GB btrfs `fedora` (subvolumes `root`, `home`) | **the old Fedora 43 KDE install**; auto-mounted at `/run/media/olivia/fedora`. Source of the theme, tiling and apps in [FEDORA.md](FEDORA.md). Not part of the config. |
 
 Other findings that matter for dual-boot:
 - **Windows Fast Startup is on** (`HiberbootEnabled = 1`). That leaves `C:` in a hibernated state

@@ -95,6 +95,28 @@ codex is not in the binary cache (it fails on Hydra too), so it compiles locally
 After the fixes, the full system (`config.system.build.toplevel`) with **every** app from the
 original lists builds.
 
+## Problems found after first boot (2026-11-08/09)
+
+| # | Problem | Cause | Fix | Commit |
+|---|---|---|---|---|
+| 8 | WezTerm not installed | the original config linked `~/.config/wezterm` but never added the package | `wezterm` in `dev.nix` (plain package; `programs.wezterm` would write `wezterm.lua` into the live link) | `bb89df5` |
+| 9 | `netbird up` logged in to NetBird's cloud (`LoginFailed`) | the server is self-hosted at `netbird.weblivia.dev` (found in Windows' `C:\ProgramData\Netbird\default.json`) | `services.netbird.clients.default.config.ManagementURL` | `8628c39` |
+| 10 | After `nh os switch`, `netbird up` *still* went to the cloud | the module merges `config.d/50-nixos.json` only when the daemon starts, and a switch doesn't restart it when only that file changes | `systemd.services.netbird.restartTriggers` on that file. (The login was done once with `--management-url`, which also persists.) | `93865f2` |
+| 11 | No internet while NetBird is connected | the server pushes **Exit Node (unraid)** (`0.0.0.0/0`, `::/0`); the client auto-selected it, the unraid peer never answered, so all traffic hit WireGuard with no peer (`write: required key not available`) | `netbird networks deselect "Exit Node (unraid)" "Exit Node (unraid)-v6"`, exactly what Windows' `state.json` had. Stored in `/var/lib/netbird/state.json`. | `93865f2` (docs) |
+| 12 | No graphical VPN toggle for NetBird | WARP's `warp-taskbar` autostarts from its package; NetBird's tray app doesn't, and a second plain `netbird-ui` in `apps.nix` duplicated the menu entry | `makeAutostartItem` for the module's wrapped `netbird-ui`; dropped the duplicate | `7644365` |
+| 13 | Fedora migration: `electron-41.10.7` refused as insecure | stable `ente-desktop` 1.7.22 is pinned to an EOL Electron | `unstable.ente-desktop` (1.7.27) | `0ef7162` |
+| 14 | Fedora migration: `wineWowPackages` deprecation warning | renamed in 26.05 | `wineWow64Packages.stable` | `0ef7162` |
+
+Other things checked along the way:
+- The NetBird tray app (`netbird-ui`) and the CLI both default to the module's socket
+  `unix:///var/run/netbird/sock`, so the plain package wasn't broken, just redundant.
+- Fedora's Krohnkite binds `Meta+,` / `Meta+\` / `Meta+|` were Krohnkite's own defaults (decoded from
+  `kglobalshortcutsrc` escaping), so they're left for Krohnkite to register.
+- plasma-manager splits `configFile` group names on `/`, so `"Greeter/Wallpaper/<plugin>/General"`
+  becomes `[Greeter][Wallpaper][<plugin>][General]` (checked in the generated `data.json`).
+- The theme artwork links point at `themes/art/` through the store (`mkOutOfStoreSymlink`), and only
+  `art/.gitkeep` is tracked by git.
+
 ## Checked on the installed system (2026-11-08)
 
 | Area | Result |
@@ -102,6 +124,8 @@ original lists builds.
 | Disk id / disko | ✅ installed on the Samsung, Windows NVMe untouched |
 | Display | ✅ DP-1 2560×1440 @ 165 Hz picked automatically; Adaptive Sync set to *Automatic* (`kscreen-doctor output.DP-1.vrrpolicy.automatic`). A second 1600×1200 @ 75 Hz monitor is on DP-2. |
 | Services | ✅ `lactd`, `ollama`, `openrgb`, `docker`, `netbird`, `cloudflare-warp` running; no failed units |
+| NetBird | ✅ logged in to `netbird.weblivia.dev`; Management, Signal and 2/2 relays connected, 2/5 peers; internet works with it up (exit node deselected). Tray app autostarts. |
+| WARP | ✅ registered (free account); `warp-cli` works. ❓ `warp-taskbar` autostarts, but it's made for Zero Trust teams and may not give a consumer on/off switch; not confirmed in the GUI. Don't connect WARP and NetBird at the same time (both change routing and DNS). |
 | PipeWire virtual sinks | ✅ `virtual_game`, `virtual_music`, `virtual_chat` exist. Newer `wpctl status` lists them under **Filters**, not Sinks. |
 | SMB mounts | ✅ `/mnt/unraid/*` automount with the credentials file |
 | `/mnt/windows` | ✅ mounted read-only (ntfs3) |
@@ -117,6 +141,11 @@ original lists builds.
 | ROCm in Resolve / Blender / Ollama | Render with HIP in Blender, run a model and check `ollama ps` shows GPU. |
 | Seiren Mini + EasyEffects | Record a test clip. |
 | Firefox | Open it: add-ons, Sidebery panels, logins and tabs should all be there. |
+| Fedora theme (after `nh os switch` + re-login) | Catppuccin colors, Klassy borders, Lain splash, Bocchi cursor, per-screen wallpapers, animated lock screen (Meta+L). |
+| Krohnkite | New windows tile; Meta+H/J/K focus, Meta+Shift+H/J/K/L move. If not, System Settings → Window Management → KWin Scripts → Krohnkite. |
+| Ulauncher | Meta+Space opens it; Alt+Shift switches pt/us. |
+| GNOME Boxes | Needs the `libvirtd` group, so a re-login after the switch. |
+| `github-artlivia` deploy key | Re-add the public key on GitHub, then `git ls-remote git@github-artlivia:itripley/artlivia.git`. |
 
 After any edit, build before switching: `nh os build` (or `nh os switch`, which stops on errors
 before activating). `scripts/verify.ps1` is still useful when editing from Windows.

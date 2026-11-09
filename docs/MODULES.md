@@ -135,7 +135,7 @@ here) only if the hardware changes.
 | `networking.hosts."192.168.1.65" = [ unraid-olivia UNRAID-OLIVIA ]` | Public DNS can't resolve the Unraid NetBIOS name. |
 | `services.netbird`, `services.cloudflare-warp` | Same overlay/VPN clients as on Windows. |
 | `services.netbird.clients.default.config.ManagementURL` | NetBird is self-hosted at `netbird.weblivia.dev` (from the Windows client's `C:\ProgramData\Netbird\default.json`). Without it the daemon uses NetBird's cloud and `netbird up` fails. The module merges this into `/var/lib/netbird/config.json` when the daemon starts; a `restartTriggers` entry makes `nh os switch` restart it when that changes (the module doesn't). The server's *Exit Node (unraid)* route is deselected on the client, as on Windows (see OPERATIONS troubleshooting). It's an object because NetBird serialises Go's `url.URL`. The tray app is the module's wrapped `netbird-ui` (the plain one was dropped from `apps.nix` to avoid two menu entries). |
-| Tray autostart (`makeAutostartItem` for NetBird) | Graphical on/off toggles at login. WARP's `warp-taskbar` autostarts from its own package; NetBird's tray app doesn't, so `networking.nix` adds an autostart entry. Both icons may sit under the tray's ^ arrow: right-click the tray → *Configure System Tray* → set them to *Always shown*. |
+| Tray autostart (`makeAutostartItem` for NetBird) | Graphical on/off toggles at login. WARP's `warp-taskbar` autostarts from its own package (but targets Zero Trust teams, see OPERATIONS); NetBird's tray app doesn't, so `networking.nix` adds an autostart entry. Both icons may sit under the tray's ^ arrow: right-click the tray → *Configure System Tray* → set them to *Always shown*. |
 | Firewall: TCP 53317, 3000; UDP 53317, 32410, 32412–32414 | LocalSend; plex-mpv-shim's HTTP control port; Plex GDM discovery. Everything else stays closed (Steam, KDE Connect and Avahi open their own). |
 
 ## `modules/nixos/storage.nix`
@@ -192,6 +192,13 @@ Notable choices:
 - `davinci-resolve`: see the codec caveat in [MIGRATION.md](MIGRATION.md).
 - `yabridge` / `yabridgectl`: run Windows VST plugins in Linux DAWs through Wine.
 - `unstable.claude-code`, `unstable.codex`, `unstable.opencode`: from unstable because they move fast.
+- "From the old Fedora install" block: Ulauncher, Thunar, btop, w3m, Ente, High Tide, GNOME Boxes,
+  distrobox + DistroShelf, Warehouse, pokemon-colorscripts; Wine + winetricks next to Bottles. See
+  [FEDORA.md](FEDORA.md).
+- `unstable.ente-desktop`: stable's 1.7.22 is pinned to Electron 41, which is EOL and marked insecure
+  (nixpkgs refuses to evaluate it); unstable's 1.7.27 uses a supported Electron.
+- `wineWow64Packages.stable`: `wineWowPackages` is deprecated in 26.05.
+- No `netbird-ui` here: the NetBird module provides it (wrapped for the daemon socket).
 
 ## `home/olivia/dev.nix`
 
@@ -202,7 +209,7 @@ Notable choices:
 | `programs.neovim` + `extraPackages` | LazyVim needs a C compiler (treesitter), ripgrep/fd (search), lazygit, and LSPs; Nix provides them on Neovim's PATH. `sideloadInitLua = true` because HM 26.05 always generates `nvim/init.lua`, which can't be written into the live-linked LazyVim folder. |
 | `programs.vscode`, `package = vscode.fhs` | The FHS variant lets marketplace extensions with native binaries work. 8 extensions available in nixpkgs are declared; the rest come back through Settings Sync. |
 | `wezterm` (plain package) | The terminal. Not `programs.wezterm`, which would generate `wezterm.lua` into the live-linked config folder. Uses JetBrainsMono Nerd Font from `desktop.nix`. |
-| Dev tools | Node, Python + uv, .NET SDK (Godot C#), Godot 4 + Mono, docker-compose, tmux, mc, fastfetch, jq, gh. |
+| Dev tools | Node, Python + uv, .NET SDK (Godot C#), Godot 4 + Mono, docker-compose, tmux, mc, fastfetch, jq, gh; from Fedora: Go, rustup (cargo), lazydocker. |
 
 ## `home/olivia/firefox.nix`
 
