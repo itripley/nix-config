@@ -268,7 +268,7 @@ The look and behaviour of the old Fedora install ([FEDORA.md](FEDORA.md) has the
 |---|---|
 | `xdg.dataFile` for `themes/` | Color scheme, kinetic effect and video-wallpaper plugin are copied from the repo into `~/.local/share`. The gitignored artwork (Lain splash, Bocchi cursor) is live-linked from `themes/art/`. |
 | `workspace.*` | Catppuccin Macchiato, Breeze Plasma style (`default`), breeze-dark icons, Bocchi cursor, Lain splash, Klassy decoration, a wallpaper per screen. No `lookAndFeel`: Fedora had none, and applying one would override the pieces. |
-| `kwin.virtualDesktops`, `configFile.kwinrc` | 3 desktops; Krohnkite enabled with Fedora's gaps; cube (skybox from `themes/art/`), translucency; tiling padding. |
+| `kwin.virtualDesktops`, `configFile.kwinrc` | 3 desktops in one column (3 rows); Krohnkite enabled with Fedora's gaps; cube (skybox from `themes/art/`), translucency; tiling padding. |
 | `configFile.klassyrc`, `breezerc` | Klassy button/corner/outline settings, no shadows. |
 | `configFile.kscreenlockerrc` | Lock screen plays `themes/art/lockscreen.gif` through Smart Video Wallpaper Reborn. |
 | `configFile.kdeglobals.General` | WezTerm as KDE's terminal. |

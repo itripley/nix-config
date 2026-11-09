@@ -42,7 +42,7 @@ The old Linux install (Fedora 43 KDE Plasma, home `olivi`) is on the 119 GB driv
 | Wallpapers (screen 0 `GpIWw6Ma4AAXh2A.png`, screen 1 `D2uFrIz.png`) | `themes/art/wallpapers/`, `workspace.wallpaper` (per screen) |
 | Krohnkite script + gaps | `kdePackages.krohnkite` (system), `configFile.kwinrc."Script-krohnkite"` |
 | Effects: cube (with skybox image), translucency, kinetic_maximize | `configFile.kwinrc.Plugins` / `Effect-*`, `themes/kwin-effects/kinetic_maximize` |
-| 3 virtual desktops, 1 row | `kwin.virtualDesktops` |
+| 3 virtual desktops, 1 row | `kwin.virtualDesktops` (now 3 rows, one column, since 2026-11-09) |
 | Tiling padding 4 | `configFile.kwinrc.Tiling` |
 | Animated lock screen (Smart Video Wallpaper Reborn + `~/Videos/lockscreen.gif`) | `themes/plasma-wallpapers/…`, `kdePackages.qtmultimedia` (system), `configFile.kscreenlockerrc` |
 | WezTerm as KDE's terminal | `configFile.kdeglobals.General` |
