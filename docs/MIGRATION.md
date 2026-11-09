@@ -14,6 +14,7 @@ Legend: **same** = the same app runs natively · **alt** = Linux replacement · 
 | Helium | AppImage | not packaged; download the AppImage and run it directly |
 | Helium PWAs (Immich, Kavita, Open WebUI, Paper, TweetDeck, FileBrowser Quantum) | reinstall | open each site and "Install app" from Chromium/Zen |
 | Signal, Vesktop, Legcord, Element, Cinny, Dissent | same | |
+| (new) Serein | native Discord client | from its own flake (`serein` input); see DESIGN §4 |
 | Bitwarden, Obsidian, Sublime Text, Termius | same | |
 | VS Code (+43 extensions) | same | FHS build; 8 extensions declared, the rest via Settings Sync |
 | Notion, ChatGPT, Claude desktop | web | no official Linux apps |

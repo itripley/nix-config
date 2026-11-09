@@ -51,9 +51,10 @@ just a CLI environment).
 | `disko` | See §2. |
 | `nix-flatpak` | Declarative Flatpaks for the few apps that aren't in nixpkgs (JDownloader, Stremio). |
 | `zen-browser` flake | Zen isn't in nixpkgs. |
+| `serein` flake ([ViceVerse-cz/Serein](https://github.com/ViceVerse-cz/Serein)) | Native Rust Discord client, not in nixpkgs. Its own flake targets nixos-unstable, so its `nixpkgs` follows our `nixpkgs-unstable` (same channel, no extra copy). Built from source: not in any binary cache. No release tags, so `flake.lock` pins a commit; `nix flake update serein` moves it. Needs the same `dontCargoUseSystemLibs` override as codex (VERIFICATION #15). |
 
-Every input except nix-flatpak follows our `nixpkgs`, so there's one package set instead of several
-copies. `flake.lock` pins exact revisions, so evaluation is reproducible until you choose to update.
+Every input except nix-flatpak follows our `nixpkgs` (Serein follows `nixpkgs-unstable`), so there's
+one package set per channel instead of several copies. `flake.lock` pins exact revisions, so evaluation is reproducible until you choose to update.
 
 **Unfree / insecure:** `allowUnfree = true` (Steam, Resolve, VS Code, Plex, …). One insecure package
 is permitted, `openssl-1.1.1w`, because **Sublime Text 4 still links the end-of-life OpenSSL 1.1**.

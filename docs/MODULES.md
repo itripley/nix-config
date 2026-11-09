@@ -199,6 +199,8 @@ Notable choices:
   (nixpkgs refuses to evaluate it); unstable's 1.7.27 uses a supported Electron.
 - `wineWow64Packages.stable`: `wineWowPackages` is deprecated in 26.05.
 - No `netbird-ui` here: the NetBird module provides it (wrapped for the daemon socket).
+- `inputs.serein.packages.<system>.default`: Serein, a native Rust Discord client, from its own flake
+  (DESIGN §4). Compiles locally on first build and on each `nix flake update serein`.
 
 ## `home/olivia/dev.nix`
 

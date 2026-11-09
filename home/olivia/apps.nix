@@ -20,6 +20,11 @@
     pokemon-colorscripts # fish greeting (default.nix)
 
     # Chat & social
+    # Serein, native Discord client (flake input). Same fix as codex in overlays/build-fixes.nix:
+    # nixpkgs' cargoUseSystemLibs hook forces a system AWS-LC that isn't there.
+    (inputs.serein.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs {
+      dontCargoUseSystemLibs = true;
+    })
     signal-desktop
     vesktop
     legcord
