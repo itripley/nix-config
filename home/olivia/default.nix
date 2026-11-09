@@ -13,6 +13,7 @@ in
     ./firefox.nix
     ./plasma.nix
     ./flatpak.nix
+    ./warp-gui.nix
   ];
 
   home.username = "olivia";

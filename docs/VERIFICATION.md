@@ -106,6 +106,7 @@ original lists builds.
 | 12 | No graphical VPN toggle for NetBird | WARP's `warp-taskbar` autostarts from its package; NetBird's tray app doesn't, and a second plain `netbird-ui` in `apps.nix` duplicated the menu entry | `makeAutostartItem` for the module's wrapped `netbird-ui`; dropped the duplicate | `7644365` |
 | 13 | Fedora migration: `electron-41.10.7` refused as insecure | stable `ente-desktop` 1.7.22 is pinned to an EOL Electron | `unstable.ente-desktop` (1.7.27) | `0ef7162` |
 | 14 | Fedora migration: `wineWowPackages` deprecation warning | renamed in 26.05 | `wineWow64Packages.stable` | `0ef7162` |
+| 15 | No WARP on/off switch in the tray | `warp-taskbar` is Zero Trust only: with a free registration each click opens a team sign-in | `home/olivia/warp-gui.nix`: packaged warp-cloudflare-gui, `warp-taskbar` autostart hidden | (uncommitted) |
 
 Other things checked along the way:
 - The NetBird tray app (`netbird-ui`) and the CLI both default to the module's socket
@@ -125,7 +126,7 @@ Other things checked along the way:
 | Display | ✅ DP-1 2560×1440 @ 165 Hz picked automatically; Adaptive Sync set to *Automatic* (`kscreen-doctor output.DP-1.vrrpolicy.automatic`). A second 1600×1200 @ 75 Hz monitor is on DP-2. |
 | Services | ✅ `lactd`, `ollama`, `openrgb`, `docker`, `netbird`, `cloudflare-warp` running; no failed units |
 | NetBird | ✅ logged in to `netbird.weblivia.dev`; Management, Signal and 2/2 relays connected, 2/5 peers; internet works with it up (exit node deselected). Tray app autostarts. |
-| WARP | ✅ registered (free account); `warp-cli` works. ❓ `warp-taskbar` autostarts, but it's made for Zero Trust teams and may not give a consumer on/off switch; not confirmed in the GUI. Don't connect WARP and NetBird at the same time (both change routing and DNS). |
+| WARP | ✅ registered (free account); `warp-cli` works. ✅ confirmed `warp-taskbar` is Zero Trust only (no switch for the free account); replaced by `warp-gui.nix`, whose tray icon was checked to register with Plasma. Don't connect WARP and NetBird at the same time (both change routing and DNS). |
 | PipeWire virtual sinks | ✅ `virtual_game`, `virtual_music`, `virtual_chat` exist. Newer `wpctl status` lists them under **Filters**, not Sinks. |
 | SMB mounts | ✅ `/mnt/unraid/*` automount with the credentials file |
 | `/mnt/windows` | ✅ mounted read-only (ntfs3) |

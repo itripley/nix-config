@@ -113,8 +113,8 @@ reboot
   set up), then **turn off the server's exit node** or the internet stops working while connected:
   `netbird networks deselect "Exit Node (unraid)" "Exit Node (unraid)-v6"`. Check with
   `netbird status` and `netbird networks list`.
-- **WARP:** `warp-cli registration new`, then `warp-cli connect` / `disconnect` (its tray app targets
-  Zero Trust teams and may not show a switch for the free account). Don't run it at the
+- **WARP:** `warp-cli registration new`, then `warp-cli connect` / `disconnect` (or the *Cloudflare Warp*
+  tray icon from `home/olivia/warp-gui.nix`; Cloudflare's own tray app is Zero Trust only). Don't run it at the
   same time as NetBird.
 - **Other logins:** Steam, Heroic, Bitwarden, Signal (re-link), VS Code Settings Sync (brings back the
   remaining extensions).

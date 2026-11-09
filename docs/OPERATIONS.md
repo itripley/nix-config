@@ -66,14 +66,17 @@ the next switch puts the configured value back.
 
 - **Tray toggles:** both tray apps start at login (check under the tray's ^ arrow; right-click the
   tray → *Configure System Tray* → *Always shown*). NetBird: *Connect* / *Disconnect*, and the
-  networks menu. WARP's own tray app (`warp-taskbar`) is built for Zero Trust teams: with the free registration it may only offer a team sign-in instead of an on/off switch. Use `warp-cli connect` / `warp-cli disconnect` for consumer WARP.
+  networks menu. WARP: the *Cloudflare Warp* icon (`home/olivia/warp-gui.nix`); right-click →
+  *Connect / Disconnect*, or *Hide / Show* for the window with the switch. Cloudflare's own
+  `warp-taskbar` is disabled: it's Zero Trust only and has no switch for the free account.
 - **Use one at a time.** Both change routing and DNS.
 - **NetBird is self-hosted** at `https://netbird.weblivia.dev` (set in `networking.nix`). CLI:
   `netbird up`, `netbird down`, `netbird status`, `netbird networks list`.
 - **Exit node:** the server offers *Exit Node (unraid)*. It's deselected on this machine (else all
   traffic goes through the Unraid peer). To use it on purpose: `netbird networks select "Exit Node (unraid)"`;
   undo with `deselect`. On a fresh install, deselect it again (see the README).
-- **WARP:** `warp-cli status`, `warp-cli connect` / `disconnect`. Registered with a free account.
+- **WARP:** `warp-cli status`, `warp-cli connect` / `disconnect`. Registered with a free account
+  (no sign-in exists for it; the sign-in screen in Cloudflare's tray app is for Zero Trust teams).
 
 ## Theme (from the Fedora install)
 

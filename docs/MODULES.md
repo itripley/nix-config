@@ -14,7 +14,7 @@ hosts/desktop-olivia/
 modules/nixos/                    system level (root, services, hardware)
   boot.nix  amd.nix  desktop.nix  audio.nix  networking.nix  storage.nix  gaming.nix  services.nix
 home/olivia/                      user level (home-manager)
-  default.nix  apps.nix  dev.nix  firefox.nix  plasma.nix  flatpak.nix
+  default.nix  apps.nix  dev.nix  firefox.nix  plasma.nix  flatpak.nix  warp-gui.nix
   themes/                         Plasma theme files from Fedora (art/ is gitignored)
   dotfiles/                       wezterm/ nvim/ fastfetch/ firefox/userChrome.css
 scripts/
@@ -135,7 +135,7 @@ here) only if the hardware changes.
 | `networking.hosts."192.168.1.65" = [ unraid-olivia UNRAID-OLIVIA ]` | Public DNS can't resolve the Unraid NetBIOS name. |
 | `services.netbird`, `services.cloudflare-warp` | Same overlay/VPN clients as on Windows. |
 | `services.netbird.clients.default.config.ManagementURL` | NetBird is self-hosted at `netbird.weblivia.dev` (from the Windows client's `C:\ProgramData\Netbird\default.json`). Without it the daemon uses NetBird's cloud and `netbird up` fails. The module merges this into `/var/lib/netbird/config.json` when the daemon starts; a `restartTriggers` entry makes `nh os switch` restart it when that changes (the module doesn't). The server's *Exit Node (unraid)* route is deselected on the client, as on Windows (see OPERATIONS troubleshooting). It's an object because NetBird serialises Go's `url.URL`. The tray app is the module's wrapped `netbird-ui` (the plain one was dropped from `apps.nix` to avoid two menu entries). |
-| Tray autostart (`makeAutostartItem` for NetBird) | Graphical on/off toggles at login. WARP's `warp-taskbar` autostarts from its own package (but targets Zero Trust teams, see OPERATIONS); NetBird's tray app doesn't, so `networking.nix` adds an autostart entry. Both icons may sit under the tray's ^ arrow: right-click the tray → *Configure System Tray* → set them to *Always shown*. |
+| Tray autostart (`makeAutostartItem` for NetBird) | Graphical on/off toggles at login. WARP's own `warp-taskbar` is replaced by a consumer GUI (see `home/olivia/warp-gui.nix`); NetBird's tray app doesn't, so `networking.nix` adds an autostart entry. Both icons may sit under the tray's ^ arrow: right-click the tray → *Configure System Tray* → set them to *Always shown*. |
 | Firewall: TCP 53317, 3000; UDP 53317, 32410, 32412–32414 | LocalSend; plex-mpv-shim's HTTP control port; Plex GDM discovery. Everything else stays closed (Steam, KDE Connect and Avahi open their own). |
 
 ## `modules/nixos/storage.nix`
@@ -238,6 +238,22 @@ The look and behaviour of the old Fedora install ([FEDORA.md](FEDORA.md) has the
 
 Flathub apps installed and auto-updated weekly by nix-flatpak: JDownloader 2 and Stremio (not usable
 from nixpkgs).
+
+## `home/olivia/warp-gui.nix`
+
+On/off switch and tray icon for **consumer** WARP. Cloudflare's own tray app (`warp-taskbar`) only
+does Zero Trust: with the free registration every click opens a team-name sign-in screen and there's
+no switch (log: `taskbar_icon: menu clicked` → `auth_window: show`).
+
+| Setting | Why |
+|---|---|
+| `warp-cloudflare-gui` (github.com/mrmoein/warp-cloudflare-gui, pinned commit) | Small PyQt5 front end that only runs `warp-cli connect` / `disconnect` / `status` / `registration show`. Upstream ships an Ubuntu venv installer, so it's packaged here: `stdenv.mkDerivation` + `wrapQtAppsHook` (Qt platform plugins), a wrapper that `cd`s into the app (it imports `warp_gui` from the working dir), and a menu entry *Cloudflare WARP*. |
+| `qtwidgets` 1.1 (PyPI) | The animated toggle; not in nixpkgs. `colorbutton.py` falls back to a hardcoded PySide2 import when PyQt5 isn't loaded yet, which fails the import check, so `postPatch` points it at qtpy like the rest of the library. |
+| `autostart/warp-cloudflare-gui.desktop` with `--hide` | Starts at login as a tray icon only. Right-click → *Connect / Disconnect*, *Hide / Show* (window with the switch), *Quit*. |
+| `autostart/com.cloudflare.WarpTaskbar.desktop` with `Hidden=true` | A user autostart file with the same name overrides the package's `/etc/xdg/autostart` entry, so `warp-taskbar` no longer starts (otherwise two WARP icons). `warp-svc` itself is untouched. |
+
+Upstream quirk: the status thread updates Qt widgets from a background thread. Harmless so far; if
+the app ever crashes, that's the likely cause (just reopen it).
 
 ## `scripts/verify.ps1`
 
