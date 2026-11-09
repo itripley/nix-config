@@ -51,7 +51,7 @@
     qbittorrent
 
     # Games
-    # Java 21 (Minecraft 1.20.5+) and 25 only; the default also bundles 8 and 17 (~1 GiB) for
+    # Java 21 (Minecraft 1.20.5+) and 25 only; the default also bundles 8 and 17 (~0.7 GiB) for
     # 1.16 and older. Add jdk17 / jdk8 back here for those versions.
     (prismlauncher.override {
       jdks = [
