@@ -39,6 +39,16 @@
     binfmt = true; # run ./Something.AppImage directly
   };
 
+  # ArtCraft apps (artcraft flake input). The module also links /usr/share/fonts to the
+  # system fonts: their text tools only look there, not through fontconfig.
+  programs.artcraft = {
+    enable = true;
+    apps = [
+      "photocraft" # Photoshop
+      "filmcraft" # Premiere Pro
+    ];
+  };
+
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
     noto-fonts

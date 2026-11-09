@@ -32,8 +32,8 @@ history, open tabs) moves over. See [FIREFOX.md](FIREFOX.md) for what, how and w
 |---|---|---|
 | Blender, GIMP, Kdenlive, OBS, Audacity | same | Blender is the HIP build for the 7800 XT |
 | DaVinci Resolve | same | ⚠ free Resolve on Linux can't decode H.264/H.265/AAC — transcode with ffmpeg (DNxHR/ProRes + PCM) or cut in Kdenlive |
-| Photoshop, Clip Studio Paint | alt: Krita (+ GIMP) | |
-| Premiere Pro, Media Encoder, Avid Media Composer | alt: Resolve / Kdenlive / ffmpeg | |
+| Photoshop, Clip Studio Paint | alt: Krita (+ GIMP), PhotoCraft | PhotoCraft from the `artcraft` flake (DESIGN §4), early alpha |
+| Premiere Pro, Media Encoder, Avid Media Composer | alt: Resolve / Kdenlive / ffmpeg, FilmCraft | FilmCraft from the `artcraft` flake (DESIGN §4), early alpha |
 | paint.net | alt: Pinta | |
 | XnView MP, LosslessCut, MediaInfo, MakeMKV | same | |
 | Cavalry, Eagle, chaiNNer, Booru Tagger | Windows / AppImage | chaiNNer ships an AppImage |

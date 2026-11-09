@@ -28,6 +28,12 @@
       url = "github:ViceVerse-cz/Serein";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    # ArtCraft apps (PhotoCraft, FilmCraft, ...) from their release AppImages. Its module
+    # builds against our pkgs; follows only keeps flake.lock from pulling a second nixpkgs.
+    artcraft = {
+      url = "github:ipeglin/artcraft-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -68,6 +74,7 @@
             nixpkgs.config.permittedInsecurePackages = [ "openssl-1.1.1w" ];
           }
           disko.nixosModules.disko
+          inputs.artcraft.nixosModules.default
           ./hosts/desktop-olivia/configuration.nix
 
           home-manager.nixosModules.home-manager

@@ -115,6 +115,7 @@ here) only if the hardware changes.
 | `programs.kdeconnect` | Was in use on Windows; this also opens its firewall ports. |
 | `partition-manager`, `printing` | KDE disk tool; CUPS printing. |
 | `services.flatpak`, `programs.appimage` (+binfmt) | Escape hatches for apps outside nixpkgs (DESIGN §8). |
+| `programs.artcraft` (`apps = photocraft, filmcraft`) | ArtCraft apps from the `artcraft` flake's module (DESIGN §4). The module also turns on `fonts.fontDir` and links `/usr/share/fonts` to the system fonts, because the apps' text tools only look there, not through fontconfig. |
 | fonts: JetBrainsMono Nerd Font, Noto (+CJK, emoji), corefonts | WezTerm's font; full Unicode coverage including Japanese/Chinese; Microsoft core fonts for websites and documents that expect them. |
 
 ## `modules/nixos/audio.nix`

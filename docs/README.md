@@ -41,6 +41,7 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-09 | NetBird tray app autostarts (WARP's already did) | `7644365` |
 | 2026-11-09 | Old Fedora setup brought over: theme, Krohnkite, Ulauncher (layout switch → Alt+Shift), apps | `0ef7162`, [FEDORA.md](FEDORA.md) |
 | 2026-11-09 | Serein (native Discord client) added as a flake input | DESIGN §4 |
+| 2026-11-09 | PhotoCraft and FilmCraft (ArtCraft) added through the artcraft-nix flake's module | DESIGN §4 |
 | 2026-11-09 | WARP tray: Cloudflare's Zero Trust-only `warp-taskbar` replaced by warp-cloudflare-gui (consumer on/off) | `cc26af0` |
 
 ## Conventions
