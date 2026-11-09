@@ -17,7 +17,8 @@ Legend: **same** = the same app runs natively · **alt** = Linux replacement · 
 | (new) Serein | native Discord client | from its own flake (`serein` input); see DESIGN §4 |
 | Bitwarden, Obsidian, Sublime Text, Termius | same | |
 | VS Code (+43 extensions) | same | FHS build; 8 extensions declared, the rest via Settings Sync |
-| Notion, ChatGPT, Claude desktop | web | no official Linux apps |
+| Claude desktop | same | official Linux beta, from the `claude-desktop` flake (DESIGN §4) |
+| Notion, ChatGPT | web | no official Linux apps |
 | Figma / Figma Agent | web | figma-linux removed 2026-11-09 |
 | Scrivener | alt: Obsidian | or keep writing in Windows |
 

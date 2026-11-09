@@ -61,5 +61,7 @@
 
     # AI
     unstable.claude-code
+    # Claude Desktop (flake input): Anthropic's .deb, run with --no-sandbox (no setuid in the store)
+    inputs.claude-desktop.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 }

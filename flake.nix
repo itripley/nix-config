@@ -24,6 +24,12 @@
       url = "github:ViceVerse-cz/Serein";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    # Claude Desktop (official Linux beta), repackaged from Anthropic's apt repo. Its flake
+    # targets nixos-unstable, so share ours.
+    claude-desktop = {
+      url = "github:tomsch/claude-desktop-nix";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     # ArtCraft apps (PhotoCraft, FilmCraft, ...) from their release AppImages. Its module
     # builds against our pkgs; follows only keeps flake.lock from pulling a second nixpkgs.
     artcraft = {

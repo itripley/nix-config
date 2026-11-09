@@ -20,6 +20,26 @@
         "type": "github"
       }
     },
+    "claude-desktop": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793920547,
+        "narHash": "sha256-OekgmbrOg3ueO2uuxPxtFqGW+xlKXsPv0OHaoxYe+po=",
+        "owner": "tomsch",
+        "repo": "claude-desktop-nix",
+        "rev": "b16f4856da3a0b218d3ed0722df26b452039079f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "tomsch",
+        "repo": "claude-desktop-nix",
+        "type": "github"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -155,6 +175,7 @@
     "root": {
       "inputs": {
         "artcraft": "artcraft",
+        "claude-desktop": "claude-desktop",
         "disko": "disko",
         "home-manager": "home-manager",
         "nix-flatpak": "nix-flatpak",

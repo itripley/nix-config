@@ -74,6 +74,7 @@ Zero warnings, zero errors against `flake.lock`. Pinned revisions:
 | nix-flatpak | | `02656785` |
 | zen-browser (removed 2026-11-09) | | `5f45f55b` |
 | serein (added 2026-11-09) | main | `c028eee6` |
+| claude-desktop (added 2026-11-09) | main | `b16f4856` |
 | artcraft (added 2026-11-09) | main | `6a3de1d2` |
 
 ## First real build (2026-11-08)

@@ -188,6 +188,7 @@ Notable choices:
 - `pkgsRocm.blender`: Blender with HIP (GPU rendering on AMD). The older `blender-hip` name was removed from nixpkgs.
 - `davinci-resolve`: see the codec caveat in [MIGRATION.md](MIGRATION.md).
 - `unstable.claude-code`: from unstable because it moves fast.
+- `inputs.claude-desktop.packages.<system>.default`: Claude Desktop (official Linux beta) from its flake (DESIGN §4).
 - "From the old Fedora install" block: Ulauncher, btop, High Tide, pokemon-colorscripts.
   See [FEDORA.md](FEDORA.md).
 - Removed on 2026-11-09: Zen, Thunar, w3m, Ente, GNOME Boxes, distrobox, DistroShelf, Signal, Vesktop,

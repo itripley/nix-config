@@ -43,6 +43,7 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-09 | Serein (native Discord client) added as a flake input | DESIGN §4 |
 | 2026-11-09 | PhotoCraft and FilmCraft (ArtCraft) added through the artcraft-nix flake's module | DESIGN §4 |
 | 2026-11-09 | 43 apps removed (Zen, the JDownloader/Stremio Flatpaks, most chat, image, audio and Wine tools, codex, opencode, …), plus what only they used: Zen input, Thunar shortcut, Vesktop autostart, libvirtd, codex build fix | MODULES `apps.nix` |
+| 2026-11-09 | Warehouse removed; Claude Desktop (official Linux beta) added from the claude-desktop-nix flake | DESIGN §4 |
 | 2026-11-09 | WARP tray: Cloudflare's Zero Trust-only `warp-taskbar` replaced by warp-cloudflare-gui (consumer on/off) | `cc26af0` |
 
 ## Conventions
