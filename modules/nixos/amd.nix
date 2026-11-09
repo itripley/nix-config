@@ -13,6 +13,9 @@
 
   # LACT: fan curves, power limits, clocks (replaces AMD Software / Adrenalin)
   services.lact.enable = true;
+  # Clock/voltage control in LACT needs overdrive (adds amdgpu.ppfeaturemask to the kernel
+  # command line), as the lact module recommends. Takes effect after a reboot: `nh os boot`.
+  hardware.amdgpu.overdrive.enable = true;
 
   # DDC/CI so Plasma can control monitor brightness (replaces Twinkle Tray)
   hardware.i2c.enable = true;
