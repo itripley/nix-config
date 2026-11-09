@@ -3,7 +3,6 @@
 {
   config,
   osConfig,
-  pkgs,
   ...
 }:
 let
@@ -52,7 +51,7 @@ in
       rows = 1;
     };
 
-    # Layout switching moved off Win+Space (Ulauncher has it now, as on Fedora)
+    # Layout switching moved off Win+Space (the launcher has it now, as on Fedora)
     input.keyboard = {
       layouts = [
         { layout = "pt"; }
@@ -99,13 +98,23 @@ in
       };
       # App launchers from Fedora
       "services/org.wezfurlong.wezterm.desktop"."_launch" = "Meta+Return";
+      # Meta+V goes to Vicinae's clipboard history (below); Klipper's popup gives it up
+      plasmashell."show-on-mouse-pos" = [ ];
     };
 
-    # Wayland apps can't grab global keys themselves; KDE calls ulauncher-toggle instead
-    hotkeys.commands."ulauncher-toggle" = {
-      name = "Ulauncher";
-      key = "Meta+Space";
-      command = "ulauncher-toggle";
+    # Wayland apps can't grab global keys themselves, so KDE runs the Vicinae commands
+    # (docs.vicinae.com/quickstart/kde). Both need the server (programs.vicinae below).
+    hotkeys.commands = {
+      "vicinae-toggle" = {
+        name = "Vicinae";
+        key = "Meta+Space";
+        command = "vicinae toggle";
+      };
+      "vicinae-clipboard" = {
+        name = "Vicinae clipboard history";
+        key = "Meta+V";
+        command = "vicinae vicinae://launch/clipboard/history";
+      };
     };
 
     configFile = {
@@ -116,6 +125,9 @@ in
           translucencyEnabled = true;
           # kinetic_maximize is enabled by default once installed
         };
+        # Focus stealing prevention "Low" (KDE's default, pinned): any higher and the Vicinae
+        # window can fail to take focus when toggled (docs.vicinae.com/quickstart/kde)
+        Windows.FocusStealingPreventionLevel = 1;
         "Script-krohnkite" = {
           limitTileWidthRatio = 2.2;
           screenGapBetween = 10;
@@ -183,19 +195,18 @@ in
     };
   };
 
-  # Ulauncher (Fedora's launcher), started hidden at login. GDK_BACKEND=x11 as on Fedora:
-  # under Wayland it can't position its window otherwise.
-  systemd.user.services.ulauncher = {
-    Unit = {
-      Description = "Ulauncher application launcher";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
+  # Vicinae launcher (replaces Fedora's Ulauncher). The server runs from login as a user
+  # service; Meta+Space toggles its window (hotkeys above). Uses KWin's layer-shell support.
+  # Module and package come from the vicinae flake input (docs.vicinae.com/nixos), not
+  # home-manager/nixpkgs. `settings` goes to a store file (VICINAE_OVERRIDES) applied on top
+  # of the GUI's settings.json, so Vicinae's own settings screen still saves; Nix values win.
+  programs.vicinae = {
+    enable = true;
+    systemd.enable = true;
+    settings = {
+      theme.dark.name = "catppuccin-macchiato"; # bundled; matches the Plasma colors
+      # Vicinae asks KWin for blur itself; KDE's blur is strong, so let more of it show
+      launcher_window.opacity = 0.85;
     };
-    Service = {
-      Environment = [ "GDK_BACKEND=x11" ];
-      ExecStart = "${pkgs.ulauncher}/bin/ulauncher --hide-window";
-      Restart = "on-failure";
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
   };
 }

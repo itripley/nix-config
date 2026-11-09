@@ -14,7 +14,7 @@
   i18n.defaultLocale = "en_US.UTF-8";
 
   # pt-PT first, en-US second (matches Windows). Alt+Shift switches layouts: Win+Space
-  # opens Ulauncher, as on the old Fedora install (see home/olivia/plasma.nix).
+  # opens the launcher (Vicinae), as on the old Fedora install (see home/olivia/plasma.nix).
   services.xserver.xkb = {
     layout = "pt,us";
     options = "grp:alt_shift_toggle";

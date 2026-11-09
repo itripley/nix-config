@@ -38,6 +38,12 @@
       "flakes"
     ];
     auto-optimise-store = true;
+    # Prebuilt Vicinae from its flake input (flake.nix). Set here, system-wide, because
+    # flake nixConfig would need a trusted user.
+    extra-substituters = [ "https://vicinae.cachix.org" ];
+    extra-trusted-public-keys = [
+      "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
+    ];
     # trusted-users stays at the default (root only). Don't add @wheel: a trusted user can set
     # substituters/build hooks, i.e. become root without sudo's password. nh goes through sudo.
   };

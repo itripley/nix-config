@@ -36,6 +36,10 @@
       url = "github:ipeglin/artcraft-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Vicinae launcher, per docs.vicinae.com/nixos: newer than nixpkgs, and its NixOS module
+    # gives the input server the capability it needs to paste and expand snippets. No
+    # nixpkgs follows on purpose: the package then matches vicinae.cachix.org (configuration.nix).
+    vicinae.url = "github:vicinaehq/vicinae";
   };
 
   outputs =
@@ -92,6 +96,7 @@
           }
           disko.nixosModules.disko
           inputs.artcraft.nixosModules.default
+          inputs.vicinae.nixosModules.default
           ./hosts/desktop-olivia/configuration.nix
 
           home-manager.nixosModules.home-manager
@@ -104,6 +109,8 @@
               sharedModules = [
                 plasma-manager.homeModules.plasma-manager
                 nix-flatpak.homeManagerModules.nix-flatpak
+                # Replaces home-manager's own programs.vicinae module
+                inputs.vicinae.homeManagerModules.default
               ];
               users.olivia = import ./home/olivia;
             };
