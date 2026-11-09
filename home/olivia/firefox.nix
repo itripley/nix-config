@@ -11,15 +11,17 @@
 let
   # Bitwarden desktop writes this manifest at runtime on other distros; declaring it makes
   # "Allow browser integration" (unlock with the desktop app) work regardless of profile layout.
-  bitwardenNativeHost = pkgs.writeTextDir "lib/mozilla/native-messaging-hosts/com.8bit.bitwarden.json" (
-    builtins.toJSON {
-      name = "com.8bit.bitwarden";
-      description = "Bitwarden desktop <-> browser bridge";
-      path = "${pkgs.bitwarden-desktop}/libexec/desktop_proxy";
-      type = "stdio";
-      allowed_extensions = [ "{446900e4-71c2-419f-a6a7-df9c091e268b}" ];
-    }
-  );
+  bitwardenNativeHost =
+    pkgs.writeTextDir "lib/mozilla/native-messaging-hosts/com.8bit.bitwarden.json"
+      (
+        builtins.toJSON {
+          name = "com.8bit.bitwarden";
+          description = "Bitwarden desktop <-> browser bridge";
+          path = "${pkgs.bitwarden-desktop}/libexec/desktop_proxy";
+          type = "stdio";
+          allowed_extensions = [ "{446900e4-71c2-419f-a6a7-df9c091e268b}" ];
+        }
+      );
 in
 {
   programs.firefox = {

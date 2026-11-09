@@ -9,7 +9,8 @@ let
 in
 {
   xdg.dataFile = {
-    "color-schemes/CatppuccinMacchiato.colors".source = ./themes/color-schemes/CatppuccinMacchiato.colors;
+    "color-schemes/CatppuccinMacchiato.colors".source =
+      ./themes/color-schemes/CatppuccinMacchiato.colors;
     "kwin/effects/kinetic_maximize".source = ./themes/kwin-effects/kinetic_maximize;
     "plasma/wallpapers/luisbocanegra.smart.video.wallpaper.reborn".source =
       ./themes/plasma-wallpapers/luisbocanegra.smart.video.wallpaper.reborn;

@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, ... }:
 let
   # Live symlinks into the checkout (not the read-only store), so LazyVim can
   # write lazy-lock.json and edits apply without a rebuild.
