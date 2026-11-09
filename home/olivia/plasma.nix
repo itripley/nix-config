@@ -48,7 +48,7 @@ in
 
     kwin.virtualDesktops = {
       number = 3;
-      rows = 1;
+      rows = 3; # one column
     };
 
     # Layout switching moved off Win+Space (the launcher has it now, as on Fedora)
