@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 {
   boot.loader.systemd-boot = {
     enable = true;
@@ -23,4 +23,7 @@
   zramSwap.enable = true;
   services.fstrim.enable = true;
   services.btrfs.autoScrub.enable = true;
+  # `nixos-rebuild build-vm` swaps fileSystems for a non-btrfs disk, which trips autoScrub's
+  # assertion. (`system.build.vmWithDisko` keeps the real btrfs layout and doesn't need this.)
+  virtualisation.vmVariant.services.btrfs.autoScrub.enable = lib.mkForce false;
 }
