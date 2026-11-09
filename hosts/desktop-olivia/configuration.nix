@@ -38,11 +38,12 @@
       "flakes"
     ];
     auto-optimise-store = true;
-    trusted-users = [
-      "root"
-      "@wheel"
-    ];
+    # trusted-users stays at the default (root only). Don't add @wheel: a trusted user can set
+    # substituters/build hooks, i.e. become root without sudo's password. nh goes through sudo.
   };
+  # No legacy channels: <nixpkgs> and `nix shell nixpkgs#…` resolve to this flake's nixpkgs
+  # (nix.registry / nix.nixPath are pinned by nixosSystem).
+  nix.channel.enable = false;
 
   # `nh os switch` / `nh os boot` — nicer nixos-rebuild, plus automatic GC
   programs.nh = {
