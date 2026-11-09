@@ -13,7 +13,7 @@ choice was made, so the config can be maintained without re-deriving any of it.
 | [FEDORA.md](FEDORA.md) | what was taken from the old Fedora 43 install (theme, tiling, apps), the conflicts with the Windows-based setup and how each was decided |
 | [FIREFOX.md](FIREFOX.md) | how the Firefox profile (extensions + their data, Sidebery, themes, userChrome) is carried over, and why it's done this way |
 | [VERIFICATION.md](VERIFICATION.md) | how the config was checked before install, what broke during and after the install and how it was fixed, what was checked on the real machine, and what is still to check by hand |
-| [OPERATIONS.md](OPERATIONS.md) | day-to-day use (rebuild, update, add apps, roll back), keyboard shortcuts, VPN toggles (NetBird/WARP), theme upkeep, and troubleshooting |
+| [OPERATIONS.md](OPERATIONS.md) | day-to-day use (rebuild, update, add apps, roll back), keyboard shortcuts, VPN toggles (NetBird/WARP), theme upkeep, troubleshooting, and leftover data from removed apps |
 
 Installation steps are in the top-level [README](../README.md).
 
@@ -26,6 +26,9 @@ Installation steps are in the top-level [README](../README.md).
   plex-mpv-shim `allow_http`, Adaptive Sync, NetBird on the self-hosted server (exit node off),
   WARP registered, tray toggles for both, and the old **Fedora** setup (theme, Krohnkite, Ulauncher,
   apps; [FEDORA.md](FEDORA.md)).
+- **2026-11-09 app changes are committed and build, but not switched to yet:** PhotoCraft + FilmCraft,
+  Claude Desktop, and the removal of 44 apps. After `nh os switch`, do the checks in
+  [VERIFICATION.md](VERIFICATION.md#app-changes-2026-11-09).
 - Open: the `github-artlivia` deploy key is rejected by GitHub; a few hand checks
   ([VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand)); remaining app logins (Steam, Bitwarden, …).
 
@@ -40,10 +43,11 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-08 | NetBird pointed at the self-hosted server, restarted on config changes, exit node deselected | `8628c39`, `93865f2` |
 | 2026-11-09 | NetBird tray app autostarts (WARP's already did) | `7644365` |
 | 2026-11-09 | Old Fedora setup brought over: theme, Krohnkite, Ulauncher (layout switch → Alt+Shift), apps | `0ef7162`, [FEDORA.md](FEDORA.md) |
-| 2026-11-09 | Serein (native Discord client) added as a flake input | DESIGN §4 |
-| 2026-11-09 | PhotoCraft and FilmCraft (ArtCraft) added through the artcraft-nix flake's module | DESIGN §4 |
-| 2026-11-09 | 43 apps removed (Zen, the JDownloader/Stremio Flatpaks, most chat, image, audio and Wine tools, codex, opencode, …), plus what only they used: Zen input, Thunar shortcut, Vesktop autostart, libvirtd, codex build fix | MODULES `apps.nix` |
-| 2026-11-09 | Warehouse removed; Claude Desktop (official Linux beta) added from the claude-desktop-nix flake | DESIGN §4 |
+| 2026-11-09 | Serein (native Discord client) added as a flake input | `5d2f60a`, DESIGN §4 |
+| 2026-11-09 | PhotoCraft and FilmCraft (ArtCraft) added through the artcraft-nix flake's module | `3c298f4`, DESIGN §4 |
+| 2026-11-09 | 43 apps removed (Zen, the JDownloader/Stremio Flatpaks, most chat, image, audio and Wine tools, codex, opencode, …), plus what only they used: Zen input, Thunar shortcut, Vesktop autostart, libvirtd, codex build fix | `1aba8c9`, DESIGN §8 |
+| 2026-11-09 | Warehouse removed | `663b28e` |
+| 2026-11-09 | Claude Desktop (official Linux beta) added from the claude-desktop-nix flake | `9be83f4`, DESIGN §4 |
 | 2026-11-09 | WARP tray: Cloudflare's Zero Trust-only `warp-taskbar` replaced by warp-cloudflare-gui (consumer on/off) | `cc26af0` |
 
 ## Conventions

@@ -109,8 +109,8 @@ original lists builds.
 | 12 | No graphical VPN toggle for NetBird | WARP's `warp-taskbar` autostarts from its package; NetBird's tray app doesn't, and a second plain `netbird-ui` in `apps.nix` duplicated the menu entry | `makeAutostartItem` for the module's wrapped `netbird-ui`; dropped the duplicate | `7644365` |
 | 13 | Fedora migration: `electron-41.10.7` refused as insecure | stable `ente-desktop` 1.7.22 is pinned to an EOL Electron | `unstable.ente-desktop` (1.7.27) | `0ef7162` |
 | 14 | Fedora migration: `wineWowPackages` deprecation warning | renamed in 26.05 | `wineWow64Packages.stable` | `0ef7162` |
-| 15 | Serein: `AWS_LC_SYS_USE_SYSTEM=1 requires a system-installed AWS-LC` | same as #6: its flake builds with nixpkgs-unstable, whose `cargoUseSystemLibs` hook forces system AWS-LC | `.overrideAttrs { dontCargoUseSystemLibs = true; }` where it's installed (`apps.nix`) | this commit |
-| 15 | No WARP on/off switch in the tray | `warp-taskbar` is Zero Trust only: with a free registration each click opens a team sign-in | `home/olivia/warp-gui.nix`: packaged warp-cloudflare-gui, `warp-taskbar` autostart hidden | `cc26af0` |
+| 15 | Serein: `AWS_LC_SYS_USE_SYSTEM=1 requires a system-installed AWS-LC` | same as #6: its flake builds with nixpkgs-unstable, whose `cargoUseSystemLibs` hook forces system AWS-LC | `.overrideAttrs { dontCargoUseSystemLibs = true; }` where it's installed (`apps.nix`) | `5d2f60a` |
+| 16 | No WARP on/off switch in the tray | `warp-taskbar` is Zero Trust only: with a free registration each click opens a team sign-in | `home/olivia/warp-gui.nix`: packaged warp-cloudflare-gui, `warp-taskbar` autostart hidden | `cc26af0` |
 
 Other things checked along the way:
 - Serein runs (Vulkan on the RX 7800 XT). The system `ldd` reports `GLIBC_2.43/2.44 not found` for it,
@@ -125,6 +125,41 @@ Other things checked along the way:
 - The theme artwork links point at `themes/art/` through the store (`mkOutOfStoreSymlink`), and only
   `art/.gitkeep` is tracked by git.
 
+## App changes (2026-11-09)
+
+Built on the installed system with
+`nix build .#nixosConfigurations.desktop-olivia.config.system.build.toplevel` after each change. Not
+switched to yet.
+
+| Change | Commit | Checked |
+|---|---|---|
+| PhotoCraft + FilmCraft (`artcraft` input, `programs.artcraft` in `desktop.nix`) | `3c298f4` | ✅ both build; `photocraft-cli --version` → 0.21.0, `filmcraft-cli --version` → 0.4.0; each ships a `.desktop` file. GUIs not opened. |
+| 43 apps removed, plus their config | `1aba8c9` | ✅ evaluates and builds; `nix flake lock` dropped zen-browser and its inputs |
+| Warehouse removed | `663b28e` | ✅ builds |
+| Claude Desktop (`claude-desktop` input) | `9be83f4` | ✅ builds (4.23118.0); its own loader (glibc 2.44) resolves all 89 libraries. The system `ldd` shows `GLIBC_2.43/2.44 not found`, the same false alarm as Serein. App not opened. |
+
+Things found along the way:
+- **FilmCraft is behind upstream.** artcraft-nix's `versions.json` stops at FilmCraft 0.4.0, while
+  upstream (storytold/filmcraft) is on 0.18.0. PhotoCraft is current (0.21.0). The flake's daily job
+  only adds a release after it builds and passes a library check, so newer FilmCraft releases are
+  probably failing that check. `nix flake update artcraft` picks them up once it passes them. If it
+  stays stuck, the alternative is packaging the upstream AppImage directly.
+- artcraft-nix's module would install all seven ArtCraft apps by default; `apps = [ … ]` limits it.
+  It also sets `fonts.fontDir.enable` and a tmpfiles link `/usr/share/fonts` →
+  `/run/current-system/sw/share/X11/fonts`, because the apps' text tools don't use fontconfig.
+- After the removals, `flatpak.nix` has an empty list on purpose: nix-flatpak uninstalls the
+  Flatpaks it installed earlier on the next activation. `flatpak list --app` was already empty on
+  2026-11-09 (JDownloader and Stremio were no longer installed), so in practice there's nothing left.
+
+After the switch, check by hand:
+
+| Area | How |
+|---|---|
+| PhotoCraft / FilmCraft | Both open from the app menu. The text tool lists the system fonts (if not: `ls -l /usr/share/fonts` should point at `/run/current-system/sw/share/X11/fonts`). |
+| Claude Desktop | Opens on Wayland and signs in; Chat, Cowork and Code tabs load. |
+| Removed apps gone | e.g. `which gimp wine codex` finds nothing; the Meta+F shortcut no longer opens Thunar. |
+| Leftover data | ~290 MB of settings from Zen, Krita, Vesktop and Thunar stay in `~`, plus `/var/lib/libvirt`. The list is in [OPERATIONS.md](OPERATIONS.md#leftover-data-from-removed-apps); delete only what you don't need. |
+
 ## Checked on the installed system (2026-11-08)
 
 | Area | Result |
@@ -137,7 +172,7 @@ Other things checked along the way:
 | PipeWire virtual sinks | ✅ `virtual_game`, `virtual_music`, `virtual_chat` exist. Newer `wpctl status` lists them under **Filters**, not Sinks. |
 | SMB mounts | ✅ `/mnt/unraid/*` automount with the credentials file |
 | `/mnt/windows` | ✅ mounted read-only (ntfs3) |
-| Flatpaks | ✅ JDownloader and Stremio installed |
+| Flatpaks | ✅ JDownloader and Stremio installed (both removed from the config 2026-11-09) |
 | SSH | ✅ `ssh unraid` works. ❌ `github-artlivia`: GitHub rejects the deploy key (`Permission denied (publickey)`); re-add `id_ed25519_artlivia.pub` as a deploy key on `itripley/artlivia`. |
 | Firefox migration | ✅ script ran: 126 profile add-ons (22 enabled). Opening it in Firefox is still to be checked. |
 

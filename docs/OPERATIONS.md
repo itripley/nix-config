@@ -24,6 +24,9 @@ git add -A && git commit -m "…"  # record it
 | Run an AppImage | `chmod +x Foo.AppImage && ./Foo.AppImage` (binfmt handles it). |
 | Update everything | `nh os switch --update` (updates `flake.lock`, then rebuilds). Commit the new lock. |
 | Update one input | `nix flake update home-manager`, then `nh os switch`. |
+| Update Claude Desktop / ArtCraft / Serein | `nix flake update claude-desktop` (or `artcraft`, `serein`), then `nh os switch`. Third-party flakes: glance at the input's commits first (DESIGN §8). |
+| Add another ArtCraft app | Add it to `programs.artcraft.apps` in `modules/nixos/desktop.nix`: `vectorcraft`, `designcraft`, `lightcraft`, `effectcraft`, `pdfcraft`. |
+| Pin an ArtCraft version | Use `<app>_<x>_<y>_<z>` in that list, e.g. `"photocraft_0_20_1"`; plain `<app>` is the newest in the lock. |
 | Roll back | Pick an older generation in the boot menu, or `sudo nixos-rebuild switch --rollback`. |
 | Free disk space | Automatic (`programs.nh.clean`: keeps 10 generations / 14 days). Manual: `nh clean all`. |
 | Edit nvim / WezTerm / fastfetch config | Edit under `home/olivia/dotfiles/…`; they're live links, so there's no rebuild. |
@@ -131,4 +134,25 @@ the next switch puts the configured value back.
 | Firefox add-ons missing after migration | Add-on DB not reconciled | See [FIREFOX.md](FIREFOX.md#testing-done-and-not-done). Re-run the script (it backs up first) or reinstall from Firefox Sync's add-on list. |
 | Bitwarden extension can't reach the desktop app | Integration off | Desktop app: *Allow browser integration*; extension: enable *Unlock with desktop app*. |
 | `home-manager` activation fails: "would be clobbered" | A real file where HM wants a link | HM renames it to `*.hm-backup`; if it still fails, move the file away and rebuild. |
+| PhotoCraft / FilmCraft text tool shows no fonts | The `/usr/share/fonts` link is missing | `ls -l /usr/share/fonts`; `sudo systemd-tmpfiles --create` recreates it (from `programs.artcraft`, `linkFonts`). |
+| FilmCraft is an old version | artcraft-nix hasn't published newer ones yet | `nix flake update artcraft`; see [VERIFICATION.md](VERIFICATION.md#app-changes-2026-11-09). |
+| Claude Desktop won't start or shows a blank window | Wayland flags, or a stale profile after an update | Run `claude-desktop` in a terminal to see the error; `journalctl --user -b \| grep -i claude`. |
+| `ldd` says `GLIBC_2.4x not found` for Serein or Claude Desktop | They're linked against unstable's newer glibc; the system `ldd` uses stable's | Not a real problem. Check with the binary's own loader: `$(patchelf --print-interpreter <bin>) --list <bin>`. |
 | Rebuild fails after an update | Upstream package change | Roll back (boot menu or `--rollback`), then `git checkout flake.lock` to return to the last good pins. |
+
+## Leftover data from removed apps
+
+`nh os switch` removes the programs, not what they stored in your home folder. Checked on
+2026-11-09, these are left over from the cleanup. Look before deleting:
+
+| App | Path | Size |
+|---|---|---|
+| Zen | `~/.config/zen` (profile), `~/.cache/zen` | 98 MB, 100 MB |
+| Krita | `~/.local/share/krita`, `~/.config/kritarc`, `~/.config/kritadisplayrc`, `~/.local/share/krita*.log` | 91 MB |
+| Vesktop | `~/.config/vesktop` | 2 MB |
+| Thunar | `~/.config/Thunar` (copied from Fedora) | 16 KB |
+| libvirt (GNOME Boxes) | `/var/lib/libvirt` (system; holds `qemu/`, `secrets/`, network config) | root-only; `sudo du -sh /var/lib/libvirt` |
+
+Nothing was found for Wine/Bottles (`~/.wine`), Signal, Element, Ente, LM Studio, codex, opencode,
+GIMP, Kdenlive, VCV Rack or Renoise, or for any Flatpak (`~/.var/app`). `flatpak list --app` was
+already empty, so nix-flatpak has nothing left to uninstall.

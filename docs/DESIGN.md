@@ -54,7 +54,7 @@ just a CLI environment).
 | `claude-desktop` flake ([tomsch/claude-desktop-nix](https://github.com/tomsch/claude-desktop-nix)) | Anthropic's official Claude Desktop Linux beta isn't in nixpkgs. The flake repackages the `.deb` from Anthropic's apt repo (`downloads.claude.ai`), pinned by hash; its CI bumps it every 6 hours after checking the repo's GPG signature. Its `nixpkgs` follows our `nixpkgs-unstable`. The wrapper runs Electron with `--no-sandbox` (Chromium's setuid sandbox can't work from the store) and Wayland flags. `nix flake update claude-desktop` picks up new versions. |
 | `artcraft` flake ([ipeglin/artcraft-nix](https://github.com/ipeglin/artcraft-nix)) | Unofficial packaging of the ArtCraft apps (storytold), not in nixpkgs. Repackages the upstream release AppImages (autoPatchelf, no FHS sandbox), pinned by upstream's sha256, with GitHub/GitLab mirrors as fallback. Its NixOS module builds against our `pkgs`; `nixpkgs` follows ours only so the lock has no extra copy. Only PhotoCraft and FilmCraft are enabled (`desktop.nix`). New releases arrive with `nix flake update artcraft`. |
 
-Every input except nix-flatpak follows our `nixpkgs` (Serein follows `nixpkgs-unstable`), so there's
+Every input except nix-flatpak follows our `nixpkgs` (Serein and Claude Desktop follow `nixpkgs-unstable`), so there's
 one package set per channel instead of several copies. `flake.lock` pins exact revisions, so evaluation is reproducible until you choose to update.
 
 **Unfree / insecure:** `allowUnfree = true` (Steam, Resolve, VS Code, Plex, …). One insecure package
@@ -100,9 +100,21 @@ the Windows komorebi Alt+H/J/K/L binds; Fedora's setup replaced both.)
 Order of preference for every Windows app:
 1. **The same app from nixpkgs** (most of them).
 2. **A native Linux replacement** when the app is Windows-only (e.g. Voicemeeter → PipeWire sinks).
-3. **Flatpak** when it exists for Linux but isn't packaged in nixpkgs.
-4. **AppImage** (binfmt enabled, so they run directly) for one-off downloads like Helium or chaiNNer.
-5. **Stays on Windows**, since it's a dual-boot.
+3. **A third-party flake** when the app has a maintained Nix packaging outside nixpkgs (Serein,
+   Claude Desktop, ArtCraft; §4). Each one is pinned in `flake.lock`, and its nixpkgs follows ours
+   (or our unstable). These flakes are outside code that runs at build time, so `nix flake update
+   <name>` only after a look at what changed. Prefer flakes that repackage the vendor's own
+   release files pinned by hash (Claude Desktop, ArtCraft) or build from source (Serein).
+4. **Flatpak** when it exists for Linux but isn't packaged in nixpkgs or a flake. (None at the moment.)
+5. **AppImage** (binfmt enabled, so they run directly) for one-off downloads like Helium or chaiNNer.
+6. **Stays on Windows**, since it's a dual-boot.
+
+**2026-11-09 cleanup:** 44 apps from the original Windows and Fedora lists were removed at Olivia's
+request (Zen, the Flatpaks, most chat clients, the image/audio tools, Wine and the Windows-plugin
+tooling, LM Studio, codex, opencode, Warehouse, …; the full list is in MODULES `apps.nix`). Config that
+only existed for them went too (the zen-browser input, Meta+F Thunar, Vesktop autostart, libvirtd,
+the codex build fix). MIGRATION.md marks each one "removed 2026-11-09", so the Windows → Linux
+mapping still shows what used to cover each app.
 
 ## 9. Secrets stay out of the repo
 
