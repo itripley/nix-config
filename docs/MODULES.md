@@ -188,13 +188,13 @@ Notable choices:
 - `pkgsRocm.blender`: Blender with HIP (GPU rendering on AMD). The older `blender-hip` name was removed from nixpkgs.
 - `davinci-resolve`: see the codec caveat in [MIGRATION.md](MIGRATION.md).
 - `unstable.claude-code`: from unstable because it moves fast.
-- "From the old Fedora install" block: Ulauncher, btop, High Tide, Warehouse, pokemon-colorscripts.
+- "From the old Fedora install" block: Ulauncher, btop, High Tide, pokemon-colorscripts.
   See [FEDORA.md](FEDORA.md).
 - Removed on 2026-11-09: Zen, Thunar, w3m, Ente, GNOME Boxes, distrobox, DistroShelf, Signal, Vesktop,
   Element, Cinny, Dissent, figma-linux, Krita, GIMP, Pinta, Kdenlive, LosslessCut, XnView MP,
   Audacity, Renoise, VCV Rack, Cardinal, plugdata, yabridge, Feishin, MakeMKV, MediaInfo, get_iplayer,
   MangoHud, Bottles, Wine, winetricks, Filelight, Impression, YACReader, ActivityWatch, unrar,
-  innoextract, LM Studio, codex, opencode.
+  innoextract, LM Studio, codex, opencode. Warehouse followed the same day.
 - No `netbird-ui` here: the NetBird module provides it (wrapped for the daemon socket).
 - `inputs.serein.packages.<system>.default`: Serein, a native Rust Discord client, from its own flake
   (DESIGN §4). Compiles locally on first build and on each `nix flake update serein`.

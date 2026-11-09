@@ -105,5 +105,5 @@ installed) to `wezterm start --cwd %f`.
 | Default text editor | Fedora: Sublime for text/JSON/YAML/Markdown | Set in System Settings → Default Applications. Declaring it with `xdg.mimeApps` would make `mimeapps.list` read-only for the GUI. |
 
 **2026-11-09:** Zen, Thunar (and its Meta+F shortcut), w3m, Ente, GNOME Boxes (and libvirtd),
-distrobox, DistroShelf, Wine, winetricks and the Vesktop autostart were removed again. The tables above
+distrobox, DistroShelf, Warehouse, Wine, winetricks and the Vesktop autostart were removed again. The tables above
 record the migration as it was done.

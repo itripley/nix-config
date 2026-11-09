@@ -9,7 +9,6 @@
     ulauncher # launcher on Meta+Space (started by plasma.nix)
     btop
     high-tide # TIDAL client (was a Flatpak)
-    warehouse # Flatpak manager GUI (was a Flatpak)
     pokemon-colorscripts # fish greeting (default.nix)
 
     # Chat & social
