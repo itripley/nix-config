@@ -36,6 +36,9 @@ Installation steps are in the top-level [README](../README.md).
   extensions, TX-02, WezTerm tabs, the Serein patch, the idle-static fix). On 2026-11-09 the running
   system was exactly the working tree's build. The idle-static fix still needs a **reboot** for its
   kernel-module half (`power_save` is still 10); the WirePlumber half is live.
+- **Not switched to yet: the Windows settings sweep** (mpv, plex-mpv-shim, OBS plugins, Chromium
+  extensions, RGB colors). Builds; needs `nh os switch`. Its hand steps for plex-mpv-shim, Pear Desktop
+  and Claude Code are done; Prism is left ([OPERATIONS.md](OPERATIONS.md#settings-copied-from-windows-by-hand)).
 - **Open: audio routing doesn't work.** As of 2026-11-09 Olivia can't get the routing she wants out of
   the Game/Music/Chat sinks, EasyEffects, linuxmeeter (since uninstalled) and qpwgraph together. Observed state and next
   steps: [VERIFICATION.md](VERIFICATION.md#audio-routing-not-working-2026-11-09).
@@ -75,6 +78,7 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-09 | TX-02 font for WezTerm and Obsidian: files in gitignored `dotfiles/fonts/`, linked into `~/.local/share/fonts` | `default.nix`, `dotfiles/wezterm/config/fonts.lua` |
 | 2026-11-09 | WezTerm: fancy tab bar on, with a close × on each tab (`show_close_tab_button_in_tabs = true`) and the title bar kept dark when unfocused; tab titles lost their rounded ends and own colours so the fancy bar draws the tabs | `dotfiles/wezterm/config/appearance.lua`, `events/tab-title.lua` |
 | 2026-11-09 | Virtual desktops: 3 rows (one column) instead of 1, as changed in the KDE GUI, so the next switch keeps it | `plasma.nix` |
+| 2026-11-09 | Windows settings sweep: mpv and plex-mpv-shim configs, OBS plugins, Chromium extensions, OpenRGB lowpink colors declared; logins and app state left as hand steps | `mpv.nix`, `apps.nix`, `services.nix`, [VERIFICATION.md](VERIFICATION.md#windows-settings-sweep-2026-11-09) |
 
 ## Conventions
 

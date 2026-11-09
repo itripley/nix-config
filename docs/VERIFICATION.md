@@ -331,6 +331,44 @@ local database until then); after that Olivia confirmed the vault, plugins and s
   which is the read-only store.
 - Switched to on 2026-11-09: `~/.vscode/extensions` holds home-manager's links to the declared set.
 
+## Windows settings sweep (2026-11-09)
+
+Read-only pass over the Windows profile (`AppData`, `scoop/persist`, dotfiles, `Documents`) for apps
+that run natively here, compared against `~` on NixOS. The app list itself was already complete
+(MIGRATION.md); this looked for settings, plugins and extensions.
+
+- **Declared:** mpv's `mpv.conf` + `input.conf`; plex-mpv-shim's `mpv.conf` (on NixOS it was an empty
+  file); OBS plugins Background Removal and Scale to Sound (Image Reaction isn't in nixpkgs);
+  Chromium extensions Bitwarden and Claude (from Helium); the OpenRGB **lowpink** colors as an
+  `openrgb-colors` oneshot (MODULES `services.nix`, `mpv.nix`, `apps.nix`).
+- **OpenRGB:** the Windows profile's controller locations are `I2C: PawnIO SMBus PIIX4 0, address
+  0x18/0x1A` and `HID: \\?\HID#VID_…` paths; here `openrgb --nodetect --list-devices` shows
+  `I2C: SMBus PIIX4 adapter port 0 at 0b00 (/dev/i2c-8)` and `/dev/hidraw0`/`hidraw3`. Same four
+  devices (2× Corsair DDR5, B650M-K, Basilisk), same serials. Without `--nodetect` the CLI listed
+  each device twice (its own detection plus the server's).
+- **Hand steps** (logins or app-owned state, [OPERATIONS.md](OPERATIONS.md#settings-copied-from-windows-by-hand)).
+  Done on 2026-11-09, with neither app running:
+  - plex-mpv-shim `conf.json`: `fullscreen` false, `subtitle_size` 75, `transcode_kbps` 20000,
+    `shader_pack_subtype` "hq". Previous file kept as `conf.json.bak-2026-11-09`.
+  - Pear Desktop `config.json` copied, mode 600 (5 plugins enabled + Last.fm). It has no Windows
+    paths in it.
+  - Claude Code: `claude plugin marketplace add cloudflare/skills` +
+    `claude plugin install cloudflare@cloudflare` (1.0.4, user scope, enabled); `enabledPlugins` and
+    `extraKnownMarketplaces` in `~/.claude/settings.json` now match Windows.
+
+  Still to do: Prism instances (~16 GiB), optionally Blender's `userpref.blend`.
+- **Checked, nothing to carry:** Sublime Text (no packages, empty `Packages/User`), Legcord (stock
+  Equicord; its plugin settings are in Local Storage and sync through Equicord's cloud), Godot
+  (default editor settings, no export templates or themes), qBittorrent (no categories, 3 torrents),
+  Ollama (no models), Claude Desktop (no MCP servers), PowerShell profile (empty), user fonts (none
+  beyond TX-02), `.gitconfig` (only the email and Windows-only entries).
+- **Still installed on Windows but not in MIGRATION.md:** Moosync, Houdoku, ImageGlass, Wabbajack;
+  plus a `Calibre Library` folder (174 authors) with no Calibre install found. Not decided.
+- `nix flake check` passes; the system builds. `nvd diff` against the running system (which also
+  includes the not-yet-switched SilentSDDM work): adds `wrapped-obs-studio` 32.1.2,
+  `obs-backgroundremoval` 1.3.7, `obs-scale-to-sound` 1.2.5, the mpv and Chromium config files, the
+  `openrgb-colors` unit, and Qt/GStreamer/ODBC dev outputs; +178.7 MiB in total.
+
 ## Still to check by hand
 
 | Area | How |
@@ -347,6 +385,11 @@ local database until then); after that Olivia confirmed the vault, plugins and s
 | Obsidian, Windows side | On Windows, `git status` in the vault shouldn't show a flood of notes changed by the Linux side (update-time-on-edit). |
 | VS Code extensions | *Extensions* view lists all 43, none flagged. Open a `.py` file (Pylance + interpreter), a C# project (C# Dev Kit; may need `dotnet-sdk` in `dev.nix`), and the Claude Code panel. If debugpy's *attach to process* needs `gdb`, add `gdb` to `dev.nix`. |
 | TX-02 font | ✅ `fc-list` lists 30 TX-02 files. WezTerm (restart it) shows TX-02 with Nerd icons intact in the tab bar and prompt; Obsidian's interface and notes use it. |
+| RGB colors (after the switch) | `systemctl status openrgb-colors` succeeded; RAM and board LEDs off, the Basilisk dusty pink. If it ran before the server had all devices, `journalctl -u openrgb-colors` shows which call failed. |
+| mpv | Play a file: Japanese audio and English subs are picked, the mouse wheel changes volume, `s` saves a webp to `~/Pictures/mpv-screenshots`, `b` toggles deband. |
+| plex-mpv-shim | After the `conf.json` step: play from Plex, check subs are the Windows size and HDR content tone-maps (`target-peak=200`). |
+| OBS plugins | Add a source: *Background Removal* and *Scale to Sound* appear in its filters. |
+| Chromium extensions | Start Chromium: Bitwarden and Claude install from the Web Store within a minute. |
 | `github-artlivia` deploy key | Re-add the public key on GitHub, then `git ls-remote git@github-artlivia:itripley/artlivia.git`. |
 
 After any edit, build before switching: `nh os build` (or `nh os switch`, which stops on errors

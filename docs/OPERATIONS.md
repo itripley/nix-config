@@ -35,6 +35,8 @@ git add -A && git commit -m "…"  # record it
 | Format / lint | `nix fmt`; `nix flake check`. `nix develop` has nixfmt-tree, statix, deadnix, nvd and nil. |
 | Build a repo package alone | `nix build .#warp-cloudflare-gui` (or `obsidian-plugins`, `vscode-marketplace`; the packages in `pkgs/`). |
 | Add / update an Obsidian plugin | See [Obsidian](#obsidian). |
+| Change the RGB colors | Edit the `openrgb` calls in `openrgb-colors` (`services.nix`); colors set in the OpenRGB GUI only last until the next boot. |
+| Change mpv / plex-mpv-shim settings | `programs.mpv` in `mpv.nix` / `home/olivia/plex-mpv-shim/mpv.conf`. |
 | Add / update a VS Code extension | Add or change `{publisher, name, version, hash}` in `pkgs/vscode-marketplace/sources.json` (`"arch": "linux-x64"` if the marketplace lists per-platform builds). Get the hash by leaving it as `""`, running `nix build .#vscode-marketplace`, and copying the `got:` value. Extensions installed from inside VS Code still work but aren't kept on a fresh install. |
 | Play Minecraft 1.16 or older | Add `jdk17` / `jdk8` to the Prism Launcher `jdks` list in `apps.nix`. |
 | Free disk space | Automatic (`programs.nh.clean`: keeps 10 generations / 14 days). Manual: `nh clean all`. |
@@ -134,6 +136,51 @@ the seed won't overwrite it: close Obsidian, delete
 | Add a plugin | Look up its repo in [community-plugins.json](https://github.com/obsidianmd/obsidian-releases/blob/master/community-plugins.json), add an entry to `pkgs/obsidian-plugins/sources.json` with the release files' URLs and hashes (`nix store prefetch-file <url>` prints the hash), then add `plugins.<id>` to `communityPlugins`. |
 | Update a plugin | Change its `version`, the tag in its URLs, and the hashes in `sources.json`; the API asset URL has a new id per release (`gh api repos/<repo>/releases/tags/<version>`). `nix build .#obsidian-plugins`. |
 | Turn on the git backup here too | Clone the vault's repo into the vault folder, then drop the `disabled` around `obsidian-git`. Two machines committing the same LiveSync'd files will conflict, which is why it's off. |
+
+## Settings copied from Windows by hand
+
+These hold logins or are app state the app rewrites, so they aren't in the config. Found in the
+2026-11-09 sweep of the Windows profile ([VERIFICATION.md](VERIFICATION.md#windows-settings-sweep-2026-11-09)).
+`w=/mnt/windows/Users/olivi` below.
+
+**plex-mpv-shim** (after the `nh os switch` that brings in its `mpv.conf`). Quit the shim from its
+tray icon first so it can't write over the edit, then set the four values that differ from Windows:
+
+```sh
+c=~/.config/plex-mpv-shim/conf.json
+jq '.fullscreen = false | .subtitle_size = 75 | .transcode_kbps = 20000 | .shader_pack_subtype = "hq"' "$c" > "$c.new" && mv "$c.new" "$c"
+```
+
+The switch moves the old (empty) `mpv.conf` aside as `mpv.conf.hm-backup`, which can be deleted.
+
+**Pear Desktop**, before its first start. The config holds the plugin settings (enabled: video-toggle,
+do-not-track, downloader, scrobbler, synced-lyrics; five more configured but off) and the Last.fm
+session, so keep it private:
+
+```sh
+install -D -m600 "$w/AppData/Roaming/YouTube Music/config.json" ~/.config/"YouTube Music"/config.json
+```
+
+**Claude Code**: the Cloudflare skills plugin was installed on Windows. In `claude`:
+`/plugin marketplace add cloudflare/skills`, then `/plugin install cloudflare@cloudflare`.
+
+**Prism Launcher** (~16 GiB): close Prism, then copy the instances and clear the three that point at
+a Windows Java:
+
+```sh
+mkdir -p ~/.local/share/PrismLauncher/instances
+cp -r "$w/AppData/Roaming/PrismLauncher/instances/." ~/.local/share/PrismLauncher/instances/
+sed -i -e '/^JavaPath=/d' -e 's/^OverrideJavaLocation=true/OverrideJavaLocation=false/' \
+  ~/.local/share/PrismLauncher/instances/*/instance.cfg
+```
+
+Accounts aren't copied; log in again in Prism. `ElyPrismLauncher` (a fork for Ely.by accounts) has
+its own `26.3` and `Fabulously Optimized` instances; copy those under different names if they
+differ from the Prism ones.
+
+**Blender** (optional): `userpref.blend` is in `$w/scoop/persist/blender/portable/config/`.
+Windows runs 5.2 and nixpkgs has 5.1, so copying it to `~/.config/blender/5.1/config/` loads
+preferences from a newer version; skip it unless something specific is missing.
 
 ## Booting Windows
 

@@ -22,6 +22,8 @@ modules/nixos/                    system level (root, services, hardware)
   boot.nix  amd.nix  desktop.nix  audio.nix  networking.nix  storage.nix  gaming.nix  services.nix
 home/olivia/                      user level (home-manager)
   default.nix  apps.nix  dev.nix  firefox.nix  plasma.nix  flatpak.nix  warp-gui.nix  obsidian.nix
+  mpv.nix
+  plex-mpv-shim/mpv.conf          the shim's mpv settings from Windows (mpv.nix)
   obsidian/                       Obsidian seed settings and CSS snippets (obsidian.nix)
   themes/                         Plasma theme files from Fedora (art/ is gitignored)
   dotfiles/                       wezterm/ nvim/ fastfetch/ firefox/userChrome.css
@@ -203,11 +205,12 @@ off. Used for one-time imports (SSH keys, wallpapers, Firefox profile).
 | Docker | Replaces Docker Desktop. The `docker` group allows use without sudo. |
 | **Ollama with `ollama-rocm`** | Local LLMs on the 7800 XT (gfx1101 is a supported ROCm target, no override needed). Was a startup app on Windows. |
 | OpenRGB (`motherboard = "amd"`) | Same RGB control. Loads the AMD SMBus driver (Windows needed PawnIO for this). |
+| `openrgb-colors` oneshot | Re-applies the Windows **lowpink** profile at boot: RAM and board black (off) in Direct mode, the Basilisk `#B29393`. The profile file can't be used through `startupProfile`: OpenRGB only applies a saved controller when its location matches, and the Windows locations are PawnIO SMBus and `\\?\HID#…` paths (Linux: `/dev/i2c-8`, `/dev/hidraw*`, and hidraw numbers can change between boots). Colors decoded from `lowpink.json` (OpenRGB stores `0x00BBGGRR`). The second Basilisk entry in the profile (`#644B5F`, "Unknown Variant") is a second HID interface of the same mouse that Linux doesn't list. `--nodetect` makes each call a client of the running server; without it, the CLI also probes the hardware itself and every device shows up twice. Waits up to 30 s for the server to list the Basilisk. Colors changed in the OpenRGB GUI last until the next boot. |
 | Avahi + nss-mdns | `.local` name resolution and service discovery (replaces Apple Bonjour). |
 
 ## `home/olivia/default.nix`
 
-- Imports the other HM modules; `home.stateVersion = "26.05"` (never bump, same as the system one).
+- Imports the other HM modules (including `mpv.nix`); `home.stateVersion = "26.05"` (never bump, same as the system one).
 - **`xdg.configFile` live links** for `wezterm`, `nvim`, `fastfetch` → `~/nixos-config/home/olivia/dotfiles/…` (DESIGN §6).
 - **`xdg.dataFile."fonts/nixos-config"`** → live link to `home/olivia/dotfiles/fonts/` (gitignored, like the wallpapers), which fontconfig reads as part of `~/.local/share/fonts`. It holds **TX-02** (30 styles), the font for WezTerm (`dotfiles/wezterm/config/fonts.lua`, with JetBrainsMono Nerd Font as fallback for icons) and Obsidian (`obsidian.nix`). The font is licensed, so the files are copied in by hand and never committed; a new font dropped in that folder works without a rebuild.
   The checkout path comes from `osConfig.programs.nh.flake` (configuration.nix); `plasma.nix` uses it too.
@@ -236,6 +239,15 @@ Notable choices:
   2026-11-09, never committed. See [VERIFICATION.md](VERIFICATION.md#app-changes-2026-11-09).
 - No `netbird-ui` here: the NetBird module provides it (wrapped for the daemon socket).
 - No `obsidian` here: `obsidian.nix` installs it through `programs.obsidian`.
+- No `mpv` here: `mpv.nix` installs it through `programs.mpv`.
+- `programs.chromium` with two extensions, the ones Helium had on Windows: Bitwarden
+  (`nngceckbapebfimnlniiiahkandclblb`) and Claude (`fcoeoabgfenejglbffodgkkbkcdhcgfn`). Home-manager
+  writes `~/.config/chromium/External Extensions/<id>.json`; Chromium installs them from the Web Store
+  on its next start and keeps them updated. Chromium on Windows had none.
+- `programs.obs-studio` with `obs-backgroundremoval` and `obs-scale-to-sound`, two of the three
+  plugins enabled on Windows (`plugin_manager/modules.json`). The third, Image Reaction
+  (`libimage-reaction`), isn't in nixpkgs. The Windows scene collection isn't copied: its sources
+  are Windows-only types (`window_capture`, `monitor_capture`, `dshow_input`).
 - `inputs.serein.packages.<system>.default`: Serein, a native Rust Discord client, from its own flake
   (DESIGN §4). Compiles locally on first build and on each `nix flake update serein`.
   Its `postPatch` lowers the hard-coded minimum window size (`MIN_WINDOW_SIZE` in
@@ -253,6 +265,27 @@ Notable choices:
 | `programs.vscode`, `package = vscode.fhs` | The FHS variant lets marketplace extensions with native binaries work (C#, C# Dev Kit, Python, debugpy, Claude Code ship Linux binaries). **All 42 extensions from Windows** plus nix-ide are declared, from `pkgs/vscode-marketplace` at the Windows versions; settings still come through Settings Sync (`settings.json` isn't managed). The extensions dir stays mutable (home-manager's default), so an extension installed or auto-updated from VS Code works alongside the declared ones; a fresh install always gets the declared set. Custom CSS and JS (`be5invis.vscode-custom-css`) and Custom UI Font patch VS Code's own `workbench.html` / `workbench.desktop.main.css`, which are read-only in the store, so they're installed but can't apply. |
 | `wezterm` (plain package) | The terminal. Not `programs.wezterm`, which would generate `wezterm.lua` into the live-linked config folder. Font: TX-02 (`default.nix`), with JetBrainsMono Nerd Font from `desktop.nix` as the icon fallback. |
 | Dev tools | Node, Python + uv, Godot 4 + Mono (brings its own .NET 8 SDK, so no separate `dotnet-sdk`), docker-compose, tmux, mc, fastfetch, jq, gh; from Fedora: Go, rustup (cargo), lazydocker. Add `dotnet-sdk` back if you need the `dotnet` CLI outside Godot (e.g. VS Code's C# extension loading a project). |
+
+## `home/olivia/mpv.nix`
+
+mpv and plex-mpv-shim settings, carried over from Windows (before this NixOS had neither).
+
+- **`programs.mpv`**: the Windows `mpv.conf` (`%APPDATA%\mpv\portable_config`, from the mpv.rocks
+  installer) and `input.conf` (wheel = volume ±2). `high-quality` goes in `defaultProfiles` because
+  home-manager sorts `config` keys alphabetically: as a plain `profile=` key it would land after
+  `deband` and `dscale` and override them. Left out: `priority` and `taskbar-progress` (Windows only),
+  `gpu-api`/`gpu-context=auto` (the default), the FSRCNNX and SSimDownscaler `glsl-shader` lines and
+  `gpu-shader-cache-dir` (they point at `~/shaders`, which doesn't exist on Windows either, so they
+  never loaded), and `sub-font='Netflix Sans Medium'` (installed on neither system, so subtitles fall
+  back to the default font as before). The commented-out sections (nnedi3, HDR, interpolation,
+  Mini-Encode profiles) aren't carried. `osd-font = "Verdana"` comes from `corefonts`. The WEB-DL
+  auto-profile (deband for HatSubs/SubsPlease/HorribleSubs/Erai-raws) is kept.
+- **`plex-mpv-shim/mpv.conf`**: the shim's own mpv settings from Windows, copied as a file with LF
+  line endings (gpu-next on Vulkan, HDR→SDR tone mapping for a 200-nit display, deband, `anime` /
+  `uhd` / `sd` auto-profiles). The `anime` profile's ArtCNN shader line is dropped: the Windows
+  `shaders/` folder is empty. The shim's own shader packs (`shader_pack_*` in `conf.json`) are separate.
+- The shim's `conf.json` stays unmanaged: it holds the Plex login and the shim rewrites it. The four
+  values that differ from Windows are a hand step ([OPERATIONS.md](OPERATIONS.md#settings-copied-from-windows-by-hand)).
 
 ## `home/olivia/firefox.nix`
 

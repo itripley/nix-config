@@ -10,7 +10,7 @@ Legend: **same** = the same app runs natively · **alt** = Linux replacement · 
 | Windows | NixOS | |
 |---|---|---|
 | Firefox | same | whole profile migrated, see [FIREFOX.md](FIREFOX.md) |
-| Chromium | same | Zen was installed from its flake until 2026-11-09 |
+| Chromium | same | Bitwarden + Claude extensions declared (Helium had them). Zen was installed from its flake until 2026-11-09 |
 | Helium | AppImage | not packaged; download the AppImage and run it directly |
 | Helium PWAs (Immich, Kavita, Open WebUI, Paper, TweetDeck, FileBrowser Quantum) | reinstall | open each site and "Install app" from Chromium |
 | Legcord | same | Signal, Vesktop, Element, Cinny and Dissent removed 2026-11-09 |
@@ -32,7 +32,7 @@ history, open tabs) moves over. See [FIREFOX.md](FIREFOX.md) for what, how and w
 
 | Windows | NixOS | |
 |---|---|---|
-| Blender, OBS | same | Blender is the HIP build for the 7800 XT. GIMP, Kdenlive, Audacity removed 2026-11-09 |
+| Blender, OBS | same | Blender is the HIP build for the 7800 XT. OBS has Background Removal + Scale to Sound (Image Reaction isn't packaged); scenes need rebuilding with Linux sources. GIMP, Kdenlive, Audacity removed 2026-11-09 |
 | DaVinci Resolve | same | ⚠ free Resolve on Linux can't decode H.264/H.265/AAC — transcode with ffmpeg (DNxHR/ProRes + PCM) |
 | Photoshop, Clip Studio Paint | alt: PhotoCraft | from the `artcraft` flake (DESIGN §4), early alpha. Krita and GIMP removed 2026-11-09 |
 | Premiere Pro, Media Encoder, Avid Media Composer | alt: Resolve / ffmpeg, FilmCraft | FilmCraft from the `artcraft` flake (DESIGN §4), early alpha |
@@ -56,11 +56,11 @@ history, open tabs) moves over. See [FIREFOX.md](FIREFOX.md) for what, how and w
 
 | Windows | NixOS | |
 |---|---|---|
-| mpv, MPC-QT | same | |
+| mpv, MPC-QT | same | mpv's Windows `mpv.conf` and `input.conf` declared (MODULES `mpv.nix`) |
 | MPC-BE, madVR, LAV Filters | alt: mpv | |
-| Plex, Plexamp, plex-mpv-shim | same | firewall opened for shim (3000/tcp, GDM 32410–32414/udp); set `allow_http` |
+| Plex, Plexamp, plex-mpv-shim | same | firewall opened for shim (3000/tcp, GDM 32410–32414/udp); set `allow_http`. Shim's `mpv.conf` declared; 4 `conf.json` values by hand (OPERATIONS) |
 | TIDAL | alt: tidal-hifi | |
-| Pear Desktop | same | Feishin removed 2026-11-09 |
+| Pear Desktop | same | copy its `config.json` (plugins, Last.fm) by hand (OPERATIONS). Feishin removed 2026-11-09 |
 | Stremio, JDownloader 2 | none | were Flatpaks in `home/olivia/flatpak.nix`; removed 2026-11-09 |
 | qBittorrent, ffmpeg | same | get_iplayer removed 2026-11-09 |
 | Seanime | AppImage | |
@@ -73,7 +73,7 @@ history, open tabs) moves over. See [FIREFOX.md](FIREFOX.md) for what, how and w
 | Steam | same | Proton + Proton-GE, gamescope session, gamemode (MangoHud removed 2026-11-09) |
 | Epic, GOG Galaxy, Amazon Games | alt: Heroic | |
 | Ubisoft Connect, EA app | alt: Lutris | |
-| Prism Launcher, Tabletop Simulator | same | TTS has a native Steam build |
+| Prism Launcher, Tabletop Simulator | same | Prism instances (~16 GiB) copied by hand (OPERATIONS). TTS has a native Steam build |
 | Games | Proton | check each on protondb.com. Games with kernel-level anti-cheat (e.g. some EA/Ubisoft multiplayer titles) may need Windows. |
 | DS2 Lighting Engine mod | Proton (untested) | DLL-injection mods often work under Proton with a `WINEDLLOVERRIDES` launch option; untested for this one |
 
@@ -94,7 +94,7 @@ history, open tabs) moves over. See [FIREFOX.md](FIREFOX.md) for what, how and w
 | 7-Zip, NanaZip | alt: 7zz + Ark | |
 | Twinkle Tray | alt: Plasma brightness via DDC/CI | `hardware.i2c` enabled |
 | AMD Software | alt: LACT | |
-| OpenRGB | same | system service |
+| OpenRGB | same | system service; the lowpink colors applied at boot by `openrgb-colors` |
 | KDE Connect, LocalSend, croc | same | |
 | ActivityWatch | none | removed 2026-11-09 |
 | gsudo | sudo | |
@@ -124,3 +124,9 @@ Clip Studio Paint, Cavalry, Scrivener, Eagle, Voicemeeter, iZotope Trash, FakinT
 Blackmagic RAW/Control Panels, PACE/Sentinel license services, 8th Wall, DCP-o-matic,
 File Juggler, Ev Paneli, OpenClaw Companion, Tern, BlockSlot, Wintoys, Dolby Atmos/DTS:X/Realtek
 audio consoles, NVIDIA tools (no NVIDIA GPU in this machine), Raycast, Apple Software Update.
+
+## Found later, not decided (2026-11-09)
+
+Still installed on Windows but missing from the original inventory: Moosync, Houdoku, ImageGlass,
+Wabbajack. There's also a `Calibre Library` folder (174 authors) in `C:\Users\olivi`, with no
+Calibre install found.
