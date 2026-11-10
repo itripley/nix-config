@@ -17,7 +17,7 @@ git add -A && git commit -m "…"  # record it
   every push, and on macOS for the Macs.
 - From Windows, check edits before rebooting into NixOS: `pwsh -File scripts\verify.ps1`.
 - **The MacBook** has its own loop: `sudo darwin-rebuild switch --flake ~/nixos-config#macbook-olivia`.
-  Its commands are in the README's [macOS](../README.md#macos) section, and its troubleshooting
+  Its commands are in the README's [Everyday use](../README.md#everyday-use), and its troubleshooting
   [below](#macbook). A change in `home/shared/` affects both machines, so switch both.
 
 ## Working from two machines
@@ -60,8 +60,8 @@ work first: the script clones from GitHub.
 Afterwards:
 - **Commit and push the new `hosts/<name>/`** from the new machine (`gh auth login` first). The
   script stages it but never commits.
-- **The hand steps** still apply: SSH keys, the TX-02 font, the gitignored art, logins (README,
-  "After first boot", and the Mac's "Bootstrap a fresh Mac" step 6).
+- **The hand steps** still apply: SSH keys, the TX-02 font, the gitignored art, logins (the
+  README's [After setting up](../README.md#after-setting-up)).
 - **Login-screen art on a new PC:** copy `themes/art/sddm/` in, uncomment `login-art.nix` in the
   host's `configuration.nix`, `nix store add-file` both files, then switch.
 - **GUI apps on another distro** need one `sudo non-nixos-gpu-setup`, which the script offers.
@@ -73,8 +73,8 @@ Afterwards:
 - **Later switches** are the usual ones: `nh os switch` on NixOS (WSL included), `sudo
   darwin-rebuild switch --flake ~/nixos-config` on a Mac, `home-manager switch …` elsewhere.
 
-Without the script, the manual steps are the README's [Install](../README.md#install) (PC) and
-[Bootstrap a fresh Mac](../README.md#bootstrap-a-fresh-mac). For a new PC, also write
+Without the script, the manual steps are the README's [Manual install](../README.md#manual-install)
+(the desktop from the USB, a Mac, another distro, Windows). For a new PC, also write
 `hosts/<name>/configuration.nix` by hand (copy `hosts/desktop-olivia/configuration.nix`, swap
 `./disko.nix` for `../../modules/nixos/disk-layout.nix` plus `disko.devices.disk.main.device`,
 drop `amd.nix`, `login-art.nix` and `./machine.nix` as needed).
