@@ -31,13 +31,16 @@ just a CLI environment).
 | `compress=zstd,noatime` | Compression saves space and writes; `noatime` avoids a write on every read. |
 | 16 GB swapfile on its own subvolume + **zram** | btrfs swapfiles must not be copy-on-write or snapshotted; a dedicated subvolume (which disko sets up) satisfies that. zram absorbs most swapping in compressed RAM first. |
 
+New PCs get the same layout from `modules/nixos/disk-layout.nix`, with only the disk id set per
+host (§12).
+
 ## 3. Boot
 
 | Choice | Why |
 |---|---|
 | **systemd-boot** | Simple and well supported by NixOS; Secure Boot is off, so no signing tools (lanzaboote) are needed. |
 | Windows via the **ASUS F8 boot menu** | systemd-boot only auto-detects Windows on its *own* ESP. Adding an entry for the other disk's ESP requires the EFI shell device handle, which can only be read on the real hardware. The option (`boot.loader.systemd-boot.windows`) is documented in the README for later. |
-| `time.hardwareClockInLocalTime = true` | Windows keeps the hardware clock in local time; Linux defaults to UTC. Without this the clock is an hour off after every switch (in summer). |
+| `time.hardwareClockInLocalTime = true` (desktop only, `hosts/desktop-olivia/machine.nix`) | Windows keeps the hardware clock in local time; Linux defaults to UTC. Without this the clock is an hour off after every switch (in summer). Other machines keep UTC. |
 | `linuxPackages_latest` | Newest fixes for RDNA3 graphics and Zen 4. |
 
 ## 4. Flake inputs and pinning (`flake.nix`, `flake.lock`)
@@ -57,6 +60,7 @@ just a CLI environment).
 | `nix-darwin` (nix-darwin-26.05) | The Mac's system config (§11). Its `nixpkgs` follows `nixpkgs-darwin`, the pairing its README prescribes. |
 | `vicinae` flake ([vicinaehq/vicinae](https://github.com/vicinaehq/vicinae)) | The launcher's own flake, set up per [its NixOS guide](https://docs.vicinae.com/nixos). nixpkgs has the package but no NixOS module: without upstream's module the input server lacks `cap_dac_override` (a `security.wrappers` entry), so paste-to-window and snippet expansion fall back to copying. Its Home Manager module replaces home-manager's `programs.vicinae`. Its `nixpkgs` deliberately does **not** follow ours, so builds match `vicinae.cachix.org` (added to `nix.settings`); the cost is its own nixpkgs and Qt in the closure. `nix flake update vicinae` picks up new releases. |
 
+| `nixos-wsl` flake ([nix-community/NixOS-WSL](https://github.com/nix-community/NixOS-WSL), `main`) | NixOS inside WSL, for Windows machines (`hosts/wsl`, §12). The community project the NixOS wiki points to; its module provides the WSL integration (boot, `/etc/wsl.conf`, the Windows GPU driver, Start-menu launchers). `nixpkgs` follows ours. Added 2026-11-10 at `e45b24b` (2026-10-26). `nix flake update nixos-wsl` moves it. |
 | `silent-sddm` flake ([uiriansan/SilentSDDM](https://github.com/uiriansan/SilentSDDM)) | The SDDM theme Fedora used for its login screen; not in nixpkgs. Upstream's own NixOS module (`programs.silentSDDM`) builds the theme against our `pkgs` with a preset, extra backgrounds and setting overrides, and wires up SDDM. Its `nixpkgs` follows ours only so the lock has no extra copy. Pinned at `d179078` (2026-11-04), 86 commits past Fedora's `e334d92`: auto-scaling, a Qt 6.12 video-background fix, the module itself. Every setting Fedora changed still exists there. `nix flake update silent-sddm` moves it. |
 
 Every input except nix-flatpak and Vicinae follows our `nixpkgs` (Serein and Claude Desktop follow
@@ -255,3 +259,73 @@ x86_64-linux system without building it.
 - **Touch ID taken over by hash.** nix-darwin refuses to overwrite an unknown `/etc` file; the old
   `sudo_local` was declared with its exact `knownSha256Hashes`, so the switch moved it aside safely.
   `pam_reattach` makes Touch ID work in tmux.
+
+## 12. Any machine: a folder per host, three layers, one bootstrap script
+
+**Decision (2026-11-10):** the repo deploys to any new machine. Each machine is a folder in
+`hosts/`, which `flake.nix` picks up without being edited: a folder with
+`darwin-configuration.nix` is a Mac, one with `configuration.nix` is NixOS. What a machine gets
+depends on how much of it the repo can manage:
+
+| Machine | Output | What it gets |
+|---|---|---|
+| x86_64 PC with NixOS | `nixosConfigurations.<name>` | everything: Plasma, the apps, gaming, services |
+| Windows | `nixosConfigurations.wsl` (NixOS-WSL) | NixOS inside WSL: the CLI layer and the Linux apps through WSLg |
+| Apple Silicon Mac | `darwinConfigurations.<name>` | nix-darwin: Homebrew apps, macOS defaults, Touch ID |
+| any other Linux, a WSL distro, a Mac that can't be taken over | `homeConfigurations."<user>@<system>"` | standalone home-manager: CLI tools and dotfiles, plus the GUI apps on x86_64 Linux |
+
+`scripts/bootstrap.sh` (`bootstrap.ps1` on Windows) works out which case it's in and runs the
+steps, including writing the new host's folder.
+
+**Why:**
+- **Per-machine files only where the hardware needs them.** A NixOS PC needs its own
+  `hardware-configuration.nix` and disk id; WSL needs neither, so one `hosts/wsl` serves every
+  Windows machine. The script writes the per-machine files, so adding a machine needs no edit to
+  `flake.nix`. The file-name rule is why the MacBook's host file became `darwin-configuration.nix`.
+- **What only the desktop has left the shared modules** for `hosts/desktop-olivia/machine.nix`:
+  the Windows NVMe mount, the local-time RTC (dual boot), OpenRGB and the lowpink colours. The user,
+  Nix settings, nh and nix-ld moved from the desktop's `configuration.nix` to `common.nix`, which
+  every NixOS host imports. GPU support is a module a host imports: `amd.nix` (now also ROCm
+  Ollama; elsewhere Ollama runs on the CPU) or `nvidia.nix`. The script picks one from the PCI
+  vendor ids.
+- **The login-screen art is opt-in** (`login-art.nix`): a fresh checkout doesn't have the
+  gitignored files, and `requireFile` would fail the build. Without it the `rei` preset shows its
+  own video background.
+- **New PCs use the desktop's disk layout** (`disk-layout.nix`) with only the disk id set per
+  host. The mounts go by partition label, so the installed system doesn't depend on the device
+  path. Adopting an already-installed NixOS keeps its filesystems (the hardware config is generated
+  with them), and `boot.nix` only scrubs btrfs where there is btrfs.
+- **One Linux app layer** (`home/linux/`): apps, dev tools, Firefox, Obsidian, mpv, EasyEffects.
+  The desktop, WSL and other distros import the same list, so an app added once reaches all of
+  them. Plasma, Flatpak and the WARP tray need NixOS underneath and stay in `home/olivia/`. Adding
+  the layer only reordered the desktop's package lists (nix-diff: same contents).
+- **GUI apps on other distros through home-manager's `targets.genericLinux.gpu`**, not nixGL. It
+  installs Mesa at `/run/opengl-driver` with a single `sudo non-nixos-gpu-setup`, so apps run
+  unwrapped, as on NixOS, and no extra input is needed. NVIDIA's proprietary driver there needs
+  its exact version and hash per machine (`targets.genericLinux.gpu.nvidia`); that isn't
+  automated. The GUI layer is x86_64-only, because so are many of its apps (Resolve, Steam, Plex,
+  Termius, Claude Desktop); ARM Linux gets `home/shared/`.
+- **Standalone outputs are per user and system.** A flake can't read `$USER` without `--impure`,
+  so the usernames are listed (`standaloneUsers`). A new one is a single-word addition.
+- **NixOS-WSL for Windows** (the `nixos-wsl` input): no per-machine files, and it's the same NixOS
+  module system, so `common.nix` and `home/linux/` apply unchanged. The GPU goes through the
+  Windows driver (`wsl.useWindowsDriver`). §1's reason against it still holds for the desktop,
+  which has a real Linux disk; this is for Windows machines that don't.
+- **The installer path stops twice before wiping.** The disk has to be typed by name, and then
+  disko asks too. The whole system is evaluated before anything is touched, and a hostname that's
+  already in `hosts/` reinstalls that host with its own disk settings.
+
+**Rejected:**
+- One generic NixOS host for every PC (all-hardware initrd, no per-machine files): it can't adopt
+  an existing install, every PC would share a hostname, and nothing would record which machines
+  exist.
+- nixos-facter instead of `nixos-generate-config`: one more tool on the installer for a few
+  auto-detected settings. The generated file is what the desktop already uses.
+- `disko-install`: it builds in the installer's RAM-backed store, too small for a 40 GiB system.
+  `nixos-install` builds straight into the target (`--store /mnt`).
+- nixGL: it wraps every GUI app and needs another input (see above).
+- Intel Macs: nixpkgs 26.05 is the last release for `x86_64-darwin`, supported until the end of
+  2026.
+
+**Limits:** BIOS-only PCs (systemd-boot needs UEFI), hybrid NVIDIA laptops (`hardware.nvidia.prime`
+bus ids by hand), non-x86_64 NixOS PCs, and native Windows apps (Nix doesn't run on Windows).

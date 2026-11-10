@@ -2,6 +2,8 @@
 
 NixOS 26.05 flake for DESKTOP-OLIVIA, dual-booting with the existing Windows 11 install.
 The MacBook (M1) is a second host, `darwinConfigurations.macbook-olivia` (nix-darwin): see [macOS](#macos).
+Any new machine (PC, Mac, Windows through NixOS-WSL, any other Linux) is set up with one script:
+see [New machine](#new-machine).
 Generated from an inventory of the Windows machine (hardware, apps, dotfiles, network setup).
 
 | | |
@@ -13,19 +15,25 @@ Generated from an inventory of the Windows machine (hardware, apps, dotfiles, ne
 | Unraid | `//192.168.1.65/{appdata,downloads,files}` → `/mnt/unraid/*` (automount) |
 
 ```
-flake.nix                      inputs + nixosConfigurations.desktop-olivia + darwinConfigurations.macbook-olivia (+ packages, formatter, checks, devShells)
-hosts/desktop-olivia/          configuration.nix, disko.nix, hardware-configuration.nix (generated at install)
-hosts/macbook-olivia/          configuration.nix: the Mac (nix-darwin): hostname, Nix, Touch ID, fonts
+flake.nix                      inputs; nixos/darwin/homeConfigurations built from hosts/ (+ packages, formatter, checks, devShells)
+hosts/<name>/                  one folder per machine; configuration.nix = NixOS, darwin-configuration.nix = Mac
+hosts/desktop-olivia/          configuration.nix, machine.nix (Windows disk, RTC, RGB), disko.nix, hardware-configuration.nix
+hosts/macbook-olivia/          darwin-configuration.nix: the Mac (nix-darwin): hostname, user
+hosts/wsl/                     NixOS-WSL, for any Windows machine
 overlays/                      build-fixes.nix (upstream build workarounds), packages.nix (adds pkgs/)
 pkgs/                          packages written for this repo (warp-cloudflare-gui, obsidian-plugins, vscode-marketplace)
-modules/nixos/                 boot, amd, desktop, audio, networking, storage, gaming, services
-modules/darwin/                homebrew (casks, brews, App Store), defaults (Dock, Finder, trackpad, …)
-home/shared/                   home-manager modules both machines use: CLI tools, fish, git/ssh, neovim, dotfile links
-home/darwin/                   home-manager for the Mac user (olivi): zsh, Mac CLI tools, git additions
+modules/nixos/                 common (every NixOS machine), boot, desktop, audio, networking, storage, gaming, services;
+                               amd / nvidia (GPU), login-art, disk-layout (new PCs)
+modules/darwin/                common (every Mac), homebrew (casks, brews, App Store), defaults (Dock, Finder, trackpad, …)
+home/shared/                   home-manager modules every machine uses: CLI tools, fish, git/ssh, neovim, dotfile links
+home/linux/                    the apps on any x86_64 Linux (desktop, WSL, other distros)
+home/darwin/                   home-manager for a Mac user: zsh, Mac CLI tools, git additions
 home/olivia/                   home-manager for the desktop: apps, dev (gitFull, vscode, godot), firefox, plasma, flatpak, warp-gui, obsidian, mpv
-home/olivia/dotfiles/          wezterm, nvim (LazyVim), fastfetch (live-linked on both machines), firefox userChrome; fonts/ (gitignored)
+home/olivia/dotfiles/          wezterm, nvim (LazyVim), fastfetch (live-linked on every machine), firefox userChrome; fonts/ (gitignored)
 home/olivia/themes/            Plasma theme from the old Fedora install (artwork in art/, gitignored)
-scripts/                       verify.ps1 (check from Windows), migrate-firefox-profile.sh (run on NixOS)
+home/standalone.nix            standalone home-manager (machines whose OS this repo doesn't manage)
+scripts/                       bootstrap.sh / bootstrap.ps1 (set up a new machine), verify.ps1 (check from Windows),
+                               migrate-firefox-profile.sh (run on NixOS)
 docs/                          full documentation: what, how and why (the Mac: docs/MACOS.md)
 .github/workflows/check.yml    CI: nix flake check on Linux (desktop) and macOS (Mac)
 ```
@@ -44,6 +52,33 @@ docs/                          full documentation: what, how and why (the Mac: d
 | [docs/VERIFICATION.md](docs/VERIFICATION.md) | how it was checked, what broke and was fixed (before and after install), what to check by hand |
 | [docs/MACOS.md](docs/MACOS.md) | the MacBook: inventory, migration steps, what was checked, what stays manual |
 | [docs/OPERATIONS.md](docs/OPERATIONS.md) | day-to-day use, keyboard shortcuts, VPN toggles, theme, troubleshooting |
+
+## New machine
+
+Push any local work first (the script clones from GitHub), then run this on the new machine:
+
+```sh
+# a PC booted from a NixOS USB installer, a PC already running NixOS, a Mac, or any other Linux
+bash <(curl -fsSL https://raw.githubusercontent.com/itripley/nixos-config/main/scripts/bootstrap.sh)
+```
+
+```powershell
+# Windows (PowerShell): WSL + NixOS-WSL, then the same script inside it
+irm https://raw.githubusercontent.com/itripley/nixos-config/main/scripts/bootstrap.ps1 | iex
+```
+
+| Machine | Gets |
+|---|---|
+| x86_64 PC, from the NixOS installer | A new `hosts/<name>/` with its hardware config, the GPU module and the disk you pick (you type its name to confirm the wipe), then the full desktop. A known name, e.g. `desktop-olivia`, is reinstalled as it is. |
+| PC already running NixOS | Switched to its host, or adopted as a new one, keeping its disks |
+| Windows | NixOS in WSL (`hosts/wsl`): CLI tools, dotfiles, the Linux apps through WSLg |
+| Apple Silicon Mac | nix-darwin (a new `hosts/<name>/`, Homebrew + App Store apps, macOS settings), or home-manager only |
+| Any other Linux, WSL distro, locked-down Mac | standalone home-manager: CLI tools, fish, git/ssh, Neovim, dotfiles, plus the GUI apps on x86_64 Linux |
+
+Then commit and push the new `hosts/<name>/` from that machine, and do the hand steps (SSH keys,
+fonts, art, logins: [After first boot](#after-first-boot)). Details and limits:
+[docs/OPERATIONS.md](docs/OPERATIONS.md#setting-up-a-new-machine). The manual steps for this
+desktop follow.
 
 ## Before you start (in Windows)
 
@@ -92,6 +127,12 @@ git add -A
 # 4. SMB credentials for the Unraid shares (not stored in the repo)
 sudo install -m 600 /dev/null /mnt/etc/nixos/smb-secrets
 printf 'username=YOUR_USER\npassword=YOUR_PASS\n' | sudo tee /mnt/etc/nixos/smb-secrets >/dev/null
+
+# 4b. Login-screen art (gitignored; modules/nixos/login-art.nix needs it or the build fails).
+#     Copy rei2.png and avatar.png into home/olivia/themes/art/sddm/ first (themes/README.md),
+#     or comment out login-art.nix in hosts/desktop-olivia/configuration.nix
+nix --experimental-features "nix-command flakes" store add-file home/olivia/themes/art/sddm/rei2.png
+nix --experimental-features "nix-command flakes" store add-file home/olivia/themes/art/sddm/avatar.png
 
 # 5. Install
 # --no-channel-copy: the flake pins nixpkgs, so don't copy the ISO's channel for root
@@ -217,8 +258,9 @@ gone. Or `git revert` the commit and switch. A rollback doesn't undo Homebrew in
 
 ### Bootstrap a fresh Mac
 
-The config expects the macOS account `olivi`, an Apple Silicon Mac, and the checkout at
-`~/nixos-config`.
+`scripts/bootstrap.sh` does steps 1–5 ([New machine](#new-machine)) and writes a host for whatever
+the account is called. By hand, for this MacBook's own config: it expects the macOS account `olivi`,
+an Apple Silicon Mac, and the checkout at `~/nixos-config`.
 
 1. Sign in to the Apple ID and the App Store, then run `xcode-select --install` (git, and clang for
    LazyVim's treesitter).

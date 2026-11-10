@@ -12,8 +12,9 @@ git add -A && git commit -m "…"  # record it
 - `nh os switch` = `nixos-rebuild switch --flake ~/nixos-config#desktop-olivia`, with a readable diff
   of what changed. `nh os boot` applies at next boot instead (safer for kernel/driver changes).
 - **New files must be `git add`ed** before rebuilding, or the flake won't see them.
-- `nix flake check` (≈15 s) evaluates the whole system and lints the repo; `nix fmt` formats it.
-  CI runs the same check on every push.
+- `nix flake check` (≈26 s) evaluates every Linux machine and home (the desktop, WSL, any added
+  PCs, the standalone homes) and lints the repo; `nix fmt` formats it. CI runs the same check on
+  every push, and on macOS for the Macs.
 - From Windows, check edits before rebooting into NixOS: `pwsh -File scripts\verify.ps1`.
 - **The MacBook** has its own loop: `sudo darwin-rebuild switch --flake ~/nixos-config#macbook-olivia`.
   Its commands are in the README's [macOS](../README.md#macos) section, and its troubleshooting
@@ -43,11 +44,46 @@ both, so work done on one has to reach the other through GitHub:
   ```
   Before pushing a branch to this public repo, grep the staged diff for passwords, tokens and keys.
 
+## Setting up a new machine
+
+One script for every kind of machine (DESIGN §12, MODULES `scripts/bootstrap.sh`). Push any local
+work first: the script clones from GitHub.
+
+| The new machine | Run on it | Result |
+|---|---|---|
+| A PC, booted from a NixOS USB installer (UEFI) | `bash <(curl -fsSL https://raw.githubusercontent.com/itripley/nixos-config/main/scripts/bootstrap.sh)` | A new `hosts/<name>/`, the chosen disk wiped and NixOS installed with the full desktop. A known name (`desktop-olivia`) is reinstalled as it is. |
+| A PC that already runs NixOS | the same | Its hostname in `hosts/` → switched to it. Otherwise adopted as a new `hosts/<name>/`, keeping its disks. |
+| Windows | `irm https://raw.githubusercontent.com/itripley/nixos-config/main/scripts/bootstrap.ps1 \| iex` in PowerShell | WSL if missing (admin prompt, reboot, run again), the NixOS-WSL distro, then `hosts/wsl`: user olivia, CLI tools, dotfiles and the Linux apps through WSLg. |
+| An Apple Silicon Mac | the `bash <(curl …)` line, in Terminal | Its `LocalHostName` in `hosts/` → switched to it. Otherwise: a new nix-darwin host (`hosts/<name>/`, with Homebrew and the App Store apps) or home-manager only. Sign in to the App Store first. |
+| Any other Linux (Fedora, Ubuntu, a WSL distro…), or a Mac that can't be taken over | the `bash <(curl …)` line | Nix if missing, then standalone home-manager: CLI tools, fish, git/ssh, Neovim, the dotfiles, and on x86_64 the GUI apps. |
+
+Afterwards:
+- **Commit and push the new `hosts/<name>/`** from the new machine (`gh auth login` first). The
+  script stages it but never commits.
+- **The hand steps** still apply: SSH keys, the TX-02 font, the gitignored art, logins (README,
+  "After first boot", and the Mac's "Bootstrap a fresh Mac" step 6).
+- **Login-screen art on a new PC:** copy `themes/art/sddm/` in, uncomment `login-art.nix` in the
+  host's `configuration.nix`, `nix store add-file` both files, then switch.
+- **GUI apps on another distro** need one `sudo non-nixos-gpu-setup`, which the script offers.
+  NVIDIA's proprietary driver there needs `targets.genericLinux.gpu.nvidia` with the exact driver
+  version and hash; not set up.
+- **A new username** for standalone home-manager: add it to `standaloneUsers` in `flake.nix`,
+  `git add`, run the script again. The outputs are `homeConfigurations."<user>@<system>"`; later
+  switches are `home-manager switch --flake ~/nixos-config#<user>@<system>`.
+- **Later switches** are the usual ones: `nh os switch` on NixOS (WSL included), `sudo
+  darwin-rebuild switch --flake ~/nixos-config` on a Mac, `home-manager switch …` elsewhere.
+
+Without the script, the manual steps are the README's [Install](../README.md#install) (PC) and
+[Bootstrap a fresh Mac](../README.md#bootstrap-a-fresh-mac). For a new PC, also write
+`hosts/<name>/configuration.nix` by hand (copy `hosts/desktop-olivia/configuration.nix`, swap
+`./disko.nix` for `../../modules/nixos/disk-layout.nix` plus `disko.devices.disk.main.device`,
+drop `amd.nix`, `login-art.nix` and `./machine.nix` as needed).
+
 ## Common tasks
 
 | Task | How |
 |---|---|
-| Add/remove an app | Edit `home/olivia/apps.nix` (user apps) or a `modules/nixos/*.nix` file (system services). A CLI tool for both machines goes in `home/shared/cli.nix`. Find names at https://search.nixos.org. |
+| Add/remove an app | Edit `home/olivia/apps.nix` (user apps; through `home/linux` it reaches every Linux machine: the desktop, WSL, other distros) or a `modules/nixos/*.nix` file (system services). A CLI tool for every machine goes in `home/shared/cli.nix`. Find names at https://search.nixos.org. |
 | Try an app without installing | `nix shell nixpkgs#<name>` (gone when the shell closes). |
 | Add a Flatpak | Add its Flathub ID to `home/olivia/flatpak.nix`. |
 | Run an AppImage | `chmod +x Foo.AppImage && ./Foo.AppImage` (binfmt handles it). |
@@ -62,7 +98,9 @@ both, so work done on one has to reach the other through GitHub:
 | Format / lint | `nix fmt`; `nix flake check`. `nix develop` has nixfmt-tree, statix, deadnix, nvd and nil. |
 | Build a repo package alone | `nix build .#warp-cloudflare-gui` (or `obsidian-plugins`, `vscode-marketplace`; the packages in `pkgs/`). |
 | Add / update an Obsidian plugin | See [Obsidian](#obsidian). |
-| Change the RGB colors | Edit the `openrgb` calls in `openrgb-colors` (`services.nix`); colors set in the OpenRGB GUI only last until the next boot. |
+| Change the RGB colors | Edit the `openrgb` calls in `openrgb-colors` (`hosts/desktop-olivia/machine.nix`); colors set in the OpenRGB GUI only last until the next boot. |
+| Set up a new machine | `scripts/bootstrap.sh` on it (Windows: `bootstrap.ps1`). See [Setting up a new machine](#setting-up-a-new-machine). |
+| Add something to one machine only | Its own `hosts/<name>/` (the desktop: `machine.nix`). Something for every Linux machine goes in `home/linux` (or a module it imports); for every NixOS machine in `modules/nixos/common.nix`; for every Mac in `modules/darwin/common.nix`. |
 | Change mpv / plex-mpv-shim settings | `programs.mpv` in `mpv.nix` / `home/olivia/plex-mpv-shim/mpv.conf`. |
 | Add / update a VS Code extension | Add or change `{publisher, name, version, hash}` in `pkgs/vscode-marketplace/sources.json` (`"arch": "linux-x64"` if the marketplace lists per-platform builds). Get the hash by leaving it as `""`, running `nix build .#vscode-marketplace`, and copying the `got:` value. Extensions installed from inside VS Code still work but aren't kept on a fresh install. |
 | Play Minecraft 1.16 or older | Add `jdk17` / `jdk8` to the Prism Launcher `jdks` list in `apps.nix`. |
@@ -251,7 +289,7 @@ preferences from a newer version; skip it unless something specific is missing.
 | Keyboard layout won't switch | Using the old key | It's **Alt+Shift** now; Win+Space opens Vicinae. |
 | `/mnt/windows` empty or error | Windows Fast Startup / hibernation | Boot Windows, disable Fast Startup (`powercfg /h off`), shut down, retry. `journalctl -b -u mnt-windows.mount`. |
 | `/mnt/unraid/*` hangs or errors | Server down, wrong credentials | `journalctl -b -u mnt-unraid-files.mount`; check `/etc/nixos/smb-secrets`; `ping 192.168.1.65`. Times out after 5 s by design. |
-| Clock wrong after using Windows | Missing local-time RTC setting | `time.hardwareClockInLocalTime` is in `boot.nix`; check `timedatectl`. |
+| Clock wrong after using Windows | Missing local-time RTC setting | `time.hardwareClockInLocalTime` is in `hosts/desktop-olivia/machine.nix` (desktop only); check `timedatectl`. Another dual-boot PC needs the same line in its own host folder. |
 | Obsidian: LiveSync says it can't decrypt, or shows no remote | Its `data.json` is missing or was made by the plugin itself | Redo the first-time steps above (delete its `data.json`, copy it from Windows, switch). |
 | Obsidian opens with no plugins | Restricted mode is still on for the vault | *Settings → Community plugins → Turn on community plugins*. |
 | Sound only goes to one device / bus silent | Virtual sink routing | `wpctl status`; route apps in the Plasma volume applet or qpwgraph. Game/Music/Chat follow the default output. |

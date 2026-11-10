@@ -405,12 +405,44 @@ that run natively here, compared against `~` on NixOS. The app list itself was a
   `obs-backgroundremoval` 1.3.7, `obs-scale-to-sound` 1.2.5, the mpv and Chromium config files, the
   `openrgb-colors` unit, and Qt/GStreamer/ODBC dev outputs; +178.7 MiB in total.
 
+## Any-machine deploy (2026-11-10)
+
+The restructure for new machines (DESIGN §12) and `scripts/bootstrap.sh` / `bootstrap.ps1`. Checked
+on the desktop, without activating anything and without sudo:
+
+| Check | Result |
+|---|---|
+| Desktop `drvPath` before/after | Changed, by order only. `nix-diff` finds three leaf derivations: `home-manager-path` and `man-paths` (`chosenOutputs`, same entries in a new order) and `olivia-fish-completions` (the same 68 paths in a new order). Everything above them differs only through those. Cause: the apps now come in through `home/linux`, so `plasma.nix`, `flatpak.nix` and `warp-gui.nix` contribute their packages later. The Windows mount, the clock, OpenRGB, ROCm Ollama and the login art evaluate as before. |
+| Desktop build + `nvd diff /run/current-system` | Built. "No version or selection state changes", closure 3518 → 3518 paths (12 swapped: the reordered lists), +0 B. |
+| Mac `drvPath` before/after (evaluated on Linux) | Changed. `nix-diff`: `system-path` and `system-applications` (`chosenOutputs`, same entries, new order: `common.nix` is now an import), and `darwin-version.json`, whose `configurationRevision` is now `f77a47a…-dirty`, as with any uncommitted tree. Nothing else. |
+| `nix flake lock` | Added only `nixos-wsl` (`e45b24b`, 2026-10-26) and its `flake-compat`; no other input moved. |
+| `nix flake check` | Passes in 26 s (15 s before). `checks.aarch64-darwin.toplevel-eval` also evaluates from Linux. |
+| New targets | Evaluate: `nixosConfigurations.wsl` and all six `homeConfigurations`. `olivia@x86_64-linux` **built**: 19 new derivations (home-manager's own files and `non-nixos-gpu`); every app is a path the desktop already had. Its `home-path/bin` has 141 commands, including `code`, `obsidian`, `blender`, `davinci-resolve`, `wezterm`, `nvim`, `fish`, `home-manager` and `non-nixos-gpu-setup`. |
+| `boot.nix` autoScrub | true on the desktop, false in its `vmVariant` and on an adopted ext4 install. |
+| bootstrap.sh generators, in a scratch copy of the repo | `pick_disk` lists the three disks (Philips USB, Samsung, Fanxiang) with bus, model and filesystems and returns the by-id path; `gpu_modules` → `amd`; `host_disks desktop-olivia` → the Samsung by-id; `nixpkgs_release` → `26.05`. It wrote four hosts: a new AMD PC, a new NVIDIA PC, an adopted ext4 install with its ESP at `/boot/efi`, and a new Mac. All four evaluate. New PCs mount by partition label (`disk-main-root`, `disk-main-ESP`) with the swapfile. The AMD one gets `ollama-rocm`, the NVIDIA one kernel 6.18 + driver 595.71 and CPU Ollama, the adopted one `efiSysMountPoint = /boot/efi` and no scrub, and none of them gets the Windows mount or the local-time clock. |
+| Generated files vs nixfmt | `nixfmt --check` passes on all four, and on disk ids of eight lengths around the 100-column limit (the long ones are wrapped as nixfmt does). |
+| shellcheck (bootstrap.sh) | Clean. It found one real bug, fixed before the first run: `curl … \| sh … </dev/tty` would have fed the terminal to `sh` instead of the Nix installer. |
+| PowerShell parser (bootstrap.ps1, pwsh 7.6) | No errors. |
+
+**Not tested:** none of the target machines exist yet, so these have only been evaluated. They're
+in the table below: a real USB install of a new PC, adopting an installed NixOS, an NVIDIA GPU,
+NixOS-WSL on Windows (bootstrap.ps1 has only been parsed), a new Mac through the script, and
+standalone home-manager on another distro (activation and `non-nixos-gpu-setup`).
+
 ## Still to check by hand
 
 The Mac's checks are in [MACOS.md](MACOS.md#checked); all of them are done.
 
 | Area | How |
 |---|---|
+| Desktop after the any-machine restructure | `nh os switch`. The diff lists no packages added or removed (order only, above). Then: `systemctl status openrgb-colors` ran, `/mnt/windows` opens, `timedatectl` shows `RTC in local TZ: yes`, `ollama ps` still uses the GPU, the login screen still has the Rei background. |
+| Mac after the restructure | `git pull`, `sudo darwin-rebuild switch --flake ~/nixos-config#macbook-olivia`. Nothing should change except the revision; `darwin-version --configuration-revision` shows the new commit. |
+| A new PC from the USB installer | Run `bootstrap.sh` on the installer. The USB is marked `(this installer)`, the typed confirmation names the right disk, it installs and boots, and `hosts/<name>/` is committed and pushed afterwards. Best first done in a VM (the installer ISO in QEMU/virt-manager with UEFI firmware and a spare virtual disk). |
+| Adopting an installed NixOS | On a throwaway install (VM): the script writes `hosts/<name>/` with the existing filesystems, `nixos-rebuild boot` works, it boots into systemd-boot, and `sudo passwd olivia` from the old account lets olivia log in. |
+| NVIDIA | On an NVIDIA PC: the driver builds for the default kernel, Plasma starts on Wayland, `nvidia-smi` works. Older-than-Turing cards need `hardware.nvidia.open = false`. |
+| NixOS-WSL | On Windows: `bootstrap.ps1` installs the distro, the first build and the restarts make olivia the default user, `~/nixos-config` is there, a GUI app (e.g. `wezterm`) opens through WSLg, and later `nh os switch` works. |
+| A new Mac | `bootstrap.sh` in Terminal: Command Line Tools, Nix and Homebrew are installed, `hosts/<name>/darwin-configuration.nix` is written for the logged-in user, and the switch installs the casks and App Store apps. |
+| Another distro | On Fedora or Ubuntu (x86_64): the standalone switch works with `-b hm-backup`, `non-nixos-gpu-setup` runs, and a GUI app (WezTerm, Obsidian) starts with GPU rendering. |
 | git author name (after `nh os switch`) | ✅ Checked by Olivia after the 2026-11-10 switch. The running system is exactly the `8aeee79` build. `git config user.name` prints `olivia` (from `home/shared/git.nix`; before this, git used the account name `Olivia`). `nix-diff` before the switch: only the home-manager git config changes. |
 | Desktop after the shared-module move (2026-11-10) | ✅ Switched and rebooted 2026-11-10; Olivia checked the fish greeting, git config, `ssh -G unraid` and LazyVim. `nh os switch`. The diff should list only a few rebuilt derivations, with no package added or removed. Then check that the fish greeting shows a Pokémon, that `git config --list --show-origin` has the email and `credential.helper=libsecret`, that `ssh -G unraid` uses `id_unraid`, and that nvim opens LazyVim. |
 | Idle static gone | ✅ After the reboot `power_save` is `0`; `wpctl status` lists the Ryzen analog output as the default sink. Still to do: leave audio paused for a minute and listen. |

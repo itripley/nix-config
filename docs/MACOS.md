@@ -31,6 +31,7 @@ trackpad, screenshot, clock, WindowManager and loginwindow domains, and copies o
 | home-manager | 98 commands in `/etc/profiles/per-user/olivi/bin`; zsh, fish, git, ssh and the dotfile links managed |
 | Homebrew | 26 leaf formulae (191 total), 29 casks (28 declared, plus plugdata), 5 taps (3 declared). Declared in `modules/darwin/homebrew.nix`. |
 | CI | `nix flake check` on `macos-latest` on every push |
+| Files | `hosts/macbook-olivia/darwin-configuration.nix` (renamed from `configuration.nix` on 2026-11-10) for this Mac; `modules/darwin/common.nix` for what any Mac gets. Another Mac: `scripts/bootstrap.sh` (DESIGN §12) |
 
 ## Where things went
 

@@ -7,8 +7,14 @@ third-party flakes. One `nh os switch` applies both system and user config.
 
 The second host is the MacBook, `darwinConfigurations.macbook-olivia`: an M1 running nix-darwin
 26.05, with home-manager as a nix-darwin module for user `olivi`. Homebrew handles the GUI apps.
-`home/shared/` is imported by both hosts. Mac details and its migration log are in
+`home/shared/` is imported by every machine. Mac details and its migration log are in
 `docs/MACOS.md`.
+
+Any new machine is set up with `scripts/bootstrap.sh` (Windows: `bootstrap.ps1`), DESIGN §12. Every
+folder in `hosts/` is a machine, picked up by `flake.nix`: `darwin-configuration.nix` makes it a
+Mac, `configuration.nix` NixOS. `hosts/wsl` is NixOS-WSL for any Windows PC. Other distros and
+locked Macs get standalone `homeConfigurations."<user>@<system>"`. `home/linux/` (the apps) is
+shared by the desktop, WSL and other x86_64 distros.
 
 The full reasoning is in `docs/`. Read the relevant doc before changing an area:
 `docs/MODULES.md` (every file and setting), `docs/DESIGN.md` (why), `docs/OPERATIONS.md`
@@ -19,14 +25,16 @@ The full reasoning is in `docs/`. Read the relevant doc before changing an area:
 
 | Change | File |
 |---|---|
-| User app | `home/olivia/apps.nix` (dev tools: `home/olivia/dev.nix`) |
+| User app | `home/olivia/apps.nix` (dev tools: `home/olivia/dev.nix`). Through `home/linux` it also reaches WSL and other distros; Plasma/Flatpak/WARP-only things go in `home/olivia/default.nix` |
 | CLI tool for both machines | `home/shared/cli.nix` (changes the desktop too: compare its toplevel `drvPath`) |
 | Mac-only CLI tool | `home/darwin/cli.nix` |
 | Mac GUI app (Homebrew cask), Homebrew-only formula, App Store app | `modules/darwin/homebrew.nix` |
 | macOS setting (Dock, Finder, trackpad, …) | `modules/darwin/defaults.nix` (System Settings changes are reverted on switch) |
 | Shell, git/ssh, Neovim settings for both machines | `home/shared/shell.nix`, `git.nix`, `neovim.nix` (Mac-only additions: `home/darwin/shell.nix`, `git.nix`) |
-| System service, hardware, boot, network, mounts | the matching `modules/nixos/*.nix` |
-| New module | new file, then add it to `imports` in `hosts/desktop-olivia/configuration.nix` or `home/olivia/default.nix` (Mac: `hosts/macbook-olivia/configuration.nix` or `home/darwin/default.nix`) |
+| System service, hardware, boot, network, mounts | the matching `modules/nixos/*.nix` (every PC); only this PC's hardware (Windows disk, RTC, RGB): `hosts/desktop-olivia/machine.nix`; GPU: `amd.nix` / `nvidia.nix` |
+| Every NixOS machine (user, Nix settings, nh) / every Mac | `modules/nixos/common.nix` / `modules/darwin/common.nix` |
+| New module | new file, then add it to `imports` in `hosts/desktop-olivia/configuration.nix` or `home/olivia/default.nix` (Mac: `hosts/macbook-olivia/darwin-configuration.nix` or `home/darwin/default.nix`; every Linux machine: `home/linux/default.nix`) |
+| New machine | `scripts/bootstrap.sh` writes `hosts/<name>/` on it; no `flake.nix` edit. Standalone home-manager usernames: `standaloneUsers` in `flake.nix` |
 | Plasma settings, shortcuts, theme | `home/olivia/plasma.nix` |
 | Flatpak | `home/olivia/flatpak.nix` (Flathub ID) |
 | Package written for this repo | `pkgs/<name>/package.nix` + a line in `overlays/packages.nix` + `packages` in `flake.nix` |
@@ -38,7 +46,7 @@ The full reasoning is in `docs/`. Read the relevant doc before changing an area:
 Safe to run any time:
 
 ```sh
-nix flake check   # ~15 s: evaluates the whole system (every .drv) + statix, deadnix, nixfmt. CI runs the same.
+nix flake check   # ~26 s: evaluates every Linux host and home (every .drv) + statix, deadnix, nixfmt. CI runs the same (and the Macs on macOS).
 nix fmt           # nixfmt over every .nix except hardware-configuration.nix
 nix develop       # nixfmt-tree, statix, deadnix, nvd, nil
 nix eval .#nixosConfigurations.desktop-olivia.options.<option.path>.description   # look up an option in the pinned nixpkgs
@@ -92,6 +100,9 @@ their own `Docs: …` commit. Never push.
 - Never change the running system or network by hand: no `sudo`, no `systemctl start` / `stop` /
   `restart`, no `netbird up` / `networks select`, no `warp-cli connect`. Read-only status commands
   are fine.
+- Never run `scripts/bootstrap.sh` or `bootstrap.ps1`: they install, wipe disks and switch. Test
+  them only with `BOOTSTRAP_SOURCED=1 source scripts/bootstrap.sh` in a scratch copy of the repo
+  (docs/VERIFICATION.md, "Any-machine deploy").
 - Never run the disko CLI. Don't change the disk id in `hosts/desktop-olivia/disko.nix`: the
   Samsung serial is what keeps disko off the Windows NVMe. That file also defines the live
   `fileSystems`, so editing it changes real mounts.
@@ -109,10 +120,13 @@ their own `Docs: …` commit. Never push.
 
 ## Gotchas
 
-- **Two machines, one repo:** the desktop and the Mac each have a checkout. Before editing, run
-  `git fetch` and `git status`; the other machine may have pushed, or may hold uncommitted work. Never
-  discard someone's uncommitted changes. Commit them on a branch and merge
-  (docs/OPERATIONS.md, "Working from two machines").
+- **Several machines, one repo:** the desktop and the Mac (and any machine added since) each have a
+  checkout. Before editing, run `git fetch` and `git status`; another machine may have pushed, or may
+  hold uncommitted work. Never discard someone's uncommitted changes. Commit them on a branch and
+  merge (docs/OPERATIONS.md, "Working from two machines").
+- **Comparing before/after:** the desktop's toplevel `drvPath` is stable, but moving a module that
+  adds packages reorders lists. Use `nix-diff` and check it's order only. The Mac's `drvPath` also
+  changes with the git revision (`configurationRevision`), so compare it with `nix-diff` too.
 - **Live dotfiles:** `home/olivia/dotfiles/{nvim,wezterm,fastfetch}` are out-of-store symlinks
   into this checkout. Edits there change the running apps immediately, with no rebuild. The
   checkout must stay at `~/nixos-config`.

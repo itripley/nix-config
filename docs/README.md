@@ -2,7 +2,8 @@
 
 This repo turns DESKTOP-OLIVIA (Windows 11) into a NixOS 26.05 system that dual-boots alongside the
 existing Windows install. Since 2026-11-10 it also manages the MacBook (`macbook-olivia`, nix-darwin
-+ home-manager), sharing the cross-platform home-manager modules. These docs record **what** was set up, **how** it works, and **why** each
++ home-manager), sharing the cross-platform home-manager modules, and it can set up any new
+machine: another PC, a Mac, Windows (NixOS-WSL) or any other Linux (DESIGN §12). These docs record **what** was set up, **how** it works, and **why** each
 choice was made, so the config can be maintained without re-deriving any of it.
 
 | Doc | Read it when you want to know… |
@@ -17,10 +18,17 @@ choice was made, so the config can be maintained without re-deriving any of it.
 | [MACOS.md](MACOS.md) | the MacBook (`macbook-olivia`, nix-darwin): what was on it, where each app and setting went, progress, what stays manual |
 | [OPERATIONS.md](OPERATIONS.md) | day-to-day use (rebuild, update, add apps, roll back), keyboard shortcuts, VPN toggles (NetBird/WARP), theme upkeep, troubleshooting, and leftover data from removed apps |
 
-Installation steps are in the top-level [README](../README.md).
+Installation steps are in the top-level [README](../README.md); a new machine of any kind is set up
+with `scripts/bootstrap.sh` ([OPERATIONS.md](OPERATIONS.md#setting-up-a-new-machine)).
 
 ## Status (2026-11-10)
 
+- **Any-machine deploy committed and pushed (`eb1d172`, 2026-11-10), not switched yet.** Hosts are folders
+  in `hosts/`; new: `hosts/wsl` (NixOS-WSL), standalone home-manager for other distros and locked
+  Macs, and `scripts/bootstrap.sh` / `bootstrap.ps1`. Desktop and Mac evaluate to the same
+  packages (nix-diff: order only, plus the Mac's revision string). Every target evaluates and the
+  standalone Linux home builds. None of the new paths has run on a real machine yet:
+  [VERIFICATION.md](VERIFICATION.md#any-machine-deploy-2026-11-10).
 - **Review fixes switched on both machines (2026-11-10, `d2fbf68`), and the hand checks passed.**
   The Mac now runs weekly garbage collection and store optimisation, and mise is gone from zsh.
   Both machines use git `user.name` `olivia`. Afterwards, the desktop was running exactly that
@@ -115,6 +123,7 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-10 | Desktop pulled the merge, switched and rebooted: shared modules, SilentSDDM login screen, power and GTK settings, Windows sweep all live; hand checks passed; `desktop-wip` deleted | [VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand) |
 | 2026-11-10 | Review of the Mac config: everything evaluates, cached and CI-green. Fixes: the Mac now garbage-collects generations older than 14 days and optimises the store every Sunday (`nix.gc`, `nix.optimise`). mise was dropped from zsh. git `user.name = "olivia"` moved to `home/shared/git.nix`, so the desktop stops authoring as `Olivia`. | `d2fbf68`, [MACOS.md](MACOS.md#checked) step 13, DESIGN §11 |
 | 2026-11-10 | Both machines switched to the review fixes. Hand checks passed: the two LaunchDaemons are loaded, zsh starts clean, and `git config user.name` is `olivia` on both. The desktop runs exactly the `8aeee79` build. | [MACOS.md](MACOS.md#checked) step 13 |
+| 2026-11-10 | Any-machine deploy: hosts discovered from `hosts/` (Mac file renamed `darwin-configuration.nix`); `common.nix` for every NixOS and every Mac host; the desktop's Windows mount, RTC and OpenRGB in `hosts/desktop-olivia/machine.nix`; ROCm Ollama in `amd.nix`; new `nvidia.nix`, `disk-layout.nix`, opt-in `login-art.nix`; `home/linux` app layer; `hosts/wsl` (new `nixos-wsl` input); standalone `homeConfigurations`; `scripts/bootstrap.sh` + `bootstrap.ps1`. Desktop and Mac: same packages (order only) | `eb1d172`, DESIGN §12, [VERIFICATION.md](VERIFICATION.md#any-machine-deploy-2026-11-10) |
 
 ## Conventions
 
