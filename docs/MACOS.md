@@ -43,7 +43,7 @@ trackpad, screenshot, clock, WindowManager and loginwindow domains, and copies o
 | Keynote (App Store) | `masApps` |
 | Taphouse (App Store) | manual: no longer in the store |
 | Homebrew WezTerm 20240203 | nixpkgs WezTerm in `~/Applications/Home Manager Apps` (old app removed) |
-| `.zshrc`, `.zprofile`, `.zshenv`, fish `config.fish` | `home/darwin/shell.nix` + `home/shared/shell.nix` (mise, LM Studio and cargo kept; Rancher, OrbStack and Resolve lines dropped) |
+| `.zshrc`, `.zprofile`, `.zshenv`, fish `config.fish` | `home/darwin/shell.nix` + `home/shared/shell.nix` (LM Studio and cargo kept; Rancher, OrbStack and Resolve lines dropped; mise kept at first, dropped 2026-11-10) |
 | `.gitconfig`, `~/.config/git/ignore`, `~/.ssh/config` | `home/shared/git.nix` + `home/darwin/git.nix` (the old file is `~/.gitconfig.before-hm`) |
 | chezmoi copies of the nvim and wezterm configs | live links into this repo's `home/olivia/dotfiles/`; don't run `chezmoi apply` over them |
 | `~/.docker/config.json` `cliPluginsExtraDirs` (Homebrew's plugins) | removed; docker uses the Nix plugins linked into `~/.docker/cli-plugins` |
@@ -87,6 +87,7 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
 | 10 | Fonts | done: generation 10, `996c8e0` |
 | 11 | README, docs, CI | done: README macOS section, CLAUDE.md, CI matrix with `macos-latest` (`fff9b9e`) |
 | 12 | Homebrew cleanup (Olivia's OK) | done: 21 formulae now from Nix uninstalled; node and cloudflared kept (`657592e`) |
+| 13 | Review fixes: weekly GC + store optimise, mise dropped, git name shared with the desktop | in the repo, **not switched yet** (hand checks below) |
 
 ## Checked
 
@@ -169,6 +170,21 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
   `~/nix-migration-backup-2026-11-10/fonts/`, and the user font cache was cleared
   (`atsutil databases -removeUser`). `system_profiler SPFontsDataType` then lists the Nix copy as
   valid. The other fonts in `~/Library/Fonts` were not touched.
+- **Review (2026-11-10, from the desktop):** both hosts evaluate with no warnings or failed
+  assertions, `nix flake check --all-systems` passes, and CI is green on both runners. A dry-run
+  build of the Mac system against cache.nixos.org fetches every real package, the `pkgs.unstable`
+  ones included. The only local builds are the usual config files, wrappers and fish completions.
+  Since generation 10, the only effective change for the Mac had been the Brewfile (node and
+  cloudflared, `657592e`). The desktop merge left its home-manager generation identical.
+- **Step 13** (not switched yet): `nix-diff` of the Mac system against the previous config shows
+  only two changes. `.zshrc` lost the `mise activate` line, and two LaunchDaemons were added
+  (`org.nixos.nix-gc`: `nix-collect-garbage --delete-older-than 14d`, Sundays 03:15;
+  `org.nixos.nix-optimise`: `nix-store --optimise`, Sundays 04:15). The Mac's git config is
+  byte-identical: `user.name` only moved to `home/shared/git.nix`. To check after the switch:
+  - `sudo launchctl print system/org.nixos.nix-gc` and `system/org.nixos.nix-optimise` show both
+    jobs loaded.
+  - A new zsh starts without errors, and `which mise` finds nothing on PATH.
+  - `git config user.name` prints `olivia`.
 
 ## Stays manual
 
@@ -191,6 +207,8 @@ Not declared, on purpose or because it can't be:
 - **Personal or licensed fonts:** TX-02 (licensed), bianzhidai, Poppins, SF Movie Poster,
   Sixtyfour, Golos, Bitsumishi, deception scanline, all in `~/Library/Fonts`. The WezTerm backdrops
   go into the gitignored `home/olivia/dotfiles/wezterm/backdrops/`.
+- **mise** (dropped from the config 2026-11-10): the binary in `~/.local/bin/mise` and whatever it
+  installed are still on disk. Nothing runs it any more. Removing it is a manual step.
 - **Homebrew leftovers:** the `plugdata` cask. Its app is gone, but its AU, VST3, CLAP and LV2
   plugins are still in `/Library/Audio/Plug-Ins` and are tracked by the cask's pkg receipts.
   Uninstalling the cask would delete them. It isn't declared, and nothing removes it

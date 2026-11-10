@@ -241,6 +241,17 @@ x86_64-linux system without building it.
 - **macOS defaults: only captured values.** `system.defaults` declares just the settings that
   already differed from the macOS defaults, checked one by one before the switch, so adopting them
   changed nothing. Anything declared is reverted on the next switch if changed in System Settings.
+- **Garbage collection with nix-darwin's `nix.gc` and `nix.optimise`, not nh.** nix-darwin has no
+  `programs.nh`, and home-manager's only cleans the user's own profiles. The root job is enough:
+  as a NixOS or nix-darwin module, home-manager makes no profile generations of its own (only a
+  `current-home` GC root; checked in its 26.05 activation script and on the desktop), so
+  `nix-collect-garbage --delete-older-than 14d` on the system profile also frees old home
+  generations. The 14 days match the desktop, but nix-collect-garbage has no "keep 10" floor: after
+  14 days without a switch, only the current generation is left to roll back to.
+  - **Weekly `nix-store --optimise` instead of `auto-optimise-store`.** nix-darwin refuses
+    `auto-optimise-store` unless Nix has the store-corruption fix (2.32.5 or newer). The Mac's
+    2.34.9 has it, but the scheduled job doesn't depend on the Nix version, and it's what
+    nix-darwin's own option text suggests.
 - **Touch ID taken over by hash.** nix-darwin refuses to overwrite an unknown `/etc` file; the old
   `sudo_local` was declared with its exact `knownSha256Hashes`, so the switch moved it aside safely.
   `pam_reattach` makes Touch ID work in tmux.

@@ -145,6 +145,11 @@ The Mac's nix-darwin host (DESIGN §11, [MACOS.md](MACOS.md)).
   stay in `~/Library/Fonts` by hand.
 - `nix.settings.experimental-features` and `nix.channel.enable = false`, as on the desktop.
   `trusted-users` stays root-only.
+- `nix.gc` (`automatic`, `--delete-older-than 14d`) and `nix.optimise.automatic`: two root
+  LaunchDaemons, `org.nixos.nix-gc` (Sundays 03:15) and `org.nixos.nix-optimise` (`nix-store
+  --optimise`, Sundays 04:15), nix-darwin's default times. The desktop's equivalent is
+  `programs.nh.clean` + `auto-optimise-store`; why the Mac differs is in DESIGN §11. If the Mac is
+  asleep at that time, launchd runs the job when it wakes; if it's off, that week is skipped.
 - `system.configurationRevision` comes from the flake's `rev`/`dirtyRev`, so `darwin-version
   --configuration-revision` shows which commit a generation was built from.
 - `system.stateVersion = 7`: never change it.
@@ -202,7 +207,10 @@ Platform-specific config stays in the host's own home directory (DESIGN §11).
   rustup (cargo/rustc), lazydocker. All of them are in the binary cache for both systems.
 - `shell.nix`: fish, with `fish_greeting = "pokemon-colorscripts -r"`, and `home.sessionPath`
   (`~/.cargo/bin`, `~/go/bin`), as on Fedora.
-- `git.nix`: `programs.git` (email, `init.defaultBranch = main`) and `programs.ssh`. The ssh hosts
+- `git.nix`: `programs.git` (`user.name = "olivia"`, email, `init.defaultBranch = main`) and
+  `programs.ssh`. The name was only set on the Mac until 2026-11-10; the desktop had none, so git
+  fell back to the account's full name (`Olivia`) and commits from the two machines had different
+  authors. The ssh hosts
   are `github-artlivia` (deploy key) and `unraid` (root@192.168.1.65 with `id_unraid`), both with
   `IdentitiesOnly`, plus `AddKeysToAgent` for every host. It uses HM's new `settings` format
   (upstream OpenSSH directive names); `enableDefaultConfig = false` opts out of the legacy defaults.
@@ -235,11 +243,11 @@ shared modules.
 | zsh `profileExtra` | zsh is the login shell. `brew shellenv` runs first, then the Nix profiles (user, system, default) are put in front, with `typeset -U path` removing duplicates. Nix's git, node, gh … win; Homebrew's own tools stay reachable. |
 | zsh `history.path = ~/.zsh_history` | Keeps the existing history. With `stateVersion` 26.05 HM would default to the XDG location. |
 | zsh `enableCompletion = false` | nix-darwin's `/etc/zshrc` already runs `compinit` with the Nix profiles on `fpath`; a second run only slows startup. |
-| zsh `initContent`: `mise activate` | Carried over from the old `.zshrc`. The Rancher Desktop, OrbStack and DaVinci Resolve lines were dropped, since their targets are gone. |
+| Not carried over from the old `.zshrc` | The Rancher Desktop, OrbStack and DaVinci Resolve lines, since their targets are gone. `mise activate` was carried over at first, then dropped on 2026-11-10: mise isn't used (only zsh ever ran it, never fish). |
 | `programs.fish.shellInit` | The same order for fish, which WezTerm runs: `brew shellenv`, then `fish_add_path --move --prepend` for the Nix profiles. |
 | `home.sessionPath = ~/.lmstudio/bin` | LM Studio's `lms` CLI. |
 | `programs.man.generateCaches = false` | fish turns it on, but HM uses macOS's own `man` here, so it only produced a warning. |
-| git: `user.name`, `lfs.enable`, `ignores` | The old `.gitconfig` and `~/.config/git/ignore`. `lfs.enable` provides git-lfs, so it isn't in `cli.nix`. |
+| git: `lfs.enable`, `ignores` | The old `.gitconfig` and `~/.config/git/ignore`. `lfs.enable` provides git-lfs, so it isn't in `cli.nix`. The old `user.name` is in `home/shared/git.nix` now, for both machines. |
 | git: credential helpers for github.com and gist | `gh auth git-credential`, as `gh auth setup-git` had set it up. The empty first entry clears the system `osxkeychain` helper for those hosts. The token stays in the keychain. |
 | `programs.ssh.includes = ~/.colima/ssh_config` | `ssh colima` reaches the VM. The dead OrbStack include was dropped. |
 

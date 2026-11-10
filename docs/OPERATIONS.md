@@ -66,7 +66,7 @@ both, so work done on one has to reach the other through GitHub:
 | Change mpv / plex-mpv-shim settings | `programs.mpv` in `mpv.nix` / `home/olivia/plex-mpv-shim/mpv.conf`. |
 | Add / update a VS Code extension | Add or change `{publisher, name, version, hash}` in `pkgs/vscode-marketplace/sources.json` (`"arch": "linux-x64"` if the marketplace lists per-platform builds). Get the hash by leaving it as `""`, running `nix build .#vscode-marketplace`, and copying the `got:` value. Extensions installed from inside VS Code still work but aren't kept on a fresh install. |
 | Play Minecraft 1.16 or older | Add `jdk17` / `jdk8` to the Prism Launcher `jdks` list in `apps.nix`. |
-| Free disk space | Automatic (`programs.nh.clean`: keeps 10 generations / 14 days). Manual: `nh clean all`. |
+| Free disk space | Automatic (`programs.nh.clean`: keeps 10 generations / 14 days). Manual: `nh clean all`. On the Mac: automatic every Sunday (`nix.gc`: generations older than 14 days, then `nix-store --optimise`); by hand, `sudo nix-collect-garbage --delete-older-than 14d`. |
 | Add a font for yourself | Copy the `.otf`/`.ttf` files into `home/olivia/dotfiles/fonts/<Name>/` (gitignored, linked into `~/.local/share/fonts`). No rebuild; restart the app. After a fresh clone, TX-02 has to be copied back in by hand. Packaged fonts go in `fonts.packages` in `modules/nixos/desktop.nix` instead. |
 | Edit nvim / WezTerm / fastfetch config | Edit under `home/olivia/dotfiles/…`; they're live links, so there's no rebuild. |
 | Edit Firefox `userChrome.css` | Edit `home/olivia/dotfiles/firefox/userChrome.css`, then `nh os switch`, then restart Firefox. |

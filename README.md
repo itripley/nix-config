@@ -209,7 +209,8 @@ sudo darwin-rebuild --rollback                       # back one generation (syst
 sudo darwin-rebuild switch --switch-generation 7     # or to a specific one
 ```
 
-Or `git revert` the commit and switch. A rollback doesn't undo Homebrew installs or macOS
+Generations older than 14 days are garbage-collected every Sunday (`nix.gc`), so older ones may be
+gone. Or `git revert` the commit and switch. A rollback doesn't undo Homebrew installs or macOS
 `defaults`; restore those from `defaults import` or by hand. To remove nix-darwin completely, run
 `sudo darwin-uninstaller` (it restores the `*.before-nix-darwin` files), and only then
 `/nix/nix-installer uninstall`.
