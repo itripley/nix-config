@@ -102,6 +102,7 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-10 | MacBook: JetBrainsMono Nerd Font from nixpkgs (`/Library/Fonts/Nix Fonts`); the 96 hand-installed copies moved to the backup folder | `996c8e0`, [MACOS.md](MACOS.md#checked) |
 | 2026-11-10 | README: macOS section (rebuild, update inputs, add a package, roll back, bootstrap a fresh Mac); CLAUDE.md covers the Mac host | [README](../README.md#macos) |
 | 2026-11-10 | CI checks both hosts (`ubuntu-latest` + `macos-latest`). MacBook Homebrew cleanup: 21 formulae now from Nix uninstalled (plus 14 dependencies brew autoremoved); node and cloudflared kept for the services that use them | `fff9b9e`, `657592e`, [MACOS.md](MACOS.md#homebrew-cleanup-2026-11-10) |
+| 2026-11-10 | MacBook: 7 stale cask records uninstalled (apps already gone). plugdata kept because its audio plugins are still installed. All docs brought up to date for the two-host repo | `20179f6`, [MACOS.md](MACOS.md#homebrew-cleanup-2026-11-10) |
 
 ## Conventions
 

@@ -28,7 +28,7 @@ trackpad, screenshot, clock, WindowManager and loginwindow domains, and copies o
 |---|---|
 | System | nix-darwin generation 10 (`darwin-rebuild` from `nix-darwin-26.05` with `nixpkgs-26.05-darwin`), Nix 2.34.9 |
 | home-manager | 98 commands in `/etc/profiles/per-user/olivi/bin`; zsh, fish, git, ssh and the dotfile links managed |
-| Homebrew | 26 leaf formulae (191 total), 36 casks (28 declared plus 8 stale records), 5 taps (3 declared). Declared in `modules/darwin/homebrew.nix`. |
+| Homebrew | 26 leaf formulae (191 total), 29 casks (28 declared, plus plugdata), 5 taps (3 declared). Declared in `modules/darwin/homebrew.nix`. |
 | CI | `nix flake check` on `macos-latest` on every push |
 
 ## Where things went
@@ -39,7 +39,7 @@ trackpad, screenshot, clock, WindowManager and loginwindow domains, and copies o
 | Homebrew build tooling, php/httpd, Python 3.11/3.13, rbenv, mpv, tailscale, chezmoi, projectm, mole, cliclick, opencode | still Homebrew, declared as `brews` ("review later") |
 | node, cloudflared | in both: Nix for the shell, Homebrew for the services that run it by path |
 | 28 casks with their apps present, 3 taps | declared `casks` and trusted `taps` |
-| 8 casks whose apps are gone | not declared; still in brew's records |
+| 8 casks whose apps are gone | 7 uninstalled (records only). plugdata stays: its app is gone but its audio plugins aren't |
 | Keynote (App Store) | `masApps` |
 | Taphouse (App Store) | manual: no longer in the store |
 | Homebrew WezTerm 20240203 | nixpkgs WezTerm in `~/Applications/Home Manager Apps` (old app removed) |
@@ -191,9 +191,10 @@ Not declared, on purpose or because it can't be:
 - **Personal or licensed fonts:** TX-02 (licensed), bianzhidai, Poppins, SF Movie Poster,
   Sixtyfour, Golos, Bitsumishi, deception scanline, all in `~/Library/Fonts`. The WezTerm backdrops
   go into the gitignored `home/olivia/dotfiles/wezterm/backdrops/`.
-- **Homebrew leftovers:** the 8 stale casks (audacity, ente-auth, keka, plugdata, quitty, renpy,
-  shutter-encoder, tailscale-app; their apps are gone). They're still in brew's records, and
-  nothing removes them (`cleanup = "none"`).
+- **Homebrew leftovers:** the `plugdata` cask. Its app is gone, but its AU, VST3, CLAP and LV2
+  plugins are still in `/Library/Audio/Plug-Ins` and are tracked by the cask's pkg receipts.
+  Uninstalling the cask would delete them. It isn't declared, and nothing removes it
+  (`cleanup = "none"`).
 
 ## Homebrew cleanup (2026-11-10)
 
@@ -218,3 +219,13 @@ With Olivia's OK, after step 11:
   - The openclaw gateway was already failing before the cleanup: exit 78 (`EX_CONFIG`) from its
     `~/.openclaw` wrapper script, 39,580 launchd runs in 39 days of uptime. It was left alone.
 - The old `/Applications/WezTerm.app` was already gone; only the Home Manager copy is left.
+- **Stale casks** (later the same day, with Olivia's OK): `brew uninstall --cask` with
+  `HOMEBREW_NO_AUTOREMOVE=1` for audacity, ente-auth, keka, quitty, renpy, shutter-encoder and
+  tailscale-app. Their apps were already gone. Before running it, each cask's uninstall steps were
+  read (`brew info --cask --json=v2`) and its pkg receipts checked at their install locations:
+  - shutter-encoder and tailscale-app had receipts with no files left; brew forgot them with `sudo
+    pkgutil`. tailscale-app also deleted `/usr/local/bin/tailscale` (a shim that ran the missing
+    `Tailscale.app`) and one man page. Homebrew's `tailscale` formula (1.102.4) is unaffected.
+  - The rest only dropped brew's record (keka also its `/opt/homebrew/bin/keka` wrapper).
+  - **plugdata was skipped:** its 82 plugin files are still installed, and its uninstall step would
+    delete them.
