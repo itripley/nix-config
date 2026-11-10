@@ -40,6 +40,12 @@
     # gives the input server the capability it needs to paste and expand snippets. No
     # nixpkgs follows on purpose: the package then matches vicinae.cachix.org (configuration.nix).
     vicinae.url = "github:vicinaehq/vicinae";
+    # SilentSDDM login theme (as on Fedora). Its module builds against our pkgs; follows only
+    # keeps flake.lock from pulling a second nixpkgs.
+    silent-sddm = {
+      url = "github:uiriansan/SilentSDDM";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -97,6 +103,7 @@
           disko.nixosModules.disko
           inputs.artcraft.nixosModules.default
           inputs.vicinae.nixosModules.default
+          inputs.silent-sddm.nixosModules.default
           ./hosts/desktop-olivia/configuration.nix
 
           home-manager.nixosModules.home-manager

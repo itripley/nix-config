@@ -32,10 +32,11 @@ Installation steps are in the top-level [README](../README.md).
 - **Audit fixes (2026-11-09) are committed, booted and in use:** the one-time root steps were done,
   and the kernel command line has `amdgpu.ppfeaturemask`. The hand checks are in
   [VERIFICATION.md](VERIFICATION.md#audit-2026-11-09).
-- **Everything after the audit is switched to but not committed yet** (Vicinae, Obsidian, VS Code
-  extensions, TX-02, WezTerm tabs, the Serein patch, the idle-static fix). On 2026-11-09 the running
-  system was exactly the working tree's build. The idle-static fix still needs a **reboot** for its
-  kernel-module half (`power_save` is still 10); the WirePlumber half is live.
+- **Everything after the audit is committed, booted and in use** (Vicinae, Obsidian, VS Code
+  extensions, TX-02, WezTerm tabs, the Serein patch, the idle-static fix). After the 2026-11-09
+  reboot the running system was exactly that commit's build, and `power_save` is `0`.
+- **Not switched to yet:** the Fedora login screen (SilentSDDM, `desktop.nix`), and Fedora's power
+  settings and Breeze for GTK apps (`plasma.nix`). Builds; needs `nh os switch` and a reboot.
 - **Not switched to yet: the Windows settings sweep** (mpv, plex-mpv-shim, OBS plugins, Chromium
   extensions, RGB colors). Builds; needs `nh os switch`. Its hand steps for plex-mpv-shim, Pear Desktop
   and Claude Code are done; Prism is left ([OPERATIONS.md](OPERATIONS.md#settings-copied-from-windows-by-hand)).
@@ -43,9 +44,8 @@ Installation steps are in the top-level [README](../README.md).
   the Game/Music/Chat sinks, EasyEffects, linuxmeeter (since uninstalled) and qpwgraph together. Observed state and next
   steps: [VERIFICATION.md](VERIFICATION.md#audio-routing-not-working-2026-11-09).
 - **Obsidian (2026-11-09) works:** LiveSync pulled the vault, plugins and settings in place.
-- **Open: `vicinae.service` restart-loops.** An older Vicinae server (0.23.2, from before the flake
-  input) is still running outside the unit, so the unit's server exits with "A server is already
-  running". Log out and back in once ([OPERATIONS.md](OPERATIONS.md#troubleshooting)).
+- `vicinae.service` no longer restart-loops: after the reboot it's active with 0 restarts and
+  `vicinae ping` answers.
 - Open: the `github-artlivia` deploy key is rejected by GitHub; a few hand checks
   ([VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand)); remaining app logins (Steam, Bitwarden, …).
 
@@ -78,7 +78,12 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-09 | TX-02 font for WezTerm and Obsidian: files in gitignored `dotfiles/fonts/`, linked into `~/.local/share/fonts` | `default.nix`, `dotfiles/wezterm/config/fonts.lua` |
 | 2026-11-09 | WezTerm: fancy tab bar on, with a close × on each tab (`show_close_tab_button_in_tabs = true`) and the title bar kept dark when unfocused; tab titles lost their rounded ends and own colours so the fancy bar draws the tabs | `dotfiles/wezterm/config/appearance.lua`, `events/tab-title.lua` |
 | 2026-11-09 | Virtual desktops: 3 rows (one column) instead of 1, as changed in the KDE GUI, so the next switch keeps it | `plasma.nix` |
+| 2026-11-09 | Second Fedora sweep (RPM database + config diffs): Fedora's power settings (never sleep, dim 15 min, screen off 30 min) and Breeze for GTK apps added; the rest recorded | `plasma.nix`, [FEDORA.md](FEDORA.md#second-pass-2026-11-09) |
+| 2026-11-09 | Login screen from Fedora: SilentSDDM (`rei` preset, own background, JetBrainsMono, round avatar) via its flake's NixOS module; art pulled in with `requireFile` | `flake.nix`, `desktop.nix`, [VERIFICATION.md](VERIFICATION.md#login-screen-2026-11-09) |
 | 2026-11-09 | Windows settings sweep: mpv and plex-mpv-shim configs, OBS plugins, Chromium extensions, OpenRGB lowpink colors declared; logins and app state left as hand steps | `mpv.nix`, `apps.nix`, `services.nix`, [VERIFICATION.md](VERIFICATION.md#windows-settings-sweep-2026-11-09) |
+| 2026-11-09 | Firefox: native sidebar showed next to Sidebery because Firefox 159 renamed `#sidebar-main` to `#sidebar-container`; `userChrome.css` hides both | `dotfiles/firefox/userChrome.css`, [FIREFOX.md](FIREFOX.md#userchromecss-inactive-on-windows-active-on-nixos) |
+| 2026-11-09 | EasyEffects: AirPods Max EQ preset (oratory1990) in `home/olivia/easyeffects.nix` | [MODULES.md](MODULES.md#homeoliviaeasyeffectsnix) |
+| 2026-11-09 | plex-mpv-shim: uneven motion on 24p content fixed with `interpolation=yes` + `tscale=oversample` (23.976 fps doesn't divide 165 Hz or 75 Hz; 0 frames were dropped, the cadence was uneven) | `plex-mpv-shim/mpv.conf`, [MODULES.md](MODULES.md#homeoliviampvnix) |
 
 ## Conventions
 

@@ -55,6 +55,10 @@ throwing on evaluation. Only #1 and #2 failed.
 - Read the nixpkgs Firefox wrapper: it sets `MOZ_LEGACY_PROFILES=1` (uses `profiles.ini`, good) and
   `MOZ_ALLOW_DOWNGRADE=1` (no downgrade protection, hence the script's own version guard).
 - The migration script was tested on a mock profile; results are in [FIREFOX.md](FIREFOX.md#testing-done-and-not-done).
+- 2026-11-09, `userChrome.css`: 159.0.1's `omni.ja` has no `id="sidebar-main"`. The launcher's
+  parent is `<box id="sidebar-container">`, and `#sidebar-box` still gets `checked="true"`. The rule
+  now hides `#sidebar-container`. **Still to check by hand:** after `nh os switch`, quit and reopen
+  Firefox. With Sidebery open, there should be no native launcher strip.
 
 ## Current result
 
@@ -263,7 +267,7 @@ Pin them down first when this is picked up.
 | Layer | Source | What it does |
 |---|---|---|
 | Game / Music / Chat | `audio.nix` loopback sinks | Always on. Each forwards to the default output. |
-| EasyEffects | `services.easyeffects` (home/olivia/default.nix) | Always on. Takes over app output and the mic; **no effects loaded** (no presets, no RNNoise). |
+| EasyEffects | `services.easyeffects` (home/olivia/easyeffects.nix) | Always on. Takes over app output and the mic; **no effects loaded** (no RNNoise; the AirPods Max EQ preset added later on 2026-11-09 isn't loaded at startup). |
 | linuxmeeter | `pkgs/linuxmeeter` (**uninstalled** later on 2026-11-09) | Only while it runs. Its own System / Music / Chat inputs, buses A1/A2 (hardware) and B1/B2 (virtual mics). |
 | qpwgraph | `apps.nix` | Hand-made wires; patchbay with Auto pin on, Exclusive off. |
 
@@ -331,6 +335,36 @@ local database until then); after that Olivia confirmed the vault, plugins and s
   which is the read-only store.
 - Switched to on 2026-11-09: `~/.vscode/extensions` holds home-manager's links to the declared set.
 
+## Login screen (2026-11-09)
+
+- Fedora's SDDM setup read from the Fedora drive: `/etc/sddm.conf` sets `Current=silent` (it wins
+  over `sddm.conf.d/kde_settings.conf`'s `01-breeze-fedora`), the theme checkout is upstream
+  `e334d92` with `metadata.desktop` pointing at `configs/rei.conf`, and `git diff` there shows 16
+  changed settings plus the untracked `backgrounds/rei2.png`. Each one still exists in upstream's
+  current `rei.conf`, and the font sections are the same set.
+- Built (`nix build .#nixosConfigurations.desktop-olivia.config.programs.silentSDDM.package'`): the
+  theme's `rei.conf` ends with all the overrides, `backgrounds/rei2.png` is there, `metadata.desktop`
+  uses `configs/rei.conf`. Evaluated: `sddm.theme = "silent"`, Wayland with KWin, the
+  `GreeterEnvironment`/`InputMethod` settings, and tmpfiles rules linking
+  `/var/lib/AccountsService/icons/olivia` to the avatar.
+- `nix flake check` passes; the system builds. `nvd diff`: adds the theme, `test-sddm-silent`,
+  `avatar.png`, Red Hat Display, and Qt/GStreamer dev outputs; +92.6 MiB.
+- Both images were added with `nix store add-file`; their hashes are in `desktop.nix`.
+
+## Power and GTK theme (2026-11-09)
+
+- Before: no `powerdevilrc` at all (Plasma defaults; no suspend in the journal for 4 days). GTK
+  theme unset in all three places (`settings.ini` has no `gtk-theme-name`, dconf `gtk-theme` empty,
+  xsettingsd `Net/ThemeName ""`), so GTK3 apps used Adwaita. `kconf_updaterc` shows `gtkconfig.upd`
+  with only `dont_use_gtk_css_for_window_decorations` done: the `gtk_theme` migration that sets
+  Breeze never ran. kde-gtk-config 6.6.6's `applyAllSettings()` doesn't set the theme, so values
+  written by the config stay.
+- plasma-manager's generated `data.json`: `powerdevilrc` `[AC][Display]` dim 900 s, off 1800 s,
+  off when locked 300 s, `[AC][SuspendAndShutdown] AutoSuspendAction=0`; `gtk-3.0/settings.ini`
+  `[Settings] gtk-theme-name=Breeze`. home-manager `dconf.settings` has
+  `org/gnome/desktop/interface` `gtk-theme = "Breeze"`.
+- `nix flake check` passes; the system builds. No package changes from these two.
+
 ## Windows settings sweep (2026-11-09)
 
 Read-only pass over the Windows profile (`AppData`, `scoop/persist`, dotfiles, `Documents`) for apps
@@ -373,21 +407,24 @@ that run natively here, compared against `~` on NixOS. The app list itself was a
 
 | Area | How |
 |---|---|
-| Idle static gone | After a reboot (already switched to): leave audio paused for a minute and listen. `cat /sys/module/snd_hda_intel/parameters/power_save` → `0`; `wpctl status` shows the Ryzen output not suspended. |
+| Idle static gone | ✅ After the reboot `power_save` is `0`; `wpctl status` lists the Ryzen analog output as the default sink. Still to do: leave audio paused for a minute and listen. |
+| Power (after the switch) | System Settings → Power Management (AC): dim 15 min, screen off 30 min (5 min when locked), *When inactive: Do nothing*. |
+| GTK theme (after the switch, restart GTK apps) | `dconf read /org/gnome/desktop/interface/gtk-theme` → `'Breeze'`; a GTK3 app (e.g. the file chooser in a GTK app, or `gtk3-demo` via `nix shell nixpkgs#gtk3`) looks like Breeze in Catppuccin colors, not Adwaita. |
+| Login screen (after `nh os switch` + reboot) | Looks like Fedora's: Rei background, JetBrainsMono clock, round avatar on the left. Size: if it's bigger or smaller than on Fedora, set `settings.General.scale` (Fedora had 1.25, before the theme applied display scaling). Typing the password and Alt+Shift layout switching work; the session menu offers Plasma. `test-sddm-silent` previews it before the reboot. |
 | Plasma shortcuts | System Settings → Shortcuts; adjust `plasma.nix` if a KWin action name differs. |
 | ROCm in Resolve / Blender / Ollama | Render with HIP in Blender, run a model and check `ollama ps` shows GPU. |
 | Seiren Mini + EasyEffects | Record a test clip. |
 | Firefox | Open it: add-ons, Sidebery panels, logins and tabs should all be there. |
 | Fedora theme (after `nh os switch` + re-login) | Catppuccin colors, Klassy borders, Lain splash, Bocchi cursor, per-screen wallpapers, animated lock screen (Meta+L). |
 | Krohnkite | New windows tile; Meta+H/J/K focus, Meta+Shift+H/J/K/L move. If not, System Settings → Window Management → KWin Scripts → Krohnkite. |
-| Vicinae | First, `systemctl --user status vicinae` is *active* (on 2026-11-09 it restart-looped behind an old 0.23.2 server; log out/in). Then Meta+Space opens it with focus (Catppuccin colors, blurred background); Meta+V opens clipboard history, and Enter on an entry pastes it into the focused window (input server; `ls /run/wrappers/bin/vicinae-input-server`); Alt+Shift switches pt/us. |
+| Vicinae | ✅ After the reboot `vicinae.service` is active, 0 restarts. Still to do: Meta+Space opens it with focus (Catppuccin colors, blurred background); Meta+V opens clipboard history, and Enter on an entry pastes it into the focused window (input server; `ls /run/wrappers/bin/vicinae-input-server`); Alt+Shift switches pt/us. |
 | Serein minimum size | Shrink the window below ~836×572 px; check the channel list, chat and composer still lay out without overlapping at narrow widths. |
 | Obsidian, Windows side | On Windows, `git status` in the vault shouldn't show a flood of notes changed by the Linux side (update-time-on-edit). |
 | VS Code extensions | *Extensions* view lists all 43, none flagged. Open a `.py` file (Pylance + interpreter), a C# project (C# Dev Kit; may need `dotnet-sdk` in `dev.nix`), and the Claude Code panel. If debugpy's *attach to process* needs `gdb`, add `gdb` to `dev.nix`. |
 | TX-02 font | ✅ `fc-list` lists 30 TX-02 files. WezTerm (restart it) shows TX-02 with Nerd icons intact in the tab bar and prompt; Obsidian's interface and notes use it. |
 | RGB colors (after the switch) | `systemctl status openrgb-colors` succeeded; RAM and board LEDs off, the Basilisk dusty pink. If it ran before the server had all devices, `journalctl -u openrgb-colors` shows which call failed. |
 | mpv | Play a file: Japanese audio and English subs are picked, the mouse wheel changes volume, `s` saves a webp to `~/Pictures/mpv-screenshots`, `b` toggles deband. |
-| plex-mpv-shim | After the `conf.json` step: play from Plex, check subs are the Windows size and HDR content tone-maps (`target-peak=200`). |
+| plex-mpv-shim | After the `conf.json` step: play from Plex, check subs are the Windows size and HDR content tone-maps (`target-peak=200`). Pans in a 23.976 fps film are smooth on both monitors; with the shim's player focused, `Shift+I` then `2` shows `Interpolation` on and few or no mistimed frames. (Tested before the fix with the shim's `mpv.conf` on a 24p clip: 0 drops, `vsync-ratio` 3.13 on DP-2, i.e. a 3,3,…,4 repeat pattern.) |
 | OBS plugins | Add a source: *Background Removal* and *Scale to Sound* appear in its filters. |
 | Chromium extensions | Start Chromium: Bitwarden and Claude install from the Web Store within a minute. |
 | `github-artlivia` deploy key | Re-add the public key on GitHub, then `git ls-remote git@github-artlivia:itripley/artlivia.git`. |

@@ -22,7 +22,7 @@ modules/nixos/                    system level (root, services, hardware)
   boot.nix  amd.nix  desktop.nix  audio.nix  networking.nix  storage.nix  gaming.nix  services.nix
 home/olivia/                      user level (home-manager)
   default.nix  apps.nix  dev.nix  firefox.nix  plasma.nix  flatpak.nix  warp-gui.nix  obsidian.nix
-  mpv.nix
+  mpv.nix  easyeffects.nix
   plex-mpv-shim/mpv.conf          the shim's mpv settings from Windows (mpv.nix)
   obsidian/                       Obsidian seed settings and CSS snippets (obsidian.nix)
   themes/                         Plasma theme files from Fedora (art/ is gitignored)
@@ -44,8 +44,8 @@ scripts/
 - **`nixpkgsConfig`**, used for both stable and `pkgs.unstable` so they can't drift apart:
   - `allowUnfree`: Steam, Resolve, VS Code, Plex, Obsidian, etc. are unfree.
   - `permittedInsecurePackages = [ "openssl-1.1.1w" ]`: needed only by Sublime Text 4 (see DESIGN §4).
-- **NixOS modules from inputs:** disko, `artcraft` (`programs.artcraft`) and `vicinae` (the
-  input-server wrapper).
+- **NixOS modules from inputs:** disko, `artcraft` (`programs.artcraft`), `vicinae` (the
+  input-server wrapper) and `silent-sddm` (`programs.silentSDDM`, the login screen).
 - **home-manager block:** `useGlobalPkgs` (same pkgs as the system), `useUserPackages` (user
   packages installed through the system profile), `backupFileExtension`, and `sharedModules` loading
   plasma-manager, nix-flatpak's HM module and vicinae's HM module (which replaces home-manager's own
@@ -147,6 +147,7 @@ here) only if the hardware changes.
 | `services.orca`, `services.speechd`, `programs.kde-pim` = `false` | Plasma (and NixOS' graphical-desktop defaults) turn these on with `mkDefault`. Not used here: the Orca screen reader and speech-dispatcher with its voices (~1.2 GiB, ran at every login), and KDE PIM (Akonadi + a MariaDB server, for KMail/KOrganizer/Kontact). Turning them off saved ~1.3 GiB. Switch back on for a screen reader / text-to-speech or the KDE PIM apps. |
 | `services.flatpak`, `programs.appimage` (+binfmt) | Escape hatches for apps outside nixpkgs (DESIGN §8). |
 | `programs.artcraft` (`apps = photocraft, filmcraft`) | ArtCraft apps from the `artcraft` flake's module (DESIGN §4). The module also turns on `fonts.fontDir` and links `/usr/share/fonts` to the system fonts, because the apps' text tools only look there, not through fontconfig. |
+| `programs.silentSDDM` | The Fedora login screen: [SilentSDDM](https://github.com/uiriansan/SilentSDDM) from the `silent-sddm` flake's module (DESIGN §4), preset `rei` with Fedora's edits as `settings` (appended to `configs/rei.conf`): the static `rei2.png` instead of the `rei.mp4` video on the login and lock screens, JetBrainsMono Nerd Font everywhere (system font, so the greeter sees it), round avatar. Fedora's `scale = 1.25` is left out: the theme now multiplies it by the display scale itself. The module sets SDDM's theme, `extraPackages` (QtMultimedia, SVG, virtual keyboard, image formats), `GreeterEnvironment`/`InputMethod`, adds Red Hat Display to `fonts.packages` and installs `test-sddm-silent`. SDDM stays on Wayland/KWin (its default when `services.xserver` is off). `rei2.png` and `avatar.png` are gitignored art from `themes/art/sddm/`, pulled in with `requireFile` by hash (DESIGN §9). `profileIcons.olivia` writes `/var/lib/AccountsService/users/olivia` (`f+`, so it replaces that file) and links the icon. Adds ~90 MiB, mostly Qt multimedia dev outputs the module drags in through `systemPackages`. |
 | fonts: JetBrainsMono Nerd Font, Noto (+CJK, emoji), corefonts | WezTerm's font; full Unicode coverage including Japanese/Chinese; Microsoft core fonts for websites and documents that expect them. |
 
 ## `modules/nixos/audio.nix`
@@ -210,13 +211,25 @@ off. Used for one-time imports (SSH keys, wallpapers, Firefox profile).
 
 ## `home/olivia/default.nix`
 
-- Imports the other HM modules (including `mpv.nix`); `home.stateVersion = "26.05"` (never bump, same as the system one).
+- Imports the other HM modules (including `mpv.nix` and `easyeffects.nix`); `home.stateVersion = "26.05"` (never bump, same as the system one).
 - **`xdg.configFile` live links** for `wezterm`, `nvim`, `fastfetch` → `~/nixos-config/home/olivia/dotfiles/…` (DESIGN §6).
 - **`xdg.dataFile."fonts/nixos-config"`** → live link to `home/olivia/dotfiles/fonts/` (gitignored, like the wallpapers), which fontconfig reads as part of `~/.local/share/fonts`. It holds **TX-02** (30 styles), the font for WezTerm (`dotfiles/wezterm/config/fonts.lua`, with JetBrainsMono Nerd Font as fallback for icons) and Obsidian (`obsidian.nix`). The font is licensed, so the files are copied in by hand and never committed; a new font dropped in that folder works without a rebuild.
   The checkout path comes from `osConfig.programs.nh.flake` (configuration.nix); `plasma.nix` uses it too.
 - `programs.fish.functions.fish_greeting = "pokemon-colorscripts -r"`, `home.sessionPath` (`~/.cargo/bin`, `~/go/bin`): as on Fedora.
+
+## `home/olivia/easyeffects.nix`
+
 - `services.easyeffects`: background audio effects; RNNoise noise suppression for the Seiren Mini
   replaces NVIDIA Broadcast / AMD Noise Suppression.
+- **`extraPresets."Apple AirPods Max (oratory1990)"`**: output preset with oratory1990's AirPods Max EQ
+  (ANC on or Transparency mode, sheet v2.9 from 09.02.22): 10 bands plus a -4.0 dB preamp, which is
+  the equalizer's `input-gain` and keeps the +4.5 dB high shelf from clipping. The bands are written as
+  a `[ type Hz dB Q ]` list. Filter mode `APO (DR)` uses the same filter maths as Equalizer APO, the
+  format the sheet's values are meant for. home-manager writes the preset to
+  `~/.local/share/easyeffects/output/` as a **read-only store link**. Changes saved over it in the
+  EasyEffects GUI fail, so either edit it here or save it under a new name. The preset isn't loaded at
+  startup (`services.easyeffects.preset` is unset). Pick it in EasyEffects' Presets menu.
+  The sheet suggests adjusting bands 1, 2, 5 and 10 to taste: sub-bass, bass, treble, air.
 
 ## `home/olivia/apps.nix`
 
@@ -284,6 +297,11 @@ mpv and plex-mpv-shim settings, carried over from Windows (before this NixOS had
   line endings (gpu-next on Vulkan, HDR→SDR tone mapping for a 200-nit display, deband, `anime` /
   `uhd` / `sd` auto-profiles). The `anime` profile's ArtCNN shader line is dropped: the Windows
   `shaders/` folder is empty. The shim's own shader packs (`shader_pack_*` in `conf.json`) are separate.
+  One change from Windows: `interpolation=yes` + `tscale=oversample` (Windows had it off). Neither
+  monitor is a whole multiple of 23.976 fps (165.08 Hz gives 6.885 refreshes per frame, 75 Hz gives
+  3.13), and `display-resample` only corrects up to 1 % speed, so without interpolation frames repeat
+  unevenly (7,7,…,6 / 3,3,…,4) and pans judder in the windowed shim. `oversample` blends only the
+  one refresh where the frame changes, so there's no motion smoothing.
 - The shim's `conf.json` stays unmanaged: it holds the Plex login and the shim rewrites it. The four
   values that differ from Windows are a hand step ([OPERATIONS.md](OPERATIONS.md#settings-copied-from-windows-by-hand)).
 
@@ -309,6 +327,8 @@ The look and behaviour of the old Fedora install ([FEDORA.md](FEDORA.md) has the
 | `shortcuts.kwin` | Krohnkite on Meta+H/J/K/L (focus), +Shift (move), +Ctrl (resize), Meta+M monocle, Meta+S float, Meta+I increase. Focus Right is unbound because Meta+L locks the screen (same as Fedora). The old Alt+H/J/K/L window binds are set back to KDE's defaults explicitly, because plasma-manager doesn't reset keys that are removed. Alt+Q close and Alt+M minimize stay from Windows. |
 | `shortcuts."services/…"` | Meta+Return WezTerm. |
 | `hotkeys.commands.vicinae-*` + `programs.vicinae` | Vicinae replaced Fedora's Ulauncher, set up per [its KDE quickstart](https://docs.vicinae.com/quickstart/kde). Wayland apps can't grab global keys, so KDE binds Meta+Space to `vicinae toggle` and Meta+V to its clipboard history (Klipper's Meta+V popup is unbound). Home Manager's `programs.vicinae.systemd` runs `vicinae server` from login. Module and package come from the `vicinae` flake input (DESIGN §4), whose NixOS module also adds the input-server wrapper for pasting and snippets. `settings` (Catppuccin Macchiato theme, window opacity 0.85 so KWin's blur shows) goes into a store file that the wrapper passes as `VICINAE_OVERRIDES`, applied over `settings.json`, so Vicinae's own settings screen still saves; values set in Nix win. |
+| `powerdevil.AC` | Fedora's power settings: dim after 15 min, screen off after 30 (after 5 when locked), **never sleep** (`autoSuspend.action = "nothing"`). Without them Plasma's defaults apply, which can suspend the PC when idle. |
+| `configFile."gtk-3.0/settings.ini"` + `dconf.settings…gtk-theme` | Breeze for GTK apps, as on Fedora; Breeze takes its colors from the Plasma scheme (`colors.css`). Plasma's GTK bridge (`gtkconfig`) never sets the theme at login, only through its settings page or a one-time migration (`kconf_update` `gtk_theme`), and that migration never ran here, so GTK3 apps fell back to Adwaita. GTK on Wayland reads the dconf key; `settings.ini` is the fallback. Not set: `xsettingsd` (`Net/ThemeName` is empty), which only X11 GTK apps read. |
 | `configFile.kwinrc.Windows.FocusStealingPreventionLevel = 1` | KDE's default ("Low"), pinned: a higher level can stop the Vicinae window from taking focus. |
 
 ## `home/olivia/flatpak.nix`

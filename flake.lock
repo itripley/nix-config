@@ -237,6 +237,7 @@
         "nixpkgs-unstable": "nixpkgs-unstable",
         "plasma-manager": "plasma-manager",
         "serein": "serein",
+        "silent-sddm": "silent-sddm",
         "vicinae": "vicinae"
       }
     },
@@ -258,6 +259,26 @@
       "original": {
         "owner": "ViceVerse-cz",
         "repo": "Serein",
+        "type": "github"
+      }
+    },
+    "silent-sddm": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793825007,
+        "narHash": "sha256-0bYPQwI4+vkIGMHMBgawx1lpoV8XFpGhDyZFXM6T5b4=",
+        "owner": "uiriansan",
+        "repo": "SilentSDDM",
+        "rev": "d179078e88cde18195b82841d3e879949b06faa8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "uiriansan",
+        "repo": "SilentSDDM",
         "type": "github"
       }
     },

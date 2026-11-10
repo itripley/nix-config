@@ -62,6 +62,12 @@ actually been applied on Windows.** You chose to activate it on NixOS. With Side
 now hides the native tab strip, Firefox's new sidebar launcher and splitter, and the sidebar header,
 and it shows the window buttons in the nav-bar.
 
+**Fixed 2026-11-09:** the native sidebar (the vertical-tabs launcher) still showed with Sidebery
+open. The rule hid `#sidebar-main`, but in Firefox 159 that id is gone: `<sidebar-main>` has no id
+and its parent box is `#sidebar-container` (checked in 159.0.1's `omni.ja`). The rule now lists
+`#sidebar-container` too, and keeps `#sidebar-main` for older versions. The `#sidebar-box[checked]`
+condition still matches in 159: `browser-sidebar.js` sets `checked="true"` on that box.
+
 A stray ` */` after the last rule was removed. It came after all real rules, so it hadn't been
 cutting anything off.
 

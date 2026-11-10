@@ -26,7 +26,8 @@
   }
 
   /* Hide new Firefox sidebar, restyle addon's sidebar */
-  #sidebar-main, #sidebar-launcher-splitter {
+  /* Firefox 159 moved the id from <sidebar-main> to its parent #sidebar-container */
+  #sidebar-container, #sidebar-main, #sidebar-launcher-splitter {
     display: none !important;
   }
   #sidebar-box {
