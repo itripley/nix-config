@@ -90,6 +90,7 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-10 | MacBook: docker uses the Nix buildx/compose plugins (Homebrew plugin dir removed from `~/.docker/config.json`). macOS defaults declared (Dock, Finder, trackpad, clock, Stage Manager); all 34 values matched the live ones, only the Dock list was rewritten | `a252741`, [MACOS.md](MACOS.md#checked) |
 | 2026-11-10 | MacBook: Touch ID for sudo from nix-darwin (`touchIdAuth` + `pam_reattach` for tmux); the hand-written `sudo_local` was recognised by hash and moved aside | `9607781`, [MACOS.md](MACOS.md#checked) |
 | 2026-11-10 | MacBook: JetBrainsMono Nerd Font from nixpkgs (`/Library/Fonts/Nix Fonts`); the 96 hand-installed copies moved to the backup folder | `996c8e0`, [MACOS.md](MACOS.md#checked) |
+| 2026-11-10 | README: macOS section (rebuild, update inputs, add a package, roll back, bootstrap a fresh Mac); CLAUDE.md covers the Mac host | [README](../README.md#macos) |
 
 ## Conventions
 

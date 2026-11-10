@@ -1,6 +1,7 @@
-# nixos-config — desktop-olivia
+# nixos-config — desktop-olivia + macbook-olivia
 
 NixOS 26.05 flake for DESKTOP-OLIVIA, dual-booting with the existing Windows 11 install.
+The MacBook (M1) is a second host, `darwinConfigurations.macbook-olivia` (nix-darwin): see [macOS](#macos).
 Generated from an inventory of the Windows machine (hardware, apps, dotfiles, network setup).
 
 | | |
@@ -12,11 +13,15 @@ Generated from an inventory of the Windows machine (hardware, apps, dotfiles, ne
 | Unraid | `//192.168.1.65/{appdata,downloads,files}` → `/mnt/unraid/*` (automount) |
 
 ```
-flake.nix                      inputs + nixosConfigurations.desktop-olivia (+ packages, formatter, checks, devShells)
+flake.nix                      inputs + nixosConfigurations.desktop-olivia + darwinConfigurations.macbook-olivia (+ packages, formatter, checks, devShells)
 hosts/desktop-olivia/          configuration.nix, disko.nix, hardware-configuration.nix (generated at install)
+hosts/macbook-olivia/          configuration.nix: the Mac (nix-darwin): hostname, Nix, Touch ID, fonts
 overlays/                      build-fixes.nix (upstream build workarounds), packages.nix (adds pkgs/)
 pkgs/                          packages written for this repo (warp-cloudflare-gui, obsidian-plugins, vscode-marketplace)
 modules/nixos/                 boot, amd, desktop, audio, networking, storage, gaming, services
+modules/darwin/                homebrew (casks, brews, App Store), defaults (Dock, Finder, trackpad, …)
+home/shared/                   home-manager modules both machines use: CLI tools, fish, git/ssh, neovim, dotfile links
+home/darwin/                   home-manager for the Mac user (olivi): zsh, Mac CLI tools, git additions
 home/olivia/                   home-manager: apps, dev (git/ssh/nvim/vscode), firefox, plasma, flatpak, warp-gui, obsidian
 home/olivia/dotfiles/          wezterm, nvim (LazyVim), fastfetch, firefox userChrome — copied from Windows; fonts/ (gitignored)
 home/olivia/themes/            Plasma theme from the old Fedora install (artwork in art/, gitignored)
@@ -36,6 +41,7 @@ docs/                          full documentation: what, how and why
 | [docs/FIREFOX.md](docs/FIREFOX.md) | the Firefox profile migration |
 | [docs/FEDORA.md](docs/FEDORA.md) | what came over from the old Fedora install, and the conflicts |
 | [docs/VERIFICATION.md](docs/VERIFICATION.md) | how it was checked, what broke and was fixed (before and after install), what to check by hand |
+| [docs/MACOS.md](docs/MACOS.md) | the MacBook: inventory, migration steps, what was checked, what stays manual |
 | [docs/OPERATIONS.md](docs/OPERATIONS.md) | day-to-day use, keyboard shortcuts, VPN toggles, theme, troubleshooting |
 
 ## Before you start (in Windows)
@@ -145,3 +151,99 @@ nix fmt               # format the .nix files
 Edit `home/olivia/apps.nix` to add/remove apps. Search packages at https://search.nixos.org.
 nvim / wezterm / fastfetch configs are live symlinks into this repo — edit them in place, no rebuild needed.
 Keyboard shortcuts, VPN toggles and theme notes: [docs/OPERATIONS.md](docs/OPERATIONS.md).
+
+## macOS
+
+`macbook-olivia` is nix-darwin + home-manager for the user `olivi`, with Homebrew for GUI apps.
+Details and the migration log: [docs/MACOS.md](docs/MACOS.md).
+
+### Rebuild
+
+```sh
+cd ~/nixos-config
+sudo darwin-rebuild switch --flake .#macbook-olivia   # activation runs as root
+nix flake check                                      # evaluate the Mac config + lint, no root
+nix build .#darwinConfigurations.macbook-olivia.system   # build without activating
+```
+
+A switch applies the system, home-manager, the declared Homebrew apps and the macOS defaults. It
+installs missing casks and brews but never upgrades or removes them; `brew upgrade` is manual.
+Settings declared in `modules/darwin/defaults.nix` that are changed in System Settings are put back
+on the next switch.
+
+### Update flake inputs
+
+Update one named input at a time, then build and compare before switching:
+
+```sh
+nix flake update nixpkgs-darwin     # Mac packages only; also nix-darwin, nixpkgs-unstable, home-manager
+nix build .#darwinConfigurations.macbook-olivia.system
+nix run nixpkgs#nvd -- diff /run/current-system ./result
+sudo darwin-rebuild switch --flake .#macbook-olivia
+```
+
+`home-manager` and `nixpkgs-unstable` are shared with the desktop: updating them changes both
+machines, so the desktop needs a `nh os switch` too.
+
+### Add a package
+
+| What | Where |
+|---|---|
+| CLI tool on both machines | `home/shared/cli.nix` (check the desktop too, see CLAUDE.md) |
+| CLI tool on the Mac only | `home/darwin/cli.nix` (`pkgs.unstable.<name>` if stable is too old) |
+| GUI app | a cask in `modules/darwin/homebrew.nix` (`brew search --cask <name>`) |
+| App Store app | `masApps` in `modules/darwin/homebrew.nix` (ID from `mas list` or `mas search`) |
+| macOS setting | `modules/darwin/defaults.nix` |
+
+Then `nix fmt`, `nix flake check`, and switch. New files need `git add` first, because flakes
+ignore untracked files. Search for packages at https://search.nixos.org (choose the 26.05 channel).
+
+### Roll back
+
+```sh
+sudo darwin-rebuild --list-generations
+sudo darwin-rebuild --rollback                       # back one generation (system + home-manager)
+sudo darwin-rebuild switch --switch-generation 7     # or to a specific one
+```
+
+Or `git revert` the commit and switch. A rollback doesn't undo Homebrew installs or macOS
+`defaults`; restore those from `defaults import` or by hand. To remove nix-darwin completely, run
+`sudo darwin-uninstaller` (it restores the `*.before-nix-darwin` files), and only then
+`/nix/nix-installer uninstall`.
+
+### Bootstrap a fresh Mac
+
+The config expects the macOS account `olivi`, an Apple Silicon Mac, and the checkout at
+`~/nixos-config`.
+
+1. Sign in to the Apple ID and the App Store, then run `xcode-select --install` (git, and clang for
+   LazyVim's treesitter).
+2. Install Homebrew from https://brew.sh. nix-darwin declares its contents but doesn't install it.
+3. Install Nix:
+   ```sh
+   curl -sSfL https://artifacts.nixos.org/nix-installer | sh -s -- install --enable-flakes
+   ```
+   Open a new terminal afterwards.
+4. Clone the repo:
+   ```sh
+   git clone https://github.com/itripley/nixos-config.git ~/nixos-config
+   ```
+5. First switch. `darwin-rebuild` isn't installed yet, so build it from the flake:
+   ```sh
+   cd ~/nixos-config
+   nix build .#darwinConfigurations.macbook-olivia.system
+   sudo ./result/sw/bin/darwin-rebuild switch --flake .#macbook-olivia
+   ```
+   - If it stops with "Unexpected files in /etc", look at the files it lists. Rename each one to
+     `<name>.before-nix-darwin` and run the switch again.
+   - home-manager moves the dotfiles it replaces to `*.hm-backup`. If a `~/.gitconfig` exists,
+     rename it, because it would override the managed `~/.config/git/config`.
+   - The switch also installs every cask and App Store app, so the first run takes a while.
+6. Restore by hand what isn't in the repo (full list in [MACOS.md](docs/MACOS.md#stays-manual)):
+   - SSH keys into `~/.ssh` (`id_ed25519`, `id_unraid`, `id_ed25519_artlivia`), then run
+     `gh auth login`.
+   - TX-02 and the other personal fonts into `~/Library/Fonts`, and the WezTerm backdrops into
+     `home/olivia/dotfiles/wezterm/backdrops/`.
+   - App licences, VPN logins and privacy permissions (Accessibility, Screen Recording).
+7. From then on, `sudo darwin-rebuild switch --flake ~/nixos-config#macbook-olivia`. Once the
+   hostname is set, the `#macbook-olivia` part is optional.

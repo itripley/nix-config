@@ -56,7 +56,7 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
 | 8 | macOS defaults | done: generation 8, `a252741` |
 | 9 | Touch ID for sudo (nix-darwin managed) | done: generation 9, `9607781` |
 | 10 | Fonts | done: generation 10, `996c8e0` |
-| 11 | README, docs, CI | |
+| 11 | README, docs, CI | README macOS section and CLAUDE.md done; macOS CI job: waiting on Olivia |
 
 ## Checked
 

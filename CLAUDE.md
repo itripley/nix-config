@@ -5,6 +5,11 @@ on Wayland). It's **installed and in daily use**, dual-booting with Windows 11 o
 home-manager runs as a NixOS module (user `olivia`), with plasma-manager, nix-flatpak and a few
 third-party flakes. One `nh os switch` applies both system and user config.
 
+The second host is the MacBook, `darwinConfigurations.macbook-olivia`: an M1 running nix-darwin
+26.05, with home-manager as a nix-darwin module for user `olivi`. Homebrew handles the GUI apps.
+`home/shared/` is imported by both hosts. Mac details and its migration log are in
+`docs/MACOS.md`.
+
 The full reasoning is in `docs/`. Read the relevant doc before changing an area:
 `docs/MODULES.md` (every file and setting), `docs/DESIGN.md` (why), `docs/OPERATIONS.md`
 (how-tos, troubleshooting), `docs/VERIFICATION.md` (what broke and how it was checked).
@@ -49,6 +54,14 @@ nvd diff /run/current-system "$(nix build --no-link --print-out-paths .#nixosCon
 nixos-rebuild build-vm --flake .#desktop-olivia   # VM for risky changes (no btrfs; see boot.nix)
 ```
 
+On the Mac, `nix flake check` covers the aarch64-darwin config and also cross-evaluates the desktop:
+
+```sh
+nix build --no-link .#darwinConfigurations.macbook-olivia.system   # build the Mac system without activating
+nix eval .#darwinConfigurations.macbook-olivia.options.<option.path>.description
+nix eval .#nixosConfigurations.desktop-olivia.config.system.build.toplevel.drvPath   # desktop unchanged? compare before/after
+```
+
 On Windows (no Nix installed), `pwsh -File scripts\verify.ps1` evaluates the flake in Docker on the Unraid server. It runs `git add -A` first.
 
 ## Workflow for every change
@@ -63,7 +76,8 @@ On Windows (no Nix installed), `pwsh -File scripts\verify.ps1` evaluates the fla
    `docs/MIGRATION.md` for app additions and removals, `docs/VERIFICATION.md` for anything checked
    or still to check by hand.
 7. Stop there and tell Olivia what to run: `nh os switch`, or `nh os boot` + reboot for kernel,
-   driver, boot or kernel-parameter changes. Also list any hand checks.
+   driver, boot or kernel-parameter changes. On the Mac, run `sudo darwin-rebuild switch --flake
+   ~/nixos-config#macbook-olivia`. Also list any hand checks.
 
 Commit only when asked. Commit messages are a short imperative sentence, optionally with an area
 prefix (`NetBird: restart on config change`, `Add Serein from its flake`). Doc-only changes get
@@ -72,7 +86,9 @@ their own `Docs: …` commit. Never push.
 ## Hard rules
 
 - Never activate anything: no `nh os switch` / `boot` / `test`, no `nixos-rebuild switch` / `boot` /
-  `test` / `--rollback`. Olivia does that.
+  `test` / `--rollback`, no `darwin-rebuild switch` / `activate` / `--rollback`. Olivia does that.
+- Mac: never uninstall Homebrew packages, and never set `homebrew.onActivation.cleanup` to
+  `"uninstall"` or `"zap"` without asking. Never delete files there without asking either.
 - Never change the running system or network by hand: no `sudo`, no `systemctl start` / `stop` /
   `restart`, no `netbird up` / `networks select`, no `warp-cli connect`. Read-only status commands
   are fine.
