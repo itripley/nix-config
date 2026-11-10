@@ -17,7 +17,7 @@ Linked into `~/.local/share` by `home/olivia/plasma.nix`.
 checkout, copy it back from the Fedora drive (`/run/media/olivia/fedora/home/olivi`):
 
 ```sh
-F=/run/media/olivia/fedora/home/olivi; A=~/nixos-config/home/olivia/themes/art
+F=/run/media/olivia/fedora/home/olivi; A=~/nix-config/home/olivia/themes/art
 cp -r $F/.local/share/plasma/look-and-feel/Lain $F/.icons/Bocchi-The-Cursor-Alt-Cross $A/
 mkdir -p $A/wallpapers && cp $F/Pictures/{GpIWw6Ma4AAXh2A,D2uFrIz,GVLweQ9bgAEn4ct}.png $A/wallpapers/
 cp $F/Videos/lockscreen.gif $A/

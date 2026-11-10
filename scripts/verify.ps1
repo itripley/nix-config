@@ -8,7 +8,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
-$tmp = Join-Path ([IO.Path]::GetTempPath()) "nixos-config-verify"
+$tmp = Join-Path ([IO.Path]::GetTempPath()) "nix-config-verify"
 New-Item -ItemType Directory -Force $tmp | Out-Null
 
 $run = @'

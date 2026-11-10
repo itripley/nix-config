@@ -9,7 +9,7 @@ let
       inherit name hash;
       message = ''
         ${name} is gitignored art. Add it to the store, then build again:
-          nix store add-file ~/nixos-config/home/olivia/themes/art/sddm/${name}
+          nix store add-file ~/nix-config/home/olivia/themes/art/sddm/${name}
       '';
     };
 in

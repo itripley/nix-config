@@ -14,7 +14,7 @@
   ];
 
   # Licensed fonts (TX-02 for WezTerm and Obsidian), kept out of git: dotfiles/fonts is gitignored.
-  # A live link into the checkout (~/nixos-config), like the shared dotfiles.
-  xdg.dataFile."fonts/nixos-config".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nixos-config/home/olivia/dotfiles/fonts";
+  # A live link into the checkout (~/nix-config), like the shared dotfiles.
+  xdg.dataFile."fonts/nix-config".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/olivia/dotfiles/fonts";
 }

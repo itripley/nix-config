@@ -4,7 +4,7 @@
 # containers, logins, cookies, history, bookmarks, open tabs and prefs.
 #
 # Run on NixOS as olivia after the first `nh os switch`, with Firefox closed on BOTH systems:
-#   ~/nixos-config/scripts/migrate-firefox-profile.sh [WINDOWS_PROFILE_DIR]
+#   ~/nix-config/scripts/migrate-firefox-profile.sh [WINDOWS_PROFILE_DIR]
 set -euo pipefail
 
 PROFILE=9ylnf32e.default-release

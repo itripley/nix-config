@@ -1,5 +1,5 @@
 # Standalone home-manager on a machine whose OS this repo doesn't manage (flake.nix
-# homeConfigurations): `home-manager switch --flake ~/nixos-config#<user>@<system>`.
+# homeConfigurations): `home-manager switch --flake ~/nix-config#<user>@<system>`.
 # The user, home directory and the Linux target settings come from flake.nix.
 { lib, ... }:
 {

@@ -40,8 +40,8 @@
   # `nh os switch` / `nh os boot` — nicer nixos-rebuild, plus automatic GC
   programs.nh = {
     enable = true;
-    # The checkout. home-manager's live dotfile links point here too (~/nixos-config)
-    flake = "${config.users.users.olivia.home}/nixos-config";
+    # The checkout. home-manager's live dotfile links point here too (~/nix-config)
+    flake = "${config.users.users.olivia.home}/nix-config";
     clean = {
       enable = true;
       extraArgs = "--keep 10 --keep-since 14d";

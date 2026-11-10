@@ -1,6 +1,6 @@
 # Sets up NixOS in WSL on a Windows machine and applies hosts/wsl from this repo. Run it in
 # PowerShell as yourself (it asks for administrator rights only to install WSL itself):
-#   irm https://raw.githubusercontent.com/itripley/nixos-config/main/scripts/bootstrap.ps1 | iex
+#   irm https://raw.githubusercontent.com/itripley/nix-config/main/scripts/bootstrap.ps1 | iex
 # or from a checkout: pwsh -File scripts\bootstrap.ps1
 # Steps: WSL (once; needs a reboot) -> the NixOS distro from NixOS-WSL's latest release ->
 # scripts/bootstrap.sh inside it -> the restarts NixOS-WSL documents for a new default user.
@@ -11,7 +11,7 @@ function Invoke-NixosWslBootstrap {
     $ProgressPreference = 'SilentlyContinue'  # Invoke-WebRequest is slow with the progress bar
     $env:WSL_UTF8 = '1'                       # wsl.exe prints UTF-8 instead of UTF-16
     $distro = 'NixOS'
-    $raw = 'https://raw.githubusercontent.com/itripley/nixos-config/main'
+    $raw = 'https://raw.githubusercontent.com/itripley/nix-config/main'
     $tmp = [IO.Path]::GetTempPath()
 
     # 1. WSL itself
@@ -38,7 +38,7 @@ function Invoke-NixosWslBootstrap {
     # 3. bootstrap.sh inside it: the one next to this script, or the published one
     $sh = if ($PSScriptRoot) { Join-Path $PSScriptRoot 'bootstrap.sh' } else { '' }
     if (-not $sh -or -not (Test-Path $sh)) {
-        $sh = Join-Path $tmp 'nixos-config-bootstrap.sh'
+        $sh = Join-Path $tmp 'nix-config-bootstrap.sh'
         Invoke-WebRequest "$raw/scripts/bootstrap.sh" -OutFile $sh -UseBasicParsing
     }
     $linuxPath = (wsl.exe -d $distro -- wslpath -u ($sh -replace '\\', '/')).Trim()

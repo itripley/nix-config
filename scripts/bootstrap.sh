@@ -3,8 +3,8 @@
 # shellcheck disable=SC2024
 #
 # Sets up a machine from this repo. Run it on the machine itself:
-#   bash <(curl -fsSL https://raw.githubusercontent.com/itripley/nixos-config/main/scripts/bootstrap.sh)
-# or from a checkout: ~/nixos-config/scripts/bootstrap.sh
+#   bash <(curl -fsSL https://raw.githubusercontent.com/itripley/nix-config/main/scripts/bootstrap.sh)
+# or from a checkout: ~/nix-config/scripts/bootstrap.sh
 #
 # What it does depends on where it runs (docs/OPERATIONS.md, "Setting up a new machine"):
 #   NixOS USB installer   new PC: writes hosts/<name>/, wipes the disk you pick (typed
@@ -17,8 +17,8 @@
 # Windows itself: scripts/bootstrap.ps1.
 set -euo pipefail
 
-REPO_URL=${NIXOS_CONFIG_REPO:-https://github.com/itripley/nixos-config.git}
-CHECKOUT=${NIXOS_CONFIG_DIR:-$HOME/nixos-config}
+REPO_URL=${BOOTSTRAP_REPO:-https://github.com/itripley/nix-config.git}
+CHECKOUT=${BOOTSTRAP_DIR:-$HOME/nix-config}
 # Flakes for every nix call here, whatever the machine's nix.conf says: NIX_CONFIG reaches the
 # tools nix starts (home-manager), the flags reach the sudo calls, which drop the environment
 NIX_FLAGS=(--extra-experimental-features "nix-command flakes")
@@ -281,12 +281,12 @@ nixos_installer() {
   sudo nixos-install --flake ".#$name" --no-channel-copy </dev/tty
   say "Password for olivia"
   sudo nixos-enter --root /mnt -c 'passwd olivia' </dev/tty
-  # The config expects the checkout at ~/nixos-config (dotfile links, nh)
+  # The config expects the checkout at ~/nix-config (dotfile links, nh)
   sudo cp -a "$CHECKOUT" /mnt/home/olivia/
-  sudo nixos-enter --root /mnt -c 'chown -R olivia:users /home/olivia/nixos-config'
+  sudo nixos-enter --root /mnt -c 'chown -R olivia:users /home/olivia/nix-config'
   say "Done. Reboot into $name. Then:"
   cat >&2 <<EOF
-  - commit and push hosts/$name from ~/nixos-config (gh auth login first)
+  - commit and push hosts/$name from ~/nix-config (gh auth login first)
   - the rest of the hand steps: README.md, "After setting up"
 EOF
 }
@@ -322,9 +322,9 @@ nixos_installed() {
   sudo nixos-rebuild boot --flake ".#$name"
   say "Reboot. olivia is created on boot without a password: from another account (or a TTY), run"
   echo "  sudo passwd olivia" >&2
-  [[ $CHECKOUT == /home/olivia/nixos-config ]] || cat >&2 <<EOF
+  [[ $CHECKOUT == /home/olivia/nix-config ]] || cat >&2 <<EOF
 Then move the checkout to where the config expects it:
-  sudo cp -a $CHECKOUT /home/olivia/ && sudo chown -R olivia:users /home/olivia/nixos-config
+  sudo cp -a $CHECKOUT /home/olivia/ && sudo chown -R olivia:users /home/olivia/nix-config
 EOF
   echo "Commit and push hosts/$name afterwards." >&2
 }
@@ -344,7 +344,7 @@ nixos_wsl() {
   say "Building hosts/wsl (default user olivia)"
   sudo nixos-rebuild boot --flake .#wsl
   # Same uid 1000 as olivia, so the copy keeps the right owner
-  if [[ $CHECKOUT != /home/olivia/nixos-config ]]; then
+  if [[ $CHECKOUT != /home/olivia/nix-config ]]; then
     sudo install -d -o "$(id -u)" -g users -m 700 /home/olivia
     cp -a "$CHECKOUT" /home/olivia/
   fi

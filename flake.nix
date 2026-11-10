@@ -230,10 +230,10 @@
       # `nh os switch` on a NixOS machine (picks the config by hostname)
       nixosConfigurations = lib.genAttrs (lib.filter (name: !isMac name) hostNames) mkNixos;
 
-      # `sudo darwin-rebuild switch --flake ~/nixos-config` on a Mac (picks it by hostname)
+      # `sudo darwin-rebuild switch --flake ~/nix-config` on a Mac (picks it by hostname)
       darwinConfigurations = lib.genAttrs (lib.filter isMac hostNames) mkDarwin;
 
-      # `home-manager switch --flake ~/nixos-config#<user>@<system>`
+      # `home-manager switch --flake ~/nix-config#<user>@<system>`
       homeConfigurations = lib.listToAttrs (
         lib.concatMap (
           user:
