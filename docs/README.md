@@ -21,7 +21,7 @@ Installation steps are in the top-level [README](../README.md).
 ## Status (2026-11-09)
 
 - **MacBook added (2026-11-10):** `darwinConfigurations.macbook-olivia` (nix-darwin) is switched to
-  (generation 2: hostname, Nix management, home-manager). The remaining steps are tracked in [MACOS.md](MACOS.md#steps).
+  (generation 3: hostname, Nix management, home-manager, CLI packages). The remaining steps are tracked in [MACOS.md](MACOS.md#steps).
 - **Installed** on the Samsung 850 EVO and in daily use; `hardware-configuration.nix` is the generated one.
 - Every app from the original lists builds. Upstream build failures are patched in
   `overlays/build-fixes.nix` ([VERIFICATION.md](VERIFICATION.md#first-real-build-2026-11-08)).
@@ -84,6 +84,7 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-09 | Windows settings sweep: mpv and plex-mpv-shim configs, OBS plugins, Chromium extensions, OpenRGB lowpink colors declared; logins and app state left as hand steps | `mpv.nix`, `apps.nix`, `services.nix`, [VERIFICATION.md](VERIFICATION.md#windows-settings-sweep-2026-11-09) |
 | 2026-11-10 | MacBook: Nix installed (NixOS installer), nix-darwin bootstrapped as `macbook-olivia`; repo tooling and checks now also cover aarch64-darwin; desktop drv unchanged | `2256d0e`, [MACOS.md](MACOS.md), DESIGN §11 |
 | 2026-11-10 | MacBook: home-manager added for `olivi` (generation 2), HM settings shared with the desktop via `homeManagerModule`; rollback rehearsed | `39c8bbd`, [MACOS.md](MACOS.md#checked) |
+| 2026-11-10 | Shared home-manager modules start: `home/shared/cli.nix` (12 CLI tools moved from `dev.nix`/`apps.nix`, desktop package set unchanged); the Mac gets its own CLI list (`home/darwin/cli.nix`) | `13f0528`, MODULES.md |
 
 ## Conventions
 

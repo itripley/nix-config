@@ -50,7 +50,7 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
 | 2 | Baseline the desktop's toplevel `drvPath` (cross-evaluated on the Mac) | done: `c577barl…-nixos-system-desktop-olivia-26.05.20261105.c56a87d.drv` |
 | 3 | Minimal nix-darwin: hostname, `primaryUser`, `nix.settings`, no channels | done: generation 1, `2256d0e` |
 | 4 | home-manager (no file takeover yet) | done: generation 2, `39c8bbd`; rollback rehearsed (2 → 1 → 2) |
-| 5 | Shared home modules + CLI packages | |
+| 5 | Shared home modules + CLI packages | done: generation 3, `13f0528` |
 | 6 | Shell, git, ssh, editor config taken over | |
 | 7 | Homebrew casks, brews, App Store apps (declared) | |
 | 8 | macOS defaults | |
@@ -74,3 +74,9 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
   (checked in the 2.35.4 source), so it leaves nix-darwin's `/etc/zshrc` and others alone. It only
   re-adds the Nix lines if a macOS update puts a stock file back, which keeps Nix usable until the
   next switch.
+- **Step 5** (generation 3): 73 binaries in `/etc/profiles/per-user/olivi/bin`, all from the binary
+  cache (911 MiB download). Versions checked: colima 0.10.3, docker 29.9.2, node 26.13.0, croc
+  11.5.5, uv 0.11.21. Homebrew's copies still come first on PATH (`~/.zprofile` runs `brew
+  shellenv`) until step 6. **Desktop:** same 68 packages. Its toplevel `drvPath` changed only because
+  the package order in `home-manager-path`, `man-paths` and `olivia-fish-completions` moved
+  (nix-diff). Its next `nh os switch` rebuilds those few derivations with identical contents.

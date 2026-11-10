@@ -15,6 +15,8 @@ The full reasoning is in `docs/`. Read the relevant doc before changing an area:
 | Change | File |
 |---|---|
 | User app | `home/olivia/apps.nix` (dev tools: `home/olivia/dev.nix`) |
+| CLI tool for both machines | `home/shared/cli.nix` (changes the desktop too: compare its toplevel `drvPath`) |
+| Mac-only CLI tool | `home/darwin/cli.nix` |
 | System service, hardware, boot, network, mounts | the matching `modules/nixos/*.nix` |
 | New module | new file, then add it to `imports` in `hosts/desktop-olivia/configuration.nix` or `home/olivia/default.nix` |
 | Plasma settings, shortcuts, theme | `home/olivia/plasma.nix` |

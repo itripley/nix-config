@@ -22,8 +22,10 @@ hosts/macbook-olivia/
   configuration.nix               the Mac (nix-darwin): hostname, primaryUser, nix settings
 modules/nixos/                    system level (root, services, hardware)
   boot.nix  amd.nix  desktop.nix  audio.nix  networking.nix  storage.nix  gaming.nix  services.nix
+home/shared/                      home-manager modules both hosts import
+  default.nix  cli.nix
 home/darwin/                      the Mac user's home-manager config (olivi)
-  default.nix
+  default.nix  cli.nix
 home/olivia/                      user level (home-manager)
   default.nix  apps.nix  dev.nix  firefox.nix  plasma.nix  flatpak.nix  warp-gui.nix  obsidian.nix
   mpv.nix
@@ -137,6 +139,19 @@ The Mac's nix-darwin host (DESIGN §11, [MACOS.md](MACOS.md)).
   --configuration-revision` shows which commit a generation was built from.
 - `system.stateVersion = 7`: never change it.
 
+## `home/shared/default.nix`, `home/shared/cli.nix`
+
+Home-manager modules imported by **both** `home/olivia/default.nix` (desktop) and
+`home/darwin/default.nix` (Mac). Only things that work the same on Linux and macOS go here.
+Platform-specific config stays in the host's own home directory (DESIGN §11).
+
+- `cli.nix`: Python + uv, docker-compose, tmux, mc, fastfetch, jq, gh, btop, and from Fedora: Go,
+  rustup (cargo/rustc), lazydocker. All of them are in the binary cache for both systems.
+- A change here changes **both** machines. Check the desktop with `nix eval
+  .#nixosConfigurations.desktop-olivia.config.system.build.toplevel.drvPath` before and after.
+  Moving packages between modules changes only the order inside `home-manager-path` (also
+  `man-paths` and the fish completions). The contents stay identical; `nix-diff` shows it.
+
 ## `home/darwin/default.nix`
 
 The Mac user's home-manager entry (`home-manager.users.olivi`, wired in `flake.nix`). The macOS
@@ -146,6 +161,24 @@ shared modules.
 - `home.stateVersion = "26.05"`: never change it. With 25.11 or later, `targets.darwin.copyApps` is
   on, so GUI apps from Nix are copied to `~/Applications/Home Manager Apps` (Spotlight finds them).
 - `users.users.olivi.home` in the host config is what home-manager's nix-darwin module reads.
+
+## `home/darwin/cli.nix`
+
+Mac-only CLI tools, chosen so nothing ends up older than what Homebrew had (checked 2026-11-10).
+`pkgs.unstable` is used where stable is behind:
+
+| Package | Why this one |
+|---|---|
+| `nodejs_26` | Homebrew had Node 26; the desktop keeps the LTS (`nodejs`, 24) |
+| `unstable.croc` | v11, as Homebrew had (stable is v10, which the desktop uses) |
+| `unstable.colima` | 0.10.3, with lima 2.2.0, the versions the existing VM (`~/.colima`, vz, aarch64) was created with |
+| `docker-client`, `unstable.docker-buildx`, `docker-credential-helpers` | the Docker CLI for Colima (buildx 0.38; stable is 0.31) |
+| `unstable.kubernetes-helm` | helm 4, as Homebrew had (stable is 3) |
+| `unstable.ente-cli` | 0.3.0, as Homebrew had |
+| `cloudflared`, `imagemagick`, `pv`, `rsync` (macOS ships openrsync), `unar`, `pipx`, `git-lfs` | stable is current enough |
+
+Not here: `cliclick` (not in nixpkgs) and `opencode` (unstable isn't cached and builds from
+source; stable is older than Homebrew's). Both stay Homebrew brews.
 
 ## `modules/nixos/boot.nix`
 
@@ -267,7 +300,7 @@ Notable choices:
   also bundles JDK 17 and 8 (~0.7 GiB) for 1.16 and older; add them back to the list for those versions.
 - `unstable.claude-code`: from unstable because it moves fast.
 - `inputs.claude-desktop.packages.<system>.default`: Claude Desktop (official Linux beta) from its flake (DESIGN §4).
-- "From the old Fedora install" block: btop, High Tide, pokemon-colorscripts.
+- "From the old Fedora install" block: High Tide, pokemon-colorscripts (btop moved to `home/shared/cli.nix`).
   See [FEDORA.md](FEDORA.md).
 - Removed on 2026-11-09: Zen, Thunar, w3m, Ente, GNOME Boxes, distrobox, DistroShelf, Signal, Vesktop,
   Element, Cinny, Dissent, figma-linux, Krita, GIMP, Pinta, Kdenlive, LosslessCut, XnView MP,
@@ -303,7 +336,7 @@ Notable choices:
 | `programs.neovim` + `extraPackages` | LazyVim needs a C compiler (treesitter), ripgrep/fd (search), lazygit, and LSPs; Nix provides them on Neovim's PATH. `sideloadInitLua = true` because HM 26.05 always generates `nvim/init.lua`, which can't be written into the live-linked LazyVim folder. |
 | `programs.vscode`, `package = vscode.fhs` | The FHS variant lets marketplace extensions with native binaries work (C#, C# Dev Kit, Python, debugpy, Claude Code ship Linux binaries). **All 42 extensions from Windows** plus nix-ide are declared, from `pkgs/vscode-marketplace` at the Windows versions; settings still come through Settings Sync (`settings.json` isn't managed). The extensions dir stays mutable (home-manager's default), so an extension installed or auto-updated from VS Code works alongside the declared ones; a fresh install always gets the declared set. Custom CSS and JS (`be5invis.vscode-custom-css`) and Custom UI Font patch VS Code's own `workbench.html` / `workbench.desktop.main.css`, which are read-only in the store, so they're installed but can't apply. |
 | `wezterm` (plain package) | The terminal. Not `programs.wezterm`, which would generate `wezterm.lua` into the live-linked config folder. Font: TX-02 (`default.nix`), with JetBrainsMono Nerd Font from `desktop.nix` as the icon fallback. |
-| Dev tools | Node, Python + uv, Godot 4 + Mono (brings its own .NET 8 SDK, so no separate `dotnet-sdk`), docker-compose, tmux, mc, fastfetch, jq, gh; from Fedora: Go, rustup (cargo), lazydocker. Add `dotnet-sdk` back if you need the `dotnet` CLI outside Godot (e.g. VS Code's C# extension loading a project). |
+| Dev tools | Node (LTS), Godot 4 + Mono (brings its own .NET 8 SDK, so no separate `dotnet-sdk`). Add `dotnet-sdk` back if you need the `dotnet` CLI outside Godot (e.g. VS Code's C# extension loading a project). The CLI tools both machines use (Python + uv, docker-compose, tmux, mc, fastfetch, jq, gh, btop, Go, rustup, lazydocker) are in `home/shared/cli.nix`. |
 
 ## `home/olivia/mpv.nix`
 
