@@ -49,7 +49,7 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
 | 1 | Install Nix (NixOS installer) | done 2026-11-10 |
 | 2 | Baseline the desktop's toplevel `drvPath` (cross-evaluated on the Mac) | done: `c577barl…-nixos-system-desktop-olivia-26.05.20261105.c56a87d.drv` |
 | 3 | Minimal nix-darwin: hostname, `primaryUser`, `nix.settings`, no channels | done: generation 1, `2256d0e` |
-| 4 | home-manager (no file takeover yet) | |
+| 4 | home-manager (no file takeover yet) | done: generation 2, `39c8bbd`; rollback rehearsed (2 → 1 → 2) |
 | 5 | Shared home modules + CLI packages | |
 | 6 | Shell, git, ssh, editor config taken over | |
 | 7 | Homebrew casks, brews, App Store apps (declared) | |
@@ -64,3 +64,13 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
   HostName; `nix store info` shows the daemon at 2.34.9 from the system profile; `nix config show`
   has `trusted-users = root`; `nix run nixpkgs#hello` works; `/etc/pam.d/sudo_local` is untouched.
   The desktop's toplevel `drvPath` is unchanged from the baseline.
+- **Step 4** (generation 2): home-manager activated for `olivi`. It added only its three marker
+  files (`~/.cache/.keep`, `~/.local/state/.keep`, `~/Library/Fonts/.home-manager-fonts-version`) and
+  `/etc/profiles/per-user/olivi`. Rollback rehearsed: `sudo darwin-rebuild --rollback` to 1, then
+  `sudo darwin-rebuild switch --switch-generation 2`. `darwin-rebuild --list-generations` needs
+  `sudo` (it takes the profile lock); `ls -l /nix/var/nix/profiles/system-*-link` works without it.
+- **Installer boot hook** (`/Library/LaunchDaemons/systems.determinate.nix-installer.nix-hook.plist`,
+  runs `/nix/nix-installer repair` at boot): kept. Its shell-profile repair skips symlinked files
+  (checked in the 2.35.4 source), so it leaves nix-darwin's `/etc/zshrc` and others alone. It only
+  re-adds the Nix lines if a macOS update puts a stock file back, which keeps Nix usable until the
+  next switch.

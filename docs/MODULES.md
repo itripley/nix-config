@@ -22,6 +22,8 @@ hosts/macbook-olivia/
   configuration.nix               the Mac (nix-darwin): hostname, primaryUser, nix settings
 modules/nixos/                    system level (root, services, hardware)
   boot.nix  amd.nix  desktop.nix  audio.nix  networking.nix  storage.nix  gaming.nix  services.nix
+home/darwin/                      the Mac user's home-manager config (olivi)
+  default.nix
 home/olivia/                      user level (home-manager)
   default.nix  apps.nix  dev.nix  firefox.nix  plasma.nix  flatpak.nix  warp-gui.nix  obsidian.nix
   mpv.nix
@@ -50,8 +52,9 @@ scripts/
   - `permittedInsecurePackages = [ "openssl-1.1.1w" ]`: needed only by Sublime Text 4 (see DESIGN §4).
 - **NixOS modules from inputs:** disko, `artcraft` (`programs.artcraft`) and `vicinae` (the
   input-server wrapper).
-- **home-manager block:** `useGlobalPkgs` (same pkgs as the system), `useUserPackages` (user
-  packages installed through the system profile), `backupFileExtension`, and `sharedModules` loading
+- **home-manager block:** `homeManagerModule` (shared with the Mac) sets `useGlobalPkgs` (same pkgs as
+  the system), `useUserPackages` (user packages installed through the system profile),
+  `backupFileExtension` and `extraSpecialArgs`. The desktop adds `sharedModules` loading
   plasma-manager, nix-flatpak's HM module and vicinae's HM module (which replaces home-manager's own
   `programs.vicinae`).
 - Outputs:
@@ -133,6 +136,16 @@ The Mac's nix-darwin host (DESIGN §11, [MACOS.md](MACOS.md)).
 - `system.configurationRevision` comes from the flake's `rev`/`dirtyRev`, so `darwin-version
   --configuration-revision` shows which commit a generation was built from.
 - `system.stateVersion = 7`: never change it.
+
+## `home/darwin/default.nix`
+
+The Mac user's home-manager entry (`home-manager.users.olivi`, wired in `flake.nix`). The macOS
+account is `olivi`; the NixOS user is `olivia`, so the username and home directory live here, not in
+shared modules.
+
+- `home.stateVersion = "26.05"`: never change it. With 25.11 or later, `targets.darwin.copyApps` is
+  on, so GUI apps from Nix are copied to `~/Applications/Home Manager Apps` (Spotlight finds them).
+- `users.users.olivi.home` in the host config is what home-manager's nix-darwin module reads.
 
 ## `modules/nixos/boot.nix`
 
