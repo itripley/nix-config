@@ -287,7 +287,7 @@ nixos_installer() {
   say "Done. Reboot into $name. Then:"
   cat >&2 <<EOF
   - commit and push hosts/$name from ~/nixos-config (gh auth login first)
-  - the rest of the hand steps: README.md, "After first boot"
+  - the rest of the hand steps: README.md, "After setting up"
 EOF
 }
 
@@ -441,7 +441,7 @@ new_mac_host() {
   say "Wrote hosts/$name for user $user. Sign in to the App Store first, or the App Store apps fail."
   confirm "Switch to it now?" || die "stopped; hosts/$name is left for you to edit"
   darwin_switch "$name"
-  say "Done. Commit and push hosts/$name. Hand steps: README.md, \"Bootstrap a fresh Mac\" step 6."
+  say "Done. Commit and push hosts/$name. Hand steps: README.md, \"After setting up\"."
 }
 
 mac() {
