@@ -52,7 +52,7 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
 | 4 | home-manager (no file takeover yet) | done: generation 2, `39c8bbd`; rollback rehearsed (2 → 1 → 2) |
 | 5 | Shared home modules + CLI packages | done: generation 3, `13f0528` |
 | 6 | Shell, git, ssh, editor config taken over | done: generations 4–5, `fa820cb` |
-| 7 | Homebrew casks, brews, App Store apps (declared) | |
+| 7 | Homebrew casks, brews, App Store apps (declared) | done: generations 6–7, `286d6f5` |
 | 8 | macOS defaults | |
 | 9 | Touch ID for sudo (nix-darwin managed) | |
 | 10 | Fonts | |
@@ -97,3 +97,19 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
     there) has `cliPluginsExtraDirs` pointing at `/opt/homebrew/lib/docker/cli-plugins`. That
     directory wins over `~/.docker/cli-plugins`, so docker still runs Homebrew's buildx 0.37.1, not
     Nix's 0.38.1. Compose is 5.5.1 either way. Removing that entry hands the plugins to Nix.
+- **Step 7** (generations 6 and 7): before the switch, `brew bundle check --no-upgrade` against the
+  generated Brewfile reported nothing to install. Without `--no-upgrade`, it lists the 30 declared
+  items that are outdated; activation passes `--no-upgrade` (`upgrade = false`), so they stay as
+  they are. After the switch:
+  - No new kegs or casks (nothing in `Cellar`/`Caskroom` newer than the switch). There are still 36
+    casks and 47 leaves.
+  - serein and anomalyco are now trusted taps (`brew tap-info`). pear was already trusted.
+  - `mas list` shows Keynote 409183694.
+  - In a fresh login shell, `HOMEBREW_BUNDLE_FILE` points at the store Brewfile and `brew bundle
+    check --no-upgrade` is satisfied. A shell that already ran nix-darwin's environment script
+    keeps the old values until it's restarted.
+  - **Taphouse is not declared.** It has an App Store receipt, but `mas list` doesn't show it and
+    Apple's lookup API returns nothing for `com.multimodalsolutions.taphouse` in the us, pt, br or
+    gb storefronts. It looks withdrawn from the store, so it stays a manual install.
+  - Brew prints a warning about a libtiff ↔ webp circular dependency. It comes from stale keg
+    records and doesn't block anything; it was left alone.

@@ -199,3 +199,8 @@ x86_64-linux system without building it.
 - **Touch ID's `sudo_local` stays hand-written until its own step.** nix-darwin manages
   `/etc/pam.d/sudo_local` by default, with empty contents unless `touchIdAuth` is set. Leaving it
   managed would have blocked the first switch, and it would drop Touch ID if ever overwritten.
+- **Homebrew stays for GUI apps and some build tools**, declared with nix-darwin's `homebrew`
+  module. Casks keep Spotlight, code signing and the apps' own updaters working; brew/Xcode builds
+  expect `/opt/homebrew`. No nix-homebrew: Homebrew itself stays a normal install. Activation never
+  upgrades or removes anything (`cleanup = "none"`), so declaring the existing apps changed nothing
+  on disk, and removals stay a manual, asked-for step.
