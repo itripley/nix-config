@@ -140,6 +140,9 @@ The Mac's nix-darwin host (DESIGN §11, [MACOS.md](MACOS.md)).
 - `environment.etc."pam.d/sudo_local".knownSha256Hashes`: the hash of the hand-written file this
   replaced, so the switch moved it to `sudo_local.before-nix-darwin` instead of aborting with
   "Unexpected files in /etc". A file with any other content still aborts.
+- `fonts.packages = [ nerd-fonts.jetbrains-mono ]`: into `/Library/Fonts/Nix Fonts`. It's
+  WezTerm's icon fallback, as on the desktop (`desktop.nix`). TX-02 and the other personal fonts
+  stay in `~/Library/Fonts` by hand.
 - `nix.settings.experimental-features` and `nix.channel.enable = false`, as on the desktop.
   `trusted-users` stays root-only.
 - `system.configurationRevision` comes from the flake's `rev`/`dirtyRev`, so `darwin-version

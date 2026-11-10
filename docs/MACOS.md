@@ -55,7 +55,7 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
 | 7 | Homebrew casks, brews, App Store apps (declared) | done: generations 6–7, `286d6f5` |
 | 8 | macOS defaults | done: generation 8, `a252741` |
 | 9 | Touch ID for sudo (nix-darwin managed) | done: generation 9, `9607781` |
-| 10 | Fonts | |
+| 10 | Fonts | done: generation 10, `996c8e0` |
 | 11 | README, docs, CI | |
 
 ## Checked
@@ -132,3 +132,34 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
   `/etc/static/pam.d/sudo_local`, which has `pam_reattach` (optional) and `pam_tid.so`
   (sufficient). `/etc/pam.d/sudo` is unchanged. Olivia checked `sudo -k; sudo true` both in a
   plain shell and inside tmux: Touch ID was offered in both.
+- **Step 10** (generation 10): `nerd-fonts.jetbrains-mono` 3.4.0 (JetBrains Mono 2.304) is in
+  `/Library/Fonts/Nix Fonts`. Its 96 files have the same names as the hand-installed ones, and the
+  Regular files are byte-identical. With Olivia's OK, the 96 hand-installed
+  `~/Library/Fonts/JetBrainsMono*NerdFont*.ttf` were moved (not deleted) to
+  `~/nix-migration-backup-2026-11-10/fonts/`, and the user font cache was cleared
+  (`atsutil databases -removeUser`). `system_profiler SPFontsDataType` then lists the Nix copy as
+  valid. The other fonts in `~/Library/Fonts` were not touched.
+
+## Stays manual
+
+Not declared, on purpose or because it can't be:
+
+- **Secrets:** SSH keys (`id_ed25519`, `id_unraid`, `id_ed25519_artlivia`), copied by hand as on
+  the desktop. The gh token (`gh auth login`, kept in the keychain), VPN logins (Tailscale, NetBird,
+  WARP, PrivadoVPN). If a secret ever needs to be declarative, use sops-nix (one tool for NixOS,
+  nix-darwin and home-manager).
+- **Accounts and permissions:** Apple ID, iCloud, the App Store sign-in (needed for `masApps`), app
+  licences (CrossOver, Scrivener, ForkLift, BetterDisplay). Also the privacy grants: Accessibility
+  and Screen Recording for Raycast, BetterDisplay, Mac Mouse Fix and OBS.
+- **Other macOS state:** login items, wallpaper, Focus, notifications, the `-currentHost` trackpad
+  keys, key repeat.
+- **App settings:** VS Code (`settings.json` holds an API key), Raycast, Sublime, `~/.config/mpv`.
+- **Apps without a cask or store listing:** PhotoCraft, Plex MPV Shim (local build), TrackWeight,
+  Authenticator, Logi Options, TeraCopy, Taphouse, and the hand-installed apps with casks that
+  weren't adopted (Firefox, CrossOver, Eagle, ForkLift, Godot Mono, qBittorrent, Scrivener,
+  NetBird UI). The old Homebrew `/Applications/WezTerm.app` is unused now and can be removed.
+- **Personal or licensed fonts:** TX-02 (licensed), bianzhidai, Poppins, SF Movie Poster,
+  Sixtyfour, Golos, Bitsumishi, deception scanline, all in `~/Library/Fonts`. The WezTerm backdrops
+  go into the gitignored `home/olivia/dotfiles/wezterm/backdrops/`.
+- **Homebrew leftovers:** the 8 stale casks, and the brew copies of tools that now come from Nix.
+  They're still installed, and nothing removes them (`cleanup = "none"`).
