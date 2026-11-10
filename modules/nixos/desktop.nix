@@ -9,20 +9,14 @@
     defaultSession = "plasma";
   };
 
+  # olivia's desktop home-manager config: Plasma, apps, dotfiles (home/olivia)
+  home-manager.users.olivia = import ../../home/olivia;
+
   # SilentSDDM login screen (silent-sddm flake input): Fedora's "rei" preset with its edits.
-  # The module sets SDDM's theme, Qt modules and virtual keyboard, and links the avatar.
+  # The module sets SDDM's theme, Qt modules and virtual keyboard. Fedora's own background and
+  # avatar are in login-art.nix; without it the preset's video background shows.
   programs.silentSDDM =
     let
-      # Third-party art, gitignored: added to the store by hand (home/olivia/themes/README.md)
-      art =
-        name: hash:
-        pkgs.requireFile {
-          inherit name hash;
-          message = ''
-            ${name} is gitignored art. Add it to the store, then build again:
-              nix store add-file ~/nixos-config/home/olivia/themes/art/sddm/${name}
-          '';
-        };
       fonts =
         lib.genAttrs
           [
@@ -45,12 +39,7 @@
     {
       enable = true;
       theme = "rei";
-      backgrounds.rei2 = art "rei2.png" "sha256-Hu/hnIvhM8ClDcNUQFmJCR/hT495eRu3gZlYta0+bXc=";
-      profileIcons.olivia = art "avatar.png" "sha256-3pdAQJ1e5xCpqMcPWMglKm0TxKa7eyDLy2/+KG5qWM8=";
       settings = fonts // {
-        General.animated-background-placeholder = "rei2.png";
-        LockScreen.background = "rei2.png";
-        LoginScreen.background = "rei2.png";
         "LoginScreen.LoginArea.Avatar".shape = "circle";
       };
     };

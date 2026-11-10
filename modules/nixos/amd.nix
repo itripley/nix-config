@@ -1,4 +1,4 @@
-# Ryzen 7 7700X + Radeon RX 7800 XT (gfx1101)
+# AMD Radeon GPUs (the desktop: RX 7800 XT, gfx1101). bootstrap.sh adds it when it finds one.
 { pkgs, ... }:
 {
   hardware.graphics = {
@@ -16,6 +16,9 @@
   # Clock/voltage control in LACT needs overdrive (adds amdgpu.ppfeaturemask to the kernel
   # command line), as the lact module recommends. Takes effect after a reboot: `nh os boot`.
   hardware.amdgpu.overdrive.enable = true;
+
+  # Local LLMs on the GPU (gfx1101 is a supported ROCm target)
+  services.ollama.package = pkgs.ollama-rocm;
 
   # DDC/CI so Plasma can control monitor brightness (replaces Twinkle Tray)
   hardware.i2c.enable = true;

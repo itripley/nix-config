@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 let
-  # Files on SMB/NTFS mounts show up as owned by olivia (configuration.nix) and group users
+  # Files on the SMB mounts show up as owned by olivia (common.nix) and group users
   owner = [
     "uid=${toString config.users.users.olivia.uid}"
     "gid=${toString config.users.groups.users.gid}"
@@ -32,16 +32,5 @@ in
   fileSystems."/mnt/unraid/downloads" = unraidShare "downloads";
   fileSystems."/mnt/unraid/files" = unraidShare "files";
 
-  # Windows C: (Fanxiang NVMe), read-only. Needs Fast Startup disabled in Windows,
-  # otherwise the volume is left "dirty" and ntfs3 refuses to mount it.
-  fileSystems."/mnt/windows" = {
-    device = "/dev/disk/by-partuuid/62cd18cb-2a2f-4de3-9849-fc529fea7536";
-    fsType = "ntfs3";
-    options = owner ++ [
-      "ro"
-      "noauto"
-      "nofail"
-      "x-systemd.automount"
-    ];
-  };
+  # The desktop's Windows disk is mounted in hosts/desktop-olivia/machine.nix
 }

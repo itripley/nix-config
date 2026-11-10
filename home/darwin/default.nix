@@ -1,4 +1,5 @@
-# home-manager for olivi on macbook-olivia (the Mac's username; the NixOS user is olivia)
+# home-manager for the Mac user (olivi on macbook-olivia). The username and home come from the
+# host's users.users (nix-darwin), or from flake.nix for standalone home-manager.
 {
   imports = [
     ../shared
@@ -7,8 +8,6 @@
     ./git.nix
   ];
 
-  home.username = "olivi";
-  home.homeDirectory = "/Users/olivi";
   home.stateVersion = "26.05";
   programs.home-manager.enable = true;
 }

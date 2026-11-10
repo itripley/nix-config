@@ -1,4 +1,9 @@
-{ lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   boot.loader.systemd-boot = {
     enable = true;
@@ -16,14 +21,12 @@
     "ntfs"
   ];
 
-  # Windows keeps the RTC in local time; without this the clock jumps on every OS switch
-  time.hardwareClockInLocalTime = true;
-
   hardware.enableRedistributableFirmware = true;
   zramSwap.enable = true;
   services.fstrim.enable = true;
-  services.btrfs.autoScrub.enable = true;
-  # `nixos-rebuild build-vm` swaps fileSystems for a non-btrfs disk, which trips autoScrub's
-  # assertion. (`system.build.vmWithDisko` keeps the real btrfs layout and doesn't need this.)
-  virtualisation.vmVariant.services.btrfs.autoScrub.enable = lib.mkForce false;
+  # Only where there is btrfs (autoScrub asserts otherwise): not on an adopted ext4 install, nor
+  # in `nixos-rebuild build-vm`, which swaps fileSystems for a plain disk
+  services.btrfs.autoScrub.enable = lib.any (fs: fs.fsType == "btrfs") (
+    lib.attrValues config.fileSystems
+  );
 }
