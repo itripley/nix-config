@@ -3,20 +3,20 @@
 ## The basic loop
 
 ```sh
-cd ~/nixos-config
+cd ~/nix-config
 $EDITOR home/olivia/apps.nix     # change something
 nh os switch                     # build + activate (asks for sudo)
 git add -A && git commit -m "…"  # record it
 ```
 
-- `nh os switch` = `nixos-rebuild switch --flake ~/nixos-config#desktop-olivia`, with a readable diff
+- `nh os switch` = `nixos-rebuild switch --flake ~/nix-config#desktop-olivia`, with a readable diff
   of what changed. `nh os boot` applies at next boot instead (safer for kernel/driver changes).
 - **New files must be `git add`ed** before rebuilding, or the flake won't see them.
 - `nix flake check` (≈26 s) evaluates every Linux machine and home (the desktop, WSL, any added
   PCs, the standalone homes) and lints the repo; `nix fmt` formats it. CI runs the same check on
   every push, and on macOS for the Macs.
 - From Windows, check edits before rebooting into NixOS: `pwsh -File scripts\verify.ps1`.
-- **The MacBook** has its own loop: `sudo darwin-rebuild switch --flake ~/nixos-config#macbook-olivia`.
+- **The MacBook** has its own loop: `sudo darwin-rebuild switch --flake ~/nix-config#macbook-olivia`.
   Its commands are in the README's [Everyday use](../README.md#everyday-use), and its troubleshooting
   [below](#macbook). A change in `home/shared/` affects both machines, so switch both.
 
@@ -51,9 +51,9 @@ work first: the script clones from GitHub.
 
 | The new machine | Run on it | Result |
 |---|---|---|
-| A PC, booted from a NixOS USB installer (UEFI) | `bash <(curl -fsSL https://raw.githubusercontent.com/itripley/nixos-config/main/scripts/bootstrap.sh)` | A new `hosts/<name>/`, the chosen disk wiped and NixOS installed with the full desktop. A known name (`desktop-olivia`) is reinstalled as it is. |
+| A PC, booted from a NixOS USB installer (UEFI) | `bash <(curl -fsSL https://raw.githubusercontent.com/itripley/nix-config/main/scripts/bootstrap.sh)` | A new `hosts/<name>/`, the chosen disk wiped and NixOS installed with the full desktop. A known name (`desktop-olivia`) is reinstalled as it is. |
 | A PC that already runs NixOS | the same | Its hostname in `hosts/` → switched to it. Otherwise adopted as a new `hosts/<name>/`, keeping its disks. |
-| Windows | `irm https://raw.githubusercontent.com/itripley/nixos-config/main/scripts/bootstrap.ps1 \| iex` in PowerShell | WSL if missing (admin prompt, reboot, run again), the NixOS-WSL distro, then `hosts/wsl`: user olivia, CLI tools, dotfiles and the Linux apps through WSLg. |
+| Windows | `irm https://raw.githubusercontent.com/itripley/nix-config/main/scripts/bootstrap.ps1 \| iex` in PowerShell | WSL if missing (admin prompt, reboot, run again), the NixOS-WSL distro, then `hosts/wsl`: user olivia, CLI tools, dotfiles and the Linux apps through WSLg. |
 | An Apple Silicon Mac | the `bash <(curl …)` line, in Terminal | Its `LocalHostName` in `hosts/` → switched to it. Otherwise: a new nix-darwin host (`hosts/<name>/`, with Homebrew and the App Store apps) or home-manager only. Sign in to the App Store first. |
 | Any other Linux (Fedora, Ubuntu, a WSL distro…), or a Mac that can't be taken over | the `bash <(curl …)` line | Nix if missing, then standalone home-manager: CLI tools, fish, git/ssh, Neovim, the dotfiles, and on x86_64 the GUI apps. |
 
@@ -69,9 +69,9 @@ Afterwards:
   version and hash; not set up.
 - **A new username** for standalone home-manager: add it to `standaloneUsers` in `flake.nix`,
   `git add`, run the script again. The outputs are `homeConfigurations."<user>@<system>"`; later
-  switches are `home-manager switch --flake ~/nixos-config#<user>@<system>`.
+  switches are `home-manager switch --flake ~/nix-config#<user>@<system>`.
 - **Later switches** are the usual ones: `nh os switch` on NixOS (WSL included), `sudo
-  darwin-rebuild switch --flake ~/nixos-config` on a Mac, `home-manager switch …` elsewhere.
+  darwin-rebuild switch --flake ~/nix-config` on a Mac, `home-manager switch …` elsewhere.
 
 Without the script, the manual steps are the README's [Manual install](../README.md#manual-install)
 (the desktop from the USB, a Mac, another distro, Windows). For a new PC, also write
@@ -282,7 +282,7 @@ preferences from a newer version; skip it unless something specific is missing.
 | `vicinae.service` restart-loops: *A server is already running (pid …)* | A Vicinae server started outside the unit (e.g. an older one from before a switch) is still running | Log out and back in, or `pkill -f vicinae-server`; the unit then starts the current one. Check the running build with `readlink /proc/<pid>/exe`. |
 | Vicinae copies instead of pasting; snippets don't expand | Input server not running (needs its setcap wrapper) | `ls -l /run/wrappers/bin/vicinae-input-server` (from the vicinae NixOS module); `journalctl --user -u vicinae \| grep -i input`. |
 | Wallpaper black, cursor default, no splash | `themes/art/` empty (fresh clone) | Copy the artwork back (`home/olivia/themes/README.md`), then log out/in. |
-| Build fails: *rei2.png* / *avatar.png* is gitignored art, add it to the store | `themes/art/sddm/` art not in the store: a fresh install, the file changed, or garbage collection (`nh clean`) removed it before any switched-to system used it | Copy it back (`home/olivia/themes/README.md`), then `nix store add-file ~/nixos-config/home/olivia/themes/art/sddm/<file>`. If the file itself changed, update its hash in `desktop.nix` (`nix hash file <file>`). |
+| Build fails: *rei2.png* / *avatar.png* is gitignored art, add it to the store | `themes/art/sddm/` art not in the store: a fresh install, the file changed, or garbage collection (`nh clean`) removed it before any switched-to system used it | Copy it back (`home/olivia/themes/README.md`), then `nix store add-file ~/nix-config/home/olivia/themes/art/sddm/<file>`. If the file itself changed, update its hash in `desktop.nix` (`nix hash file <file>`). |
 | Login screen is plain Breeze, or a black screen with a cursor | SilentSDDM theme not loaded | Reboot once after the switch. `journalctl -b -u display-manager \| grep -i -e qml -e silent`; check the theme with `test-sddm-silent`. |
 | Lock screen not animated | QtMultimedia / plugin not found | `ls ~/.local/share/plasma/wallpapers/`; `kdePackages.qtmultimedia` must be in `desktop.nix`; check `journalctl --user -b \| grep -i smart.video`. |
 | Windows don't tile | Krohnkite disabled | System Settings → Window Management → KWin Scripts → enable Krohnkite (should be set by `kwinrc.Plugins.krohnkiteEnabled`). |

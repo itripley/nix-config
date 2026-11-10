@@ -88,7 +88,7 @@ already in the way gets renamed instead of failing the activation.
 ## 6. Dotfiles: live links, not store copies
 
 **Decision:** WezTerm, Neovim and fastfetch configs are linked with `mkOutOfStoreSymlink` into the
-checkout at `~/nixos-config`, instead of being copied into the read-only Nix store. The links are in
+checkout at `~/nix-config`, instead of being copied into the read-only Nix store. The links are in
 `home/shared/default.nix`, so both machines use the same files from `home/olivia/dotfiles/`. Where
 the platforms differ (the WezTerm font size, the fish path), the Lua config branches on the
 platform.
@@ -100,8 +100,9 @@ platform.
 - Edits apply immediately, with no rebuild for a colour or keybind tweak.
 - The files stay version-controlled in this repo.
 
-**Trade-off:** the repo must live at `~/nixos-config` on both machines (the README's install step 6
-and the Mac bootstrap put it there).
+**Trade-off:** the repo must live at `~/nix-config` on every machine (`scripts/bootstrap.sh` and
+the README's manual installs put it there). It was `~/nixos-config` until 2026-11-10, when the repo
+was renamed.
 `userChrome.css` is the exception: it's a normal Nix-managed file because it's tiny and changes rarely.
 
 ## 7. Desktop: KDE Plasma 6 on Wayland

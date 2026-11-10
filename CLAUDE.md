@@ -85,7 +85,7 @@ On Windows (no Nix installed), `pwsh -File scripts\verify.ps1` evaluates the fla
    or still to check by hand.
 7. Stop there and tell Olivia what to run: `nh os switch`, or `nh os boot` + reboot for kernel,
    driver, boot or kernel-parameter changes. On the Mac, run `sudo darwin-rebuild switch --flake
-   ~/nixos-config#macbook-olivia`. Also list any hand checks.
+   ~/nix-config#macbook-olivia`. Also list any hand checks.
 
 Commit only when asked. Commit messages are a short imperative sentence, optionally with an area
 prefix (`NetBird: restart on config change`, `Add Serein from its flake`). Doc-only changes get
@@ -129,7 +129,7 @@ their own `Docs: …` commit. Never push.
   changes with the git revision (`configurationRevision`), so compare it with `nix-diff` too.
 - **Live dotfiles:** `home/olivia/dotfiles/{nvim,wezterm,fastfetch}` are out-of-store symlinks
   into this checkout. Edits there change the running apps immediately, with no rebuild. The
-  checkout must stay at `~/nixos-config`.
+  checkout must stay at `~/nix-config`.
 - **Options change between releases.** Check names with the `nix eval … .options` lookup above. For
   home-manager options use `man home-configuration.nix`. For plasma-manager, vicinae and the other
   flakes, read the module source at the locked revision. If the `nixos` docs skill is installed,

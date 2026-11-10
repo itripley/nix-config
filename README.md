@@ -1,4 +1,4 @@
-# nixos-config
+# nix-config
 
 One Nix flake for all of Olivia's machines: NixOS 26.05 on the desktop, nix-darwin 26.05 on the
 MacBook, NixOS-WSL on Windows, and standalone home-manager anywhere else. Every machine shares the
@@ -41,12 +41,12 @@ machine:
 
 ```sh
 # A PC booted from a NixOS USB installer, a PC already running NixOS, a Mac, or any other Linux
-bash <(curl -fsSL https://raw.githubusercontent.com/itripley/nixos-config/main/scripts/bootstrap.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/itripley/nix-config/main/scripts/bootstrap.sh)
 ```
 
 ```powershell
 # Windows, in PowerShell: WSL + NixOS-WSL, then the same script inside it
-irm https://raw.githubusercontent.com/itripley/nixos-config/main/scripts/bootstrap.ps1 | iex
+irm https://raw.githubusercontent.com/itripley/nix-config/main/scripts/bootstrap.ps1 | iex
 ```
 
 | Where it runs | What it does |
@@ -73,8 +73,8 @@ and native Windows apps (Nix doesn't run on Windows).
 | Machine | Command |
 |---|---|
 | NixOS (the desktop, WSL, a new PC) | `nh os switch`. Use `nh os boot`, then reboot, for kernel, driver or boot changes. |
-| Mac | `sudo darwin-rebuild switch --flake ~/nixos-config` (activation runs as root) |
-| Standalone | `home-manager switch --flake ~/nixos-config#<user>@<system>`, e.g. `#olivia@x86_64-linux` |
+| Mac | `sudo darwin-rebuild switch --flake ~/nix-config` (activation runs as root) |
+| Standalone | `home-manager switch --flake ~/nix-config#<user>@<system>`, e.g. `#olivia@x86_64-linux` |
 
 NixOS and nix-darwin pick the host from the hostname. On a Mac, a switch also installs any declared
 cask, brew or App Store app that's missing, but it never upgrades or removes one (`brew upgrade` is
@@ -83,7 +83,7 @@ manual). macOS settings declared in `modules/darwin/defaults.nix` and Plasma set
 
 The `nvim`, `wezterm` and `fastfetch` configs are live links into `home/olivia/dotfiles/` on every
 machine. Edit them in place; no switch is needed. The checkout therefore has to stay at
-`~/nixos-config`.
+`~/nix-config`.
 
 ### Check a change
 
@@ -201,7 +201,7 @@ Before starting, in Windows:
 Boot the USB from the ASUS boot menu (**F8**), connect to the network and open a terminal:
 
 ```sh
-git clone https://github.com/itripley/nixos-config ~/nixos-config && cd ~/nixos-config
+git clone https://github.com/itripley/nix-config ~/nix-config && cd ~/nix-config
 # (if git is missing on the ISO: nix-shell -p git, then run the line above)
 
 # 0. Make sure the config evaluates BEFORE touching any disk (prints a /nix/store/...drv path)
@@ -238,7 +238,7 @@ sudo nixos-install --flake .#desktop-olivia --no-channel-copy
 sudo nixos-enter --root /mnt -c 'passwd olivia'
 
 # 7. Keep the repo where the config expects it (dotfile links and nh point here)
-sudo cp -r ~/nixos-config /mnt/home/olivia/ && sudo nixos-enter --root /mnt -c 'chown -R olivia:users /home/olivia/nixos-config'
+sudo cp -r ~/nix-config /mnt/home/olivia/ && sudo nixos-enter --root /mnt -c 'chown -R olivia:users /home/olivia/nix-config'
 reboot
 ```
 
@@ -251,7 +251,7 @@ See [docs/OPERATIONS.md](docs/OPERATIONS.md#setting-up-a-new-machine).
 ### A Mac
 
 This is for the MacBook's own config (account `olivi`, Apple Silicon, the checkout at
-`~/nixos-config`). Another Mac needs its own `hosts/<name>/darwin-configuration.nix`, which the
+`~/nix-config`). Another Mac needs its own `hosts/<name>/darwin-configuration.nix`, which the
 script writes.
 
 1. Sign in to the Apple ID and the App Store, then run `xcode-select --install` (git, plus clang for
@@ -263,11 +263,11 @@ script writes.
    ```
 4. Clone the repo:
    ```sh
-   git clone https://github.com/itripley/nixos-config.git ~/nixos-config
+   git clone https://github.com/itripley/nix-config.git ~/nix-config
    ```
 5. First switch. `darwin-rebuild` isn't installed yet, so build it from the flake:
    ```sh
-   cd ~/nixos-config
+   cd ~/nix-config
    nix build .#darwinConfigurations.macbook-olivia.system
    sudo ./result/sw/bin/darwin-rebuild switch --flake .#macbook-olivia
    ```
@@ -281,7 +281,7 @@ script writes.
 
 ```sh
 curl -sSfL https://artifacts.nixos.org/nix-installer | sh -s -- install --enable-flakes   # then open a new terminal
-git clone https://github.com/itripley/nixos-config.git ~/nixos-config && cd ~/nixos-config
+git clone https://github.com/itripley/nix-config.git ~/nix-config && cd ~/nix-config
 nix run --inputs-from . home-manager -- switch --flake .#"$USER@$(nix config show system)" -b hm-backup
 sudo "$(command -v non-nixos-gpu-setup)"   # x86_64, once, in a new terminal: GPU drivers for the GUI apps
 ```
@@ -304,9 +304,9 @@ Inside NixOS, still as its default user `nixos`:
 
 ```sh
 nix --extra-experimental-features "nix-command flakes" run nixpkgs#git -- \
-  clone https://github.com/itripley/nixos-config ~/nixos-config && cd ~/nixos-config
+  clone https://github.com/itripley/nix-config ~/nix-config && cd ~/nix-config
 sudo nixos-rebuild boot --flake .#wsl   # boot, not switch: the default user changes to olivia
-sudo install -d -o "$(id -u)" -g users -m 700 /home/olivia && cp -a ~/nixos-config /home/olivia/
+sudo install -d -o "$(id -u)" -g users -m 700 /home/olivia && cp -a ~/nix-config /home/olivia/
 exit
 ```
 
@@ -341,12 +341,12 @@ Then in PowerShell, so that olivia becomes the default user (NixOS-WSL's documen
   with the EFI shell handle of the Windows ESP.
 - **SSH keys** from Windows: `mkdir -m700 ~/.ssh && cp /mnt/windows/Users/olivi/.ssh/id_* ~/.ssh/ && chmod 600 ~/.ssh/id_*`
 - **Firefox profile:** close Firefox (on Windows too, before rebooting), then run
-  `~/nixos-config/scripts/migrate-firefox-profile.sh`. It copies the whole Windows profile from
+  `~/nix-config/scripts/migrate-firefox-profile.sh`. It copies the whole Windows profile from
   `/mnt/windows` into `~/.config/mozilla/firefox/9ylnf32e.default-release`: add-ons with their
   settings and data (Sidebery panels, uBlock filters, ScriptCat scripts…), themes, logins,
   cookies, history and open tabs. It refuses if Windows' Firefox is newer than NixOS'; update
   `nixpkgs` and switch first in that case. See [docs/FIREFOX.md](docs/FIREFOX.md).
-- **WezTerm wallpapers** from Windows: `cp /mnt/windows/Users/olivi/.config/wezterm/backdrops/* ~/nixos-config/home/olivia/dotfiles/wezterm/backdrops/`
+- **WezTerm wallpapers** from Windows: `cp /mnt/windows/Users/olivi/.config/wezterm/backdrops/* ~/nix-config/home/olivia/dotfiles/wezterm/backdrops/`
 - **Fedora theme artwork** (gitignored): with the Fedora drive plugged in, run the copy commands in
   [home/olivia/themes/README.md](home/olivia/themes/README.md), then log out and back in.
 - **Monitor:** System Settings → Display → 2560×1440 @ 165 Hz and Adaptive Sync "Automatic", if

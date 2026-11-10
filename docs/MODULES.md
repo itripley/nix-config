@@ -144,7 +144,7 @@ Windows PC.
 | `wsl.useWindowsDriver` + `hardware.graphics.enable` | GPU acceleration through the Windows driver (Mesa's d3d12), for the GUI apps under WSLg. |
 | `wsl.startMenuLaunchers` | The Linux GUI apps appear in the Windows Start menu. |
 | `nixpkgs.hostPlatform = "x86_64-linux"` | Set by `hardware-configuration.nix` on the PCs; WSL has none. |
-| `networking.hostName = "wsl"` | So `nixos-rebuild switch --flake ~/nixos-config` (and nh) pick this host. |
+| `networking.hostName = "wsl"` | So `nixos-rebuild switch --flake ~/nix-config` (and nh) pick this host. |
 | `home-manager.users.olivia` = `home/linux` | The CLI layer and the Linux apps, no Plasma. `services.easyeffects` is forced off: there's no PipeWire in WSL (WSLg's audio is a PulseAudio socket). |
 | `system.stateVersion = "26.05"` | As on the desktop; never change it. |
 
@@ -163,7 +163,7 @@ What every NixOS machine gets, PCs and WSL. Until 2026-11-10 this was the deskto
 | `extra-substituters` / `extra-trusted-public-keys` | `vicinae.cachix.org`, so the Vicinae flake input downloads instead of compiling (DESIGN §4). |
 | `trusted-users` left at the default (`root`) | Not `@wheel`: a trusted user can set substituters or build hooks, which is root without sudo's password. Nothing here needs it (nh uses sudo). |
 | **`nix.channel.enable = false`** | No legacy channels. `NIX_PATH` is only `nixpkgs=flake:nixpkgs` (the pinned input), so `<nixpkgs>` and `nix shell nixpkgs#…` match the system. |
-| **`programs.nh`** with `flake = ~olivia/nixos-config` and `clean` | `nh os switch` = friendlier `nixos-rebuild`; automatic GC keeps 10 generations / 14 days. Replaces `nix.gc`. The path is built from the user's home, and home-manager's live links read it back (`osConfig.programs.nh.flake`), so the checkout location is written once. |
+| **`programs.nh`** with `flake = ~olivia/nix-config` and `clean` | `nh os switch` = friendlier `nixos-rebuild`; automatic GC keeps 10 generations / 14 days. Replaces `nix.gc`. The path is built from the user's home, and home-manager's live links read it back (`osConfig.programs.nh.flake`), so the checkout location is written once. |
 | **`programs.nix-ld`** | Lets unpatched Linux binaries run: Mason-installed LSPs in LazyVim, the VS Code server, random downloaded tools. |
 | `environment.systemPackages`: wget, curl, pciutils, usbutils | No `git`/`vim`: olivia gets `gitFull` and Neovim's vim/vi aliases from home-manager, root has nano, and Nix fetches flakes without a git binary. |
 
@@ -244,7 +244,7 @@ is in `modules/darwin/common.nix`; this file has what's specific to this one:
 
 - `nixpkgs.hostPlatform = "aarch64-darwin"` (Apple M1).
 - `networking.hostName` and `computerName` are `macbook-olivia`, so `LocalHostName` follows.
-  `darwin-rebuild switch --flake ~/nixos-config` picks this config from the hostname.
+  `darwin-rebuild switch --flake ~/nix-config` picks this config from the hostname.
 - `system.primaryUser = "olivi"`: the user that nix-darwin's user-level options (homebrew,
   `system.defaults`) apply to. Activation itself runs as root (`sudo darwin-rebuild`).
 - `users.users.olivi.home` and `home-manager.users.olivi = import ../../home/darwin`: the account
@@ -329,7 +329,7 @@ same on Linux and macOS go here. Platform-specific config stays in the platform'
 directory (DESIGN §11, §12).
 
 - `default.nix`: imports the others. It also has the **`xdg.configFile` live links** for `wezterm`,
-  `nvim` and `fastfetch`, pointing into `~/nixos-config/home/olivia/dotfiles/` (DESIGN §6). The path
+  `nvim` and `fastfetch`, pointing into `~/nix-config/home/olivia/dotfiles/` (DESIGN §6). The path
   is built from `home.homeDirectory`, because nix-darwin has no `programs.nh`. The dotfiles stay
   under `home/olivia/` on both machines.
 - `cli.nix`: Python + uv, docker-compose, tmux, mc, fastfetch, jq, gh, btop, and from Fedora: Go,
@@ -531,8 +531,8 @@ that, `home/olivia/default.nix` imported these modules itself.
 - Imports `../shared` and, from `home/olivia/`: `apps.nix`, `dev.nix`, `firefox.nix`,
   `obsidian.nix`, `mpv.nix`, `easyeffects.nix`. A module added here reaches every Linux machine; one
   that needs NixOS services (Plasma, Flatpak, WARP) goes in `home/olivia/default.nix` instead.
-- **`xdg.dataFile."fonts/nixos-config"`** → live link to `home/olivia/dotfiles/fonts/` (gitignored, like the wallpapers), which fontconfig reads as part of `~/.local/share/fonts`. It holds **TX-02** (30 styles), the font for WezTerm (`dotfiles/wezterm/config/fonts.lua`, with JetBrainsMono Nerd Font as fallback for icons) and Obsidian (`obsidian.nix`). The font is licensed, so the files are copied in by hand and never committed; a new font dropped in that folder works without a rebuild.
-  The path is built from `home.homeDirectory` (`~/nixos-config`), as in `home/shared`, because
+- **`xdg.dataFile."fonts/nix-config"`** → live link to `home/olivia/dotfiles/fonts/` (gitignored, like the wallpapers), which fontconfig reads as part of `~/.local/share/fonts`. It holds **TX-02** (30 styles), the font for WezTerm (`dotfiles/wezterm/config/fonts.lua`, with JetBrainsMono Nerd Font as fallback for icons) and Obsidian (`obsidian.nix`). The font is licensed, so the files are copied in by hand and never committed; a new font dropped in that folder works without a rebuild.
+  The path is built from `home.homeDirectory` (`~/nix-config`), as in `home/shared`, because
   standalone home-manager has no `osConfig`. On the desktop it's the same path as before.
 - On another distro the GUI apps find the GPU through `targets.genericLinux.gpu` (enabled by
   `targets.genericLinux.enable` in `flake.nix`), which needs a single `sudo non-nixos-gpu-setup`
@@ -542,7 +542,7 @@ that, `home/olivia/default.nix` imported these modules itself.
 
 Added to every standalone home (`flake.nix` `mkHome`): `home.stateVersion` (`mkDefault "26.05"`,
 since `home/darwin` sets it too) and `programs.home-manager.enable`, which installs the
-`home-manager` command for later switches (`home-manager switch --flake ~/nixos-config#<user>@<system>`).
+`home-manager` command for later switches (`home-manager switch --flake ~/nix-config#<user>@<system>`).
 
 ## `home/olivia/easyeffects.nix`
 
@@ -741,11 +741,11 @@ binaries as they are. `nix build .#vscode-marketplace` fetches and unpacks all o
 
 Sets up a machine from this repo (DESIGN §12); how to run it is in
 [OPERATIONS.md](OPERATIONS.md#setting-up-a-new-machine). It looks at where it runs, gets the
-checkout to `~/nixos-config` (clones it, or uses the one that's there), and then:
+checkout to `~/nix-config` (clones it, or uses the one that's there), and then:
 
 | Where | What it does |
 |---|---|
-| **NixOS USB installer** (`/etc/NIXOS` and `/iso` or a tmpfs root) | Needs x86_64 and UEFI. Asks for a name. A name already in `hosts/` is **reinstalled** with its own disk settings. A new one: lists the disks with size, bus, model and filesystems (the USB it booted from is marked and refused), writes `hosts/<name>/` with `nixos-generate-config --no-filesystems`, `disk-layout.nix` on the chosen disk's by-id path, and `amd.nix` or `nvidia.nix` from the PCI vendor ids, then `git add`s it. Then it evaluates the whole system, adds the login art to the store if the host imports it (and stops if the files are missing), shows each disk disko will wipe, and wants its kernel name typed. Then disko (`--inputs-from .`, so the locked version; it asks too), Unraid credentials into `/mnt/etc/nixos/smb-secrets` (optional), `nixos-install --no-channel-copy` (asks for root's password), olivia's password, and a copy of the checkout to `/mnt/home/olivia/nixos-config`. |
+| **NixOS USB installer** (`/etc/NIXOS` and `/iso` or a tmpfs root) | Needs x86_64 and UEFI. Asks for a name. A name already in `hosts/` is **reinstalled** with its own disk settings. A new one: lists the disks with size, bus, model and filesystems (the USB it booted from is marked and refused), writes `hosts/<name>/` with `nixos-generate-config --no-filesystems`, `disk-layout.nix` on the chosen disk's by-id path, and `amd.nix` or `nvidia.nix` from the PCI vendor ids, then `git add`s it. Then it evaluates the whole system, adds the login art to the store if the host imports it (and stops if the files are missing), shows each disk disko will wipe, and wants its kernel name typed. Then disko (`--inputs-from .`, so the locked version; it asks too), Unraid credentials into `/mnt/etc/nixos/smb-secrets` (optional), `nixos-install --no-channel-copy` (asks for root's password), olivia's password, and a copy of the checkout to `/mnt/home/olivia/nix-config`. |
 | **NixOS, installed** | Hostname in `hosts/`: `nixos-rebuild switch` to it. Otherwise it **adopts** the install: a new `hosts/<name>/` with `nixos-generate-config` *with* filesystems (the disks stay as they are), the ESP path from `bootctl` (`efiSysMountPoint` when it isn't `/boot`), then `nixos-rebuild boot` after a confirmation. Refuses BIOS boots. olivia is created at the next boot, without a password. |
 | **NixOS-WSL** | As olivia: `nixos-rebuild switch --flake .#wsl`. First run (as `nixos`): `nixos-rebuild boot`, because NixOS-WSL says a new default user must not be applied with `switch`; then it copies the checkout to `/home/olivia` (same uid 1000). `bootstrap.ps1` does the restarts. |
 | **macOS** | Apple Silicon only. Command Line Tools, Nix (official installer) if missing, then: `LocalHostName` in `hosts/` → `darwin-rebuild switch` (the first time from `nix build`'s `result`, as in the README). Otherwise a choice: a new nix-darwin host (installs Homebrew if asked, writes `hosts/<name>/darwin-configuration.nix` for the current user with nix-darwin's newest `stateVersion`, switches) or home-manager only. |

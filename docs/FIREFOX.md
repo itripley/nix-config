@@ -78,8 +78,8 @@ To get the Windows look back, delete the `legacyUserProfileCustomizations` line 
 Run once on NixOS, as olivia, after the first `nh os switch`, with Firefox closed on both systems:
 
 ```sh
-~/nixos-config/scripts/migrate-firefox-profile.sh            # reads from /mnt/windows
-~/nixos-config/scripts/migrate-firefox-profile.sh /path/to/profile   # or another copy
+~/nix-config/scripts/migrate-firefox-profile.sh            # reads from /mnt/windows
+~/nix-config/scripts/migrate-firefox-profile.sh /path/to/profile   # or another copy
 ```
 
 What it does, in order:

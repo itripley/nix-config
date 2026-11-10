@@ -23,6 +23,10 @@ with `scripts/bootstrap.sh` ([OPERATIONS.md](OPERATIONS.md#setting-up-a-new-mach
 
 ## Status (2026-11-10)
 
+- **Renamed to `nix-config` (2026-11-10):** the GitHub repo is `itripley/nix-config` (GitHub
+  redirects the old name), and the desktop's checkout is `~/nix-config`, with `~/nixos-config` left
+  as a symlink to it until the desktop has switched. The Mac still has to move its checkout:
+  [VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand).
 - **Any-machine deploy committed and pushed (`eb1d172`, 2026-11-10), not switched yet.** Hosts are folders
   in `hosts/`; new: `hosts/wsl` (NixOS-WSL), standalone home-manager for other distros and locked
   Macs, and `scripts/bootstrap.sh` / `bootstrap.ps1`. Desktop and Mac evaluate to the same
@@ -125,6 +129,7 @@ with `scripts/bootstrap.sh` ([OPERATIONS.md](OPERATIONS.md#setting-up-a-new-mach
 | 2026-11-10 | Both machines switched to the review fixes. Hand checks passed: the two LaunchDaemons are loaded, zsh starts clean, and `git config user.name` is `olivia` on both. The desktop runs exactly the `8aeee79` build. | [MACOS.md](MACOS.md#checked) step 13 |
 | 2026-11-10 | Any-machine deploy: hosts discovered from `hosts/` (Mac file renamed `darwin-configuration.nix`); `common.nix` for every NixOS and every Mac host; the desktop's Windows mount, RTC and OpenRGB in `hosts/desktop-olivia/machine.nix`; ROCm Ollama in `amd.nix`; new `nvidia.nix`, `disk-layout.nix`, opt-in `login-art.nix`; `home/linux` app layer; `hosts/wsl` (new `nixos-wsl` input); standalone `homeConfigurations`; `scripts/bootstrap.sh` + `bootstrap.ps1`. Desktop and Mac: same packages (order only) | `eb1d172`, DESIGN §12, [VERIFICATION.md](VERIFICATION.md#any-machine-deploy-2026-11-10) |
 | 2026-11-10 | Top-level README rewritten around the machines: what each one is, setting one up, everyday use (switch, check, where things go, update, roll back) for every kind of machine, the manual installs (desktop, Mac, another distro, Windows) and the hand steps per machine. Outdated parts fixed: the Samsung backup warning (it's the NixOS disk now), the 15 s check time, "both machines" | [README](../README.md) |
+| 2026-11-10 | Repo renamed `nixos-config` → `nix-config`: GitHub repo, the checkout path in every config (`programs.nh.flake`, the dotfile and font links), scripts and docs. The bootstrap override variables are now `BOOTSTRAP_REPO` / `BOOTSTRAP_DIR`. Desktop: only those paths change (nix-diff); `~/nixos-config` kept as a symlink until both machines switched | [VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand) |
 
 ## Conventions
 
