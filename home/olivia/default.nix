@@ -8,6 +8,7 @@ let
 in
 {
   imports = [
+    ../shared
     ./apps.nix
     ./dev.nix
     ./firefox.nix

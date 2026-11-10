@@ -4,8 +4,7 @@
   home.packages = with pkgs; [
     # Browsers: Firefox in firefox.nix, Chromium below (programs.chromium)
 
-    # From the old Fedora install
-    btop
+    # From the old Fedora install (btop: home/shared/cli.nix)
     high-tide # TIDAL client (was a Flatpak)
     pokemon-colorscripts # fish greeting (default.nix)
 

@@ -65,25 +65,14 @@
     profiles.default.extensions = pkgs.vscode-marketplace.extensions;
   };
 
+  # CLI tools both machines use: home/shared/cli.nix
   home.packages = with pkgs; [
     # Plain package, not programs.wezterm: that module writes wezterm.lua, but
     # ~/.config/wezterm is a live link to dotfiles/wezterm (see default.nix)
     wezterm
-    nodejs
-    python3
-    uv
+    nodejs # LTS; the Mac runs nodejs_26 (home/darwin/cli.nix)
     # Godot C#: godot_4-mono brings its own .NET SDK, so no separate dotnet-sdk
     godot_4
     godot_4-mono
-    docker-compose
-    tmux
-    mc
-    fastfetch
-    jq
-    gh
-    # From Fedora
-    go
-    rustup # cargo/rustc; Fedora had cargo with ~/.cargo/bin on PATH
-    lazydocker
   ];
 }
