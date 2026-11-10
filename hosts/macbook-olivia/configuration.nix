@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 {
   imports = [
     ../../modules/darwin/homebrew.nix
@@ -24,6 +24,9 @@
   environment.etc."pam.d/sudo_local".knownSha256Hashes = [
     "5bef9b2acbc58dfbb2ae23eca69788ab2c75b8368a33810625a0ba7fe46dc433"
   ];
+
+  # Into /Library/Fonts/Nix Fonts. WezTerm's icon fallback, as on the desktop (desktop.nix)
+  fonts.packages = [ pkgs.nerd-fonts.jetbrains-mono ];
 
   # fish for WezTerm at a stable path (/run/current-system/sw/bin/fish), with the Nix environment
   programs.fish.enable = true;
