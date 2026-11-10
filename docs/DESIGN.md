@@ -53,6 +53,8 @@ just a CLI environment).
 | `serein` flake ([ViceVerse-cz/Serein](https://github.com/ViceVerse-cz/Serein)) | Native Rust Discord client, not in nixpkgs. Its own flake targets nixos-unstable, so its `nixpkgs` follows our `nixpkgs-unstable` (same channel, no extra copy). Built from source: not in any binary cache. No release tags, so `flake.lock` pins a commit; `nix flake update serein` moves it. Needs a `dontCargoUseSystemLibs` override (VERIFICATION #15, the same failure codex had). |
 | `claude-desktop` flake ([tomsch/claude-desktop-nix](https://github.com/tomsch/claude-desktop-nix)) | Anthropic's official Claude Desktop Linux beta isn't in nixpkgs. The flake repackages the `.deb` from Anthropic's apt repo (`downloads.claude.ai`), pinned by hash; its CI bumps it every 6 hours after checking the repo's GPG signature. Its `nixpkgs` follows our `nixpkgs-unstable`. The wrapper runs Electron with `--no-sandbox` (Chromium's setuid sandbox can't work from the store) and Wayland flags. `nix flake update claude-desktop` picks up new versions. |
 | `artcraft` flake ([ipeglin/artcraft-nix](https://github.com/ipeglin/artcraft-nix)) | Unofficial packaging of the ArtCraft apps (storytold), not in nixpkgs. Repackages the upstream release AppImages (autoPatchelf, no FHS sandbox), pinned by upstream's sha256, with GitHub/GitLab mirrors as fallback. Its NixOS module builds against our `pkgs`; `nixpkgs` follows ours only so the lock has no extra copy. Only PhotoCraft and FilmCraft are enabled (`desktop.nix`). New releases arrive with `nix flake update artcraft`. |
+| `nixpkgs-darwin` → **nixpkgs-26.05-darwin** | The Mac's stable nixpkgs (§11). The `-darwin` channel only advances once Hydra's darwin builds pass, so the Mac gets binary-cache hits. Same release as `nixpkgs`. |
+| `nix-darwin` (nix-darwin-26.05) | The Mac's system config (§11). Its `nixpkgs` follows `nixpkgs-darwin`, the pairing its README prescribes. |
 | `vicinae` flake ([vicinaehq/vicinae](https://github.com/vicinaehq/vicinae)) | The launcher's own flake, set up per [its NixOS guide](https://docs.vicinae.com/nixos). nixpkgs has the package but no NixOS module: without upstream's module the input server lacks `cap_dac_override` (a `security.wrappers` entry), so paste-to-window and snippet expansion fall back to copying. Its Home Manager module replaces home-manager's `programs.vicinae`. Its `nixpkgs` deliberately does **not** follow ours, so builds match `vicinae.cachix.org` (added to `nix.settings`); the cost is its own nixpkgs and Qt in the closure. `nix flake update vicinae` picks up new releases. |
 
 Every input except nix-flatpak and Vicinae follows our `nixpkgs` (Serein and Claude Desktop follow
@@ -163,3 +165,37 @@ The Nix store is **world-readable**, and this repo may be pushed somewhere. So:
 - **No `system.autoUpgrade`.** Updates are manual (`nh os switch --update`, then commit
   `flake.lock`), so a broken upstream change never lands unattended on a desktop that's also used
   for work.
+
+## 11. macOS host: nix-darwin in the same flake
+
+**Decision:** the MacBook is `darwinConfigurations.macbook-olivia` in this repo, not a separate
+repo. Cross-platform home-manager modules (shell, git, editor, CLI) are shared; system and
+platform-specific modules stay separate. Details, inventory and progress: [MACOS.md](MACOS.md).
+
+**Why the same repo:** shared modules only stay shared if both hosts evaluate them from one
+`flake.lock`. The checks, lint, CI, overlays, `nixpkgsConfig` and this doc set carry over. The cost
+is coordination: a change to a shared module also changes the desktop, so every refactor is checked
+by comparing the desktop's toplevel `drvPath` before and after. The Mac can cross-evaluate the
+x86_64-linux system without building it.
+
+- **Nix installer:** the official NixOS installer ([NixOS/nix-installer](https://github.com/NixOS/nix-installer)),
+  checked 2026-11-10. It installs upstream Nix like the desktop, has a real uninstaller and survives
+  macOS upgrades.
+  - Not Determinate: its installer now installs only Determinate Nix, which needs `nix.enable = false`
+    (or its own module), with settings in `nix.custom.conf`. That would manage Nix differently from
+    the desktop's `nix.settings`.
+  - Not Lix: nix-darwin replaces it with upstream Nix anyway unless `nix.package = pkgs.lix`.
+- **nix-darwin manages Nix** (`nix.enable`, the default). The daemon, `nix.conf` and the build
+  users come from the config, the same way `nix.settings` works on NixOS. `trusted-users` stays
+  root-only, as on the desktop.
+- **`nixpkgs-26.05-darwin`**, not `nixos-26.05`, for the Mac: nix-darwin's documented pairing, and
+  binary-cache coverage for darwin. home-manager stays one input (release-26.05). As a nix-darwin
+  module with `useGlobalPkgs`, it uses the Mac's package set.
+- **`system.stateVersion = 7`**, the highest nix-darwin 26.05 supports (its template still says 6).
+  Never change it afterwards.
+- **`system.primaryUser = "olivi"`.** Since 2025, nix-darwin activation runs as root, and
+  user-level options (homebrew, `system.defaults`) apply to this user.
+- **Activation needs root:** `sudo darwin-rebuild switch`. As on the desktop, Olivia runs the switch.
+- **Touch ID's `sudo_local` stays hand-written until its own step.** nix-darwin manages
+  `/etc/pam.d/sudo_local` by default, with empty contents unless `touchIdAuth` is set. Leaving it
+  managed would have blocked the first switch, and it would drop Touch ID if ever overwritten.

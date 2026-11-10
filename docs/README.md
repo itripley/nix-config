@@ -13,12 +13,15 @@ choice was made, so the config can be maintained without re-deriving any of it.
 | [FEDORA.md](FEDORA.md) | what was taken from the old Fedora 43 install (theme, tiling, apps), the conflicts with the Windows-based setup and how each was decided |
 | [FIREFOX.md](FIREFOX.md) | how the Firefox profile (extensions + their data, Sidebery, themes, userChrome) is carried over, and why it's done this way |
 | [VERIFICATION.md](VERIFICATION.md) | how the config was checked before install, what broke during and after the install and how it was fixed, what was checked on the real machine, and what is still to check by hand |
+| [MACOS.md](MACOS.md) | the MacBook (`macbook-olivia`, nix-darwin): what was on it, where each app and setting went, progress, what stays manual |
 | [OPERATIONS.md](OPERATIONS.md) | day-to-day use (rebuild, update, add apps, roll back), keyboard shortcuts, VPN toggles (NetBird/WARP), theme upkeep, troubleshooting, and leftover data from removed apps |
 
 Installation steps are in the top-level [README](../README.md).
 
 ## Status (2026-11-09)
 
+- **MacBook added (2026-11-10):** `darwinConfigurations.macbook-olivia` (nix-darwin) is switched to
+  as generation 1 (minimal: hostname, Nix management). The remaining steps are tracked in [MACOS.md](MACOS.md#steps).
 - **Installed** on the Samsung 850 EVO and in daily use; `hardware-configuration.nix` is the generated one.
 - Every app from the original lists builds. Upstream build failures are patched in
   `overlays/build-fixes.nix` ([VERIFICATION.md](VERIFICATION.md#first-real-build-2026-11-08)).
@@ -79,10 +82,11 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-09 | WezTerm: fancy tab bar on, with a close × on each tab (`show_close_tab_button_in_tabs = true`) and the title bar kept dark when unfocused; tab titles lost their rounded ends and own colours so the fancy bar draws the tabs | `dotfiles/wezterm/config/appearance.lua`, `events/tab-title.lua` |
 | 2026-11-09 | Virtual desktops: 3 rows (one column) instead of 1, as changed in the KDE GUI, so the next switch keeps it | `plasma.nix` |
 | 2026-11-09 | Windows settings sweep: mpv and plex-mpv-shim configs, OBS plugins, Chromium extensions, OpenRGB lowpink colors declared; logins and app state left as hand steps | `mpv.nix`, `apps.nix`, `services.nix`, [VERIFICATION.md](VERIFICATION.md#windows-settings-sweep-2026-11-09) |
+| 2026-11-10 | MacBook: Nix installed (NixOS installer), nix-darwin bootstrapped as `macbook-olivia`; repo tooling and checks now also cover aarch64-darwin; desktop drv unchanged | `2256d0e`, [MACOS.md](MACOS.md), DESIGN §11 |
 
 ## Conventions
 
 - Windows-side paths are written as they appear on Windows (`C:\Users\olivi\…`). The Windows user
   is `olivi`; the NixOS user is `olivia`.
-- "HM" = home-manager. "nixpkgs" = the pinned `nixos-26.05` branch unless stated otherwise.
+- "HM" = home-manager. "nixpkgs" = the pinned `nixos-26.05` branch unless stated otherwise (`nixpkgs-26.05-darwin` on the Mac).
 - Comments in the `.nix` files explain the *what* briefly. These docs carry the full *why*.
