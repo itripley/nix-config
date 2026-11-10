@@ -26,7 +26,8 @@ trackpad, screenshot, clock, WindowManager and loginwindow domains, and copies o
 
 | | |
 |---|---|
-| System | nix-darwin generation 10 (`darwin-rebuild` from `nix-darwin-26.05` with `nixpkgs-26.05-darwin`), Nix 2.34.9 |
+| System | nix-darwin with the review fixes (`d2fbf68`, switched 2026-11-10; generation 10 was `996c8e0`), `darwin-rebuild` from `nix-darwin-26.05` with `nixpkgs-26.05-darwin`, Nix 2.34.9 |
+| Upkeep | Weekly LaunchDaemons: `nix-gc` (generations older than 14 days, Sundays 03:15) and `nix-optimise` (Sundays 04:15) |
 | home-manager | 98 commands in `/etc/profiles/per-user/olivi/bin`; zsh, fish, git, ssh and the dotfile links managed |
 | Homebrew | 26 leaf formulae (191 total), 29 casks (28 declared, plus plugdata), 5 taps (3 declared). Declared in `modules/darwin/homebrew.nix`. |
 | CI | `nix flake check` on `macos-latest` on every push |
@@ -87,7 +88,7 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
 | 10 | Fonts | done: generation 10, `996c8e0` |
 | 11 | README, docs, CI | done: README macOS section, CLAUDE.md, CI matrix with `macos-latest` (`fff9b9e`) |
 | 12 | Homebrew cleanup (Olivia's OK) | done: 21 formulae now from Nix uninstalled; node and cloudflared kept (`657592e`) |
-| 13 | Review fixes: weekly GC + store optimise, mise dropped, git name shared with the desktop | in the repo, **not switched yet** (hand checks below) |
+| 13 | Review fixes: weekly GC + store optimise, mise dropped, git name shared with the desktop | done: `d2fbf68`, switched 2026-11-10; hand checks passed |
 
 ## Checked
 
@@ -176,11 +177,12 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
   ones included. The only local builds are the usual config files, wrappers and fish completions.
   Since generation 10, the only effective change for the Mac had been the Brewfile (node and
   cloudflared, `657592e`). The desktop merge left its home-manager generation identical.
-- **Step 13** (not switched yet): `nix-diff` of the Mac system against the previous config shows
+- **Step 13** (`d2fbf68`, switched 2026-11-10): before the switch, `nix-diff` of the Mac system against the previous config showed
   only two changes. `.zshrc` lost the `mise activate` line, and two LaunchDaemons were added
   (`org.nixos.nix-gc`: `nix-collect-garbage --delete-older-than 14d`, Sundays 03:15;
   `org.nixos.nix-optimise`: `nix-store --optimise`, Sundays 04:15). The Mac's git config is
-  byte-identical: `user.name` only moved to `home/shared/git.nix`. To check after the switch:
+  byte-identical: `user.name` only moved to `home/shared/git.nix`. After the switch, Olivia checked
+  all three, and all passed:
   - `sudo launchctl print system/org.nixos.nix-gc` and `system/org.nixos.nix-optimise` show both
     jobs loaded.
   - A new zsh starts without errors, and `which mise` finds nothing on PATH.

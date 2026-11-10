@@ -407,12 +407,11 @@ that run natively here, compared against `~` on NixOS. The app list itself was a
 
 ## Still to check by hand
 
-The Mac's checks are in [MACOS.md](MACOS.md#checked). Step 13's (GC, mise, git name) are still to
-do after its next switch.
+The Mac's checks are in [MACOS.md](MACOS.md#checked); all of them are done.
 
 | Area | How |
 |---|---|
-| git author name (after `nh os switch`) | `git config user.name` prints `olivia` (from `home/shared/git.nix`; before this, git used the account name `Olivia`). `nix-diff` before the switch: only the home-manager git config changes. |
+| git author name (after `nh os switch`) | ✅ Checked by Olivia after the 2026-11-10 switch. The running system is exactly the `8aeee79` build. `git config user.name` prints `olivia` (from `home/shared/git.nix`; before this, git used the account name `Olivia`). `nix-diff` before the switch: only the home-manager git config changes. |
 | Desktop after the shared-module move (2026-11-10) | ✅ Switched and rebooted 2026-11-10; Olivia checked the fish greeting, git config, `ssh -G unraid` and LazyVim. `nh os switch`. The diff should list only a few rebuilt derivations, with no package added or removed. Then check that the fish greeting shows a Pokémon, that `git config --list --show-origin` has the email and `credential.helper=libsecret`, that `ssh -G unraid` uses `id_unraid`, and that nvim opens LazyVim. |
 | Idle static gone | ✅ After the reboot `power_save` is `0`; `wpctl status` lists the Ryzen analog output as the default sink. Still to do: leave audio paused for a minute and listen. |
 | Power (after the switch) | ✅ Checked by Olivia after the 2026-11-10 switch. System Settings → Power Management (AC): dim 15 min, screen off 30 min (5 min when locked), *When inactive: Do nothing*. |

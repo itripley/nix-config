@@ -21,13 +21,12 @@ Installation steps are in the top-level [README](../README.md).
 
 ## Status (2026-11-10)
 
-- **Waiting for a switch on both machines:** the review fixes from 2026-11-10. On the Mac: weekly
-  garbage collection and store optimisation, and mise dropped from zsh. On both: git's
-  `user.name` (`olivia`) is shared, so the desktop gets it too. Hand checks:
-  [MACOS.md](MACOS.md#checked) step 13 and
-  [VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand).
-- **MacBook migrated (2026-11-10):** `darwinConfigurations.macbook-olivia` is switched to (generation
-  10). It covers the hostname, Nix management, home-manager, CLI tools, shell/git/ssh/neovim/WezTerm,
+- **Review fixes switched on both machines (2026-11-10, `d2fbf68`), and the hand checks passed.**
+  The Mac now runs weekly garbage collection and store optimisation, and mise is gone from zsh.
+  Both machines use git `user.name` `olivia`. Afterwards, the desktop was running exactly that
+  commit's build. Details: [MACOS.md](MACOS.md#checked) step 13.
+- **MacBook migrated (2026-11-10):** `darwinConfigurations.macbook-olivia` is switched to, now at
+  the review fixes (`d2fbf68`). It covers the hostname, Nix management, home-manager, CLI tools, shell/git/ssh/neovim/WezTerm,
   Homebrew (declared, then cleaned up), macOS defaults, Touch ID sudo and fonts. All the steps are
   done, and CI checks the Mac on `macos-latest`. What stays manual:
   [MACOS.md](MACOS.md#stays-manual).
@@ -114,7 +113,8 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-10 | MacBook: 7 stale cask records uninstalled (apps already gone). plugdata kept because its audio plugins are still installed. All docs brought up to date for the two-host repo | `20179f6`, [MACOS.md](MACOS.md#homebrew-cleanup-2026-11-10) |
 | 2026-11-10 | Desktop work done in parallel (SilentSDDM, EasyEffects module, Plasma power/GTK, Firefox, plex-mpv-shim) committed as `desktop-wip` on the desktop and merged on the Mac. Conflicts in `home/olivia/default.nix` and four docs, kept both sides; desktop package sets identical to the branch (nix-diff: order only) | `07f7a8b`, [OPERATIONS.md](OPERATIONS.md#working-from-two-machines) |
 | 2026-11-10 | Desktop pulled the merge, switched and rebooted: shared modules, SilentSDDM login screen, power and GTK settings, Windows sweep all live; hand checks passed; `desktop-wip` deleted | [VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand) |
-| 2026-11-10 | Review of the Mac config: everything evaluates, cached and CI-green. Fixes: the Mac now garbage-collects generations older than 14 days and optimises the store every Sunday (`nix.gc`, `nix.optimise`). mise was dropped from zsh. git `user.name = "olivia"` moved to `home/shared/git.nix`, so the desktop stops authoring as `Olivia`. | [MACOS.md](MACOS.md#checked) step 13, DESIGN §11 |
+| 2026-11-10 | Review of the Mac config: everything evaluates, cached and CI-green. Fixes: the Mac now garbage-collects generations older than 14 days and optimises the store every Sunday (`nix.gc`, `nix.optimise`). mise was dropped from zsh. git `user.name = "olivia"` moved to `home/shared/git.nix`, so the desktop stops authoring as `Olivia`. | `d2fbf68`, [MACOS.md](MACOS.md#checked) step 13, DESIGN §11 |
+| 2026-11-10 | Both machines switched to the review fixes. Hand checks passed: the two LaunchDaemons are loaded, zsh starts clean, and `git config user.name` is `olivia` on both. The desktop runs exactly the `8aeee79` build. | [MACOS.md](MACOS.md#checked) step 13 |
 
 ## Conventions
 
