@@ -1,6 +1,9 @@
 { inputs, ... }:
 {
-  imports = [ ../../modules/darwin/homebrew.nix ];
+  imports = [
+    ../../modules/darwin/homebrew.nix
+    ../../modules/darwin/defaults.nix
+  ];
 
   nixpkgs.hostPlatform = "aarch64-darwin"; # Apple M1
 
