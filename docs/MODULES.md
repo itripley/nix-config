@@ -133,8 +133,13 @@ The Mac's nix-darwin host (DESIGN §11, [MACOS.md](MACOS.md)).
   `darwin-rebuild switch --flake ~/nixos-config` picks this config from the hostname.
 - `system.primaryUser = "olivi"`: the user that nix-darwin's user-level options (homebrew,
   `system.defaults`) apply to. Activation itself runs as root (`sudo darwin-rebuild`).
-- `security.pam.services.sudo_local.enable = false`: leaves the hand-written Touch ID
-  `/etc/pam.d/sudo_local` alone. nix-darwin manages that file by default (empty unless `touchIdAuth`).
+- `security.pam.services.sudo_local`: `touchIdAuth` (`pam_tid.so`) and `reattach`
+  (`pam_reattach`, so Touch ID also works inside tmux). Both lines can only let sudo succeed early;
+  the password check in macOS's `/etc/pam.d/sudo` is untouched. macOS 14+ includes `sudo_local`
+  on its own, so nix-darwin doesn't edit `/etc/pam.d/sudo`.
+- `environment.etc."pam.d/sudo_local".knownSha256Hashes`: the hash of the hand-written file this
+  replaced, so the switch moved it to `sudo_local.before-nix-darwin` instead of aborting with
+  "Unexpected files in /etc". A file with any other content still aborts.
 - `nix.settings.experimental-features` and `nix.channel.enable = false`, as on the desktop.
   `trusted-users` stays root-only.
 - `system.configurationRevision` comes from the flake's `rev`/`dirtyRev`, so `darwin-version

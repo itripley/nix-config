@@ -54,7 +54,7 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
 | 6 | Shell, git, ssh, editor config taken over | done: generations 4–5, `fa820cb` |
 | 7 | Homebrew casks, brews, App Store apps (declared) | done: generations 6–7, `286d6f5` |
 | 8 | macOS defaults | done: generation 8, `a252741` |
-| 9 | Touch ID for sudo (nix-darwin managed) | |
+| 9 | Touch ID for sudo (nix-darwin managed) | done: generation 9, `9607781` |
 | 10 | Fonts | |
 | 11 | README, docs, CI | |
 
@@ -126,3 +126,9 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
     `trackpadCornerClickBehavior` = 1, `enableSecondaryClick` = 0). nix-darwin only writes the
     user domain. The trackpad domains it does write give the same behaviour.
   - Key repeat is at the macOS default, so it isn't set.
+- **Step 9** (generation 9): the hand-written `sudo_local` (`pam_tid.so` only, sha256
+  `5bef9b2a…`) was declared as a known hash. The switch renamed it to
+  `/etc/pam.d/sudo_local.before-nix-darwin` (identical to the backup copy) and linked
+  `/etc/static/pam.d/sudo_local`, which has `pam_reattach` (optional) and `pam_tid.so`
+  (sufficient). `/etc/pam.d/sudo` is unchanged. Olivia checked `sudo -k; sudo true` both in a
+  plain shell and inside tmux: Touch ID was offered in both.

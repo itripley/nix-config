@@ -21,7 +21,7 @@ Installation steps are in the top-level [README](../README.md).
 ## Status (2026-11-09)
 
 - **MacBook added (2026-11-10):** `darwinConfigurations.macbook-olivia` (nix-darwin) is switched to
-  (generation 7: hostname, Nix management, home-manager, CLI packages, shell/git/ssh/neovim/WezTerm, Homebrew declared, macOS defaults). The remaining steps are tracked in [MACOS.md](MACOS.md#steps).
+  (generation 7: hostname, Nix management, home-manager, CLI packages, shell/git/ssh/neovim/WezTerm, Homebrew declared, macOS defaults, Touch ID sudo). The remaining steps are tracked in [MACOS.md](MACOS.md#steps).
 - **Installed** on the Samsung 850 EVO and in daily use; `hardware-configuration.nix` is the generated one.
 - Every app from the original lists builds. Upstream build failures are patched in
   `overlays/build-fixes.nix` ([VERIFICATION.md](VERIFICATION.md#first-real-build-2026-11-08)).
@@ -88,6 +88,7 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-10 | Shared home-manager modules for fish, git/ssh and neovim (desktop package set unchanged). The Mac's zsh, fish, git, ssh and dotfile links moved to home-manager, with Nix ahead of Homebrew on PATH; nixpkgs WezTerm replaces the 20240203 release, which rejected the config | `fa820cb`, [MACOS.md](MACOS.md#checked) |
 | 2026-11-10 | MacBook: Homebrew declared (28 casks, 24 brews, 3 trusted taps, Keynote); activation never upgrades or removes, so nothing changed on disk. Taphouse is no longer in the App Store and stays manual | `286d6f5`, [MACOS.md](MACOS.md#checked) |
 | 2026-11-10 | MacBook: docker uses the Nix buildx/compose plugins (Homebrew plugin dir removed from `~/.docker/config.json`). macOS defaults declared (Dock, Finder, trackpad, clock, Stage Manager); all 34 values matched the live ones, only the Dock list was rewritten | `a252741`, [MACOS.md](MACOS.md#checked) |
+| 2026-11-10 | MacBook: Touch ID for sudo from nix-darwin (`touchIdAuth` + `pam_reattach` for tmux); the hand-written `sudo_local` was recognised by hash and moved aside | `9607781`, [MACOS.md](MACOS.md#checked) |
 
 ## Conventions
 

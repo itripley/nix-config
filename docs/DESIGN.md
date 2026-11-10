@@ -196,7 +196,7 @@ x86_64-linux system without building it.
 - **`system.primaryUser = "olivi"`.** Since 2025, nix-darwin activation runs as root, and
   user-level options (homebrew, `system.defaults`) apply to this user.
 - **Activation needs root:** `sudo darwin-rebuild switch`. As on the desktop, Olivia runs the switch.
-- **Touch ID's `sudo_local` stays hand-written until its own step.** nix-darwin manages
+- **Touch ID's `sudo_local` stayed hand-written until its own step (9, now nix-darwin managed).** nix-darwin manages
   `/etc/pam.d/sudo_local` by default, with empty contents unless `touchIdAuth` is set. Leaving it
   managed would have blocked the first switch, and it would drop Touch ID if ever overwritten.
 - **Homebrew stays for GUI apps and some build tools**, declared with nix-darwin's `homebrew`
