@@ -22,11 +22,12 @@ modules/nixos/                 boot, amd, desktop, audio, networking, storage, g
 modules/darwin/                homebrew (casks, brews, App Store), defaults (Dock, Finder, trackpad, …)
 home/shared/                   home-manager modules both machines use: CLI tools, fish, git/ssh, neovim, dotfile links
 home/darwin/                   home-manager for the Mac user (olivi): zsh, Mac CLI tools, git additions
-home/olivia/                   home-manager: apps, dev (git/ssh/nvim/vscode), firefox, plasma, flatpak, warp-gui, obsidian
-home/olivia/dotfiles/          wezterm, nvim (LazyVim), fastfetch, firefox userChrome — copied from Windows; fonts/ (gitignored)
+home/olivia/                   home-manager for the desktop: apps, dev (gitFull, vscode, godot), firefox, plasma, flatpak, warp-gui, obsidian, mpv
+home/olivia/dotfiles/          wezterm, nvim (LazyVim), fastfetch (live-linked on both machines), firefox userChrome; fonts/ (gitignored)
 home/olivia/themes/            Plasma theme from the old Fedora install (artwork in art/, gitignored)
 scripts/                       verify.ps1 (check from Windows), migrate-firefox-profile.sh (run on NixOS)
-docs/                          full documentation: what, how and why
+docs/                          full documentation: what, how and why (the Mac: docs/MACOS.md)
+.github/workflows/check.yml    CI: nix flake check on Linux (desktop) and macOS (Mac)
 ```
 
 ## Documentation
@@ -142,14 +143,16 @@ reboot
 
 ```sh
 nh os switch          # rebuild + activate (alias for nixos-rebuild switch --flake ~/nixos-config)
-nh os switch --update # update flake inputs, then rebuild
+nh os switch --update # update all flake inputs, then rebuild (the Mac's inputs move too; switch it afterwards)
 nh clean all          # GC old generations (also runs automatically)
 nix flake check       # evaluate the whole system + lint (~15 s; CI runs it too)
 nix fmt               # format the .nix files
 ```
 
-Edit `home/olivia/apps.nix` to add/remove apps. Search packages at https://search.nixos.org.
-nvim / wezterm / fastfetch configs are live symlinks into this repo — edit them in place, no rebuild needed.
+Edit `home/olivia/apps.nix` to add/remove apps. CLI tools wanted on both machines go in
+`home/shared/cli.nix` instead. Search packages at https://search.nixos.org.
+nvim / wezterm / fastfetch configs are live symlinks into this repo on both machines. Edit them in
+place; no rebuild is needed.
 Keyboard shortcuts, VPN toggles and theme notes: [docs/OPERATIONS.md](docs/OPERATIONS.md).
 
 ## macOS

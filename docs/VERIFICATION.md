@@ -77,6 +77,8 @@ Zero warnings, zero errors against `flake.lock`. Pinned revisions:
 | claude-desktop (added 2026-11-09) | main | `b16f4856` |
 | artcraft (added 2026-11-09) | main | `6a3de1d2` |
 | vicinae (added 2026-11-09) | main | `84a0086f` |
+| nixpkgs-darwin (added 2026-11-10, Mac) | nixpkgs-26.05-darwin | `57f1c896` |
+| nix-darwin (added 2026-11-10, Mac) | nix-darwin-26.05 | `d31953cf` |
 
 ## First real build (2026-11-08)
 
@@ -371,8 +373,11 @@ that run natively here, compared against `~` on NixOS. The app list itself was a
 
 ## Still to check by hand
 
+The Mac's checks are in [MACOS.md](MACOS.md#checked); all of them are done.
+
 | Area | How |
 |---|---|
+| Desktop after the shared-module move (2026-11-10) | `nh os switch`. The diff should list only a few rebuilt derivations, with no package added or removed. Then check that the fish greeting shows a Pokémon, that `git config --list --show-origin` has the email and `credential.helper=libsecret`, that `ssh -G unraid` uses `id_unraid`, and that nvim opens LazyVim. |
 | Idle static gone | After a reboot (already switched to): leave audio paused for a minute and listen. `cat /sys/module/snd_hda_intel/parameters/power_save` → `0`; `wpctl status` shows the Ryzen output not suspended. |
 | Plasma shortcuts | System Settings → Shortcuts; adjust `plasma.nix` if a KWin action name differs. |
 | ROCm in Resolve / Blender / Ollama | Render with HIP in Blender, run a model and check `ollama ps` shows GPU. |

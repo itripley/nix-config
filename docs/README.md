@@ -1,7 +1,8 @@
 # Documentation
 
 This repo turns DESKTOP-OLIVIA (Windows 11) into a NixOS 26.05 system that dual-boots alongside the
-existing Windows install. These docs record **what** was set up, **how** it works, and **why** each
+existing Windows install. Since 2026-11-10 it also manages the MacBook (`macbook-olivia`, nix-darwin
++ home-manager), sharing the cross-platform home-manager modules. These docs record **what** was set up, **how** it works, and **why** each
 choice was made, so the config can be maintained without re-deriving any of it.
 
 | Doc | Read it when you want to know… |
@@ -18,10 +19,18 @@ choice was made, so the config can be maintained without re-deriving any of it.
 
 Installation steps are in the top-level [README](../README.md).
 
-## Status (2026-11-09)
+## Status (2026-11-10)
 
-- **MacBook added (2026-11-10):** `darwinConfigurations.macbook-olivia` (nix-darwin) is switched to
-  (generation 7: hostname, Nix management, home-manager, CLI packages, shell/git/ssh/neovim/WezTerm, Homebrew declared, macOS defaults, Touch ID sudo, fonts). The remaining steps are tracked in [MACOS.md](MACOS.md#steps).
+- **MacBook migrated (2026-11-10):** `darwinConfigurations.macbook-olivia` is switched to (generation
+  10). It covers the hostname, Nix management, home-manager, CLI tools, shell/git/ssh/neovim/WezTerm,
+  Homebrew (declared, then cleaned up), macOS defaults, Touch ID sudo and fonts. All the steps are
+  done, and CI checks the Mac on `macos-latest`. What stays manual:
+  [MACOS.md](MACOS.md#stays-manual).
+- **Desktop: needs a `nh os switch` to pick up the shared modules.** On 2026-11-10 fish, git/ssh,
+  Neovim, the dotfile links and 12 CLI tools moved from `home/olivia/` into `home/shared/`. It
+  evaluates to the same 68 packages, and the gitconfig and Neovim wrapper are identical; only the
+  package order in a few derivations changed. Not switched yet, because it was done from the Mac.
+  Hand checks: [VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand).
 - **Installed** on the Samsung 850 EVO and in daily use; `hardware-configuration.nix` is the generated one.
 - Every app from the original lists builds. Upstream build failures are patched in
   `overlays/build-fixes.nix` ([VERIFICATION.md](VERIFICATION.md#first-real-build-2026-11-08)).
@@ -35,9 +44,10 @@ Installation steps are in the top-level [README](../README.md).
 - **Audit fixes (2026-11-09) are committed, booted and in use:** the one-time root steps were done,
   and the kernel command line has `amdgpu.ppfeaturemask`. The hand checks are in
   [VERIFICATION.md](VERIFICATION.md#audit-2026-11-09).
-- **Everything after the audit is switched to but not committed yet** (Vicinae, Obsidian, VS Code
-  extensions, TX-02, WezTerm tabs, the Serein patch, the idle-static fix). On 2026-11-09 the running
-  system was exactly the working tree's build. The idle-static fix still needs a **reboot** for its
+- **Everything after the audit is committed** (`45b44c5`…`cb317e2`: Vicinae, Obsidian, VS Code
+  extensions, TX-02, WezTerm tabs, the Serein patch, the idle-static fix, the Windows settings sweep)
+  and pushed. On 2026-11-09 the running system was exactly that build, apart from the sweep (next
+  bullet). The idle-static fix still needs a **reboot** for its
   kernel-module half (`power_save` is still 10); the WirePlumber half is live.
 - **Not switched to yet: the Windows settings sweep** (mpv, plex-mpv-shim, OBS plugins, Chromium
   extensions, RGB colors). Builds; needs `nh os switch`. Its hand steps for plex-mpv-shim, Pear Desktop
@@ -72,16 +82,16 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-09 | Best-practice audit. Fixes: root-only `trusted-users`, no legacy channels, `build-vm` works, LACT overdrive, `nix fmt`/`nix flake check`/`nix develop` + CI, warp-gui moved to `pkgs/`, shared nixpkgs config, no hardcoded uid/path, closure 43.1 → 40.6 GiB (orca/speechd, KDE PIM, extra JDKs, second .NET SDK) | `b96c7e4`…`18fdfd7`, [VERIFICATION.md](VERIFICATION.md#audit-2026-11-09) |
 | 2026-11-09 | linuxmeeter (Voicemeeter-style PipeWire mixer) packaged in `pkgs/` and added | never committed, [VERIFICATION.md](VERIFICATION.md#app-changes-2026-11-09) |
 | 2026-11-09 | Audio routing reported as not working; live graph recorded, not fixed yet | [VERIFICATION.md](VERIFICATION.md#audio-routing-not-working-2026-11-09) |
-| 2026-11-09 | Idle static on the speakers: HDA power saving off, analog output never suspended | `audio.nix` |
+| 2026-11-09 | Idle static on the speakers: HDA power saving off, analog output never suspended | `074d8f4`, `audio.nix` |
 | 2026-11-09 | linuxmeeter uninstalled (package recipe removed too; it was never committed) | [VERIFICATION.md](VERIFICATION.md#app-changes-2026-11-09) |
-| 2026-11-09 | Ulauncher replaced by Vicinae from its own flake + cachix, per its NixOS and KDE guides (Meta+Space, Meta+V clipboard, blur, focus, input server) | `plasma.nix`, DESIGN §4 |
-| 2026-11-09 | Serein: minimum window size patched from 760×520 to 400×300 (hard-coded, no setting) | `apps.nix`, [VERIFICATION.md](VERIFICATION.md#problems-found-after-first-boot-2026-11-0809) #17 |
-| 2026-11-09 | Obsidian: the weblivia vault's 19 plugins and 6 themes packaged (pinned to the Windows versions), settings and snippets declared, LiveSync settings seeded from a private file so it pulls the notes | `obsidian.nix`, `pkgs/obsidian-plugins`, [VERIFICATION.md](VERIFICATION.md#obsidian-vault-2026-11-09) |
-| 2026-11-09 | VS Code: all 42 Windows extensions (+ nix-ide) declared from the marketplace at the Windows versions, instead of 8 from nixpkgs + Settings Sync | `pkgs/vscode-marketplace`, [VERIFICATION.md](VERIFICATION.md#vs-code-extensions-2026-11-09) |
-| 2026-11-09 | TX-02 font for WezTerm and Obsidian: files in gitignored `dotfiles/fonts/`, linked into `~/.local/share/fonts` | `default.nix`, `dotfiles/wezterm/config/fonts.lua` |
-| 2026-11-09 | WezTerm: fancy tab bar on, with a close × on each tab (`show_close_tab_button_in_tabs = true`) and the title bar kept dark when unfocused; tab titles lost their rounded ends and own colours so the fancy bar draws the tabs | `dotfiles/wezterm/config/appearance.lua`, `events/tab-title.lua` |
-| 2026-11-09 | Virtual desktops: 3 rows (one column) instead of 1, as changed in the KDE GUI, so the next switch keeps it | `plasma.nix` |
-| 2026-11-09 | Windows settings sweep: mpv and plex-mpv-shim configs, OBS plugins, Chromium extensions, OpenRGB lowpink colors declared; logins and app state left as hand steps | `mpv.nix`, `apps.nix`, `services.nix`, [VERIFICATION.md](VERIFICATION.md#windows-settings-sweep-2026-11-09) |
+| 2026-11-09 | Ulauncher replaced by Vicinae from its own flake + cachix, per its NixOS and KDE guides (Meta+Space, Meta+V clipboard, blur, focus, input server) | `45b44c5`, `plasma.nix`, DESIGN §4 |
+| 2026-11-09 | Serein: minimum window size patched from 760×520 to 400×300 (hard-coded, no setting) | `73a10ec`, [VERIFICATION.md](VERIFICATION.md#problems-found-after-first-boot-2026-11-0809) #17 |
+| 2026-11-09 | Obsidian: the weblivia vault's 19 plugins and 6 themes packaged (pinned to the Windows versions), settings and snippets declared, LiveSync settings seeded from a private file so it pulls the notes | `b3c127e`, `obsidian.nix`, `pkgs/obsidian-plugins`, [VERIFICATION.md](VERIFICATION.md#obsidian-vault-2026-11-09) |
+| 2026-11-09 | VS Code: all 42 Windows extensions (+ nix-ide) declared from the marketplace at the Windows versions, instead of 8 from nixpkgs + Settings Sync | `b3c127e`, [VERIFICATION.md](VERIFICATION.md#vs-code-extensions-2026-11-09) |
+| 2026-11-09 | TX-02 font for WezTerm and Obsidian: files in gitignored `dotfiles/fonts/`, linked into `~/.local/share/fonts` | `3d64e44`, `dotfiles/wezterm/config/fonts.lua` |
+| 2026-11-09 | WezTerm: fancy tab bar on, with a close × on each tab (`show_close_tab_button_in_tabs = true`) and the title bar kept dark when unfocused; tab titles lost their rounded ends and own colours so the fancy bar draws the tabs | `3d64e44`, `dotfiles/wezterm/config/appearance.lua`, `events/tab-title.lua` |
+| 2026-11-09 | Virtual desktops: 3 rows (one column) instead of 1, as changed in the KDE GUI, so the next switch keeps it | `11986c8`, `plasma.nix` |
+| 2026-11-09 | Windows settings sweep: mpv and plex-mpv-shim configs, OBS plugins, Chromium extensions, OpenRGB lowpink colors declared; logins and app state left as hand steps | `402a925`, `mpv.nix`, `apps.nix`, `services.nix`, [VERIFICATION.md](VERIFICATION.md#windows-settings-sweep-2026-11-09) |
 | 2026-11-10 | MacBook: Nix installed (NixOS installer), nix-darwin bootstrapped as `macbook-olivia`; repo tooling and checks now also cover aarch64-darwin; desktop drv unchanged | `2256d0e`, [MACOS.md](MACOS.md), DESIGN §11 |
 | 2026-11-10 | MacBook: home-manager added for `olivi` (generation 2), HM settings shared with the desktop via `homeManagerModule`; rollback rehearsed | `39c8bbd`, [MACOS.md](MACOS.md#checked) |
 | 2026-11-10 | Shared home-manager modules start: `home/shared/cli.nix` (12 CLI tools moved from `dev.nix`/`apps.nix`, desktop package set unchanged); the Mac gets its own CLI list (`home/darwin/cli.nix`) | `13f0528`, MODULES.md |
@@ -96,6 +106,6 @@ Installation steps are in the top-level [README](../README.md).
 ## Conventions
 
 - Windows-side paths are written as they appear on Windows (`C:\Users\olivi\…`). The Windows user
-  is `olivi`; the NixOS user is `olivia`.
+  is `olivi`; the NixOS user is `olivia`. The macOS user is `olivi` too.
 - "HM" = home-manager. "nixpkgs" = the pinned `nixos-26.05` branch unless stated otherwise (`nixpkgs-26.05-darwin` on the Mac).
 - Comments in the `.nix` files explain the *what* briefly. These docs carry the full *why*.

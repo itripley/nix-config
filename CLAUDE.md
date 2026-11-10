@@ -26,7 +26,7 @@ The full reasoning is in `docs/`. Read the relevant doc before changing an area:
 | macOS setting (Dock, Finder, trackpad, …) | `modules/darwin/defaults.nix` (System Settings changes are reverted on switch) |
 | Shell, git/ssh, Neovim settings for both machines | `home/shared/shell.nix`, `git.nix`, `neovim.nix` (Mac-only additions: `home/darwin/shell.nix`, `git.nix`) |
 | System service, hardware, boot, network, mounts | the matching `modules/nixos/*.nix` |
-| New module | new file, then add it to `imports` in `hosts/desktop-olivia/configuration.nix` or `home/olivia/default.nix` |
+| New module | new file, then add it to `imports` in `hosts/desktop-olivia/configuration.nix` or `home/olivia/default.nix` (Mac: `hosts/macbook-olivia/configuration.nix` or `home/darwin/default.nix`) |
 | Plasma settings, shortcuts, theme | `home/olivia/plasma.nix` |
 | Flatpak | `home/olivia/flatpak.nix` (Flathub ID) |
 | Package written for this repo | `pkgs/<name>/package.nix` + a line in `overlays/packages.nix` + `packages` in `flake.nix` |
@@ -117,7 +117,7 @@ their own `Docs: …` commit. Never push.
   flakes, read the module source at the locked revision. If the `nixos` docs skill is installed,
   use it for general Nix and NixOS questions, but it tracks nixpkgs **master**, not 26.05.
 - **Unstable is opt-in:** use `pkgs.unstable.<name>`, and only when the stable version is too old
-  (currently `claude-code`). Serein and Claude Desktop follow `nixpkgs-unstable`, so they link a
+  (currently `claude-code` on the desktop; croc, colima, docker-buildx, kubernetes-helm and ente-cli on the Mac). Serein and Claude Desktop follow `nixpkgs-unstable`, so they link a
   newer glibc. A `GLIBC_2.4x not found` from the system `ldd` is expected.
 - **Inputs follow our nixpkgs** (or our unstable, if the flake targets unstable). `vicinae` has no
   `follows` on purpose, so its builds match vicinae.cachix.org. Don't "fix" that.
@@ -129,7 +129,8 @@ their own `Docs: …` commit. Never push.
   §4, §9), statix `repeated_keys` off so each setting sits next to its comment (`statix.toml`), no
   `system.autoUpgrade` (DESIGN §10). The audit's "left on purpose" list is in `docs/VERIFICATION.md`.
 - **Settings changed in the KDE GUI are reverted** on the next switch. Lasting changes go in `plasma.nix`.
-- **Users:** the Windows user is `olivi` and the NixOS user is `olivia`. Windows paths are written
+- **Users:** the Windows user is `olivi`, the NixOS user is `olivia`, and the macOS user is `olivi`.
+  Usernames and home paths go only in per-host files, never in `home/shared/`. Windows paths are written
   as they appear on Windows. Line endings are LF (`.gitattributes`), since the repo is also edited
   on Windows.
 - **Debugging:** `nix flake check --show-trace` for evaluation errors, `nix log <drv>` for build

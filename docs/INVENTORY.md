@@ -65,8 +65,8 @@ Other findings that matter for dual-boot:
 | `~/.config/nvim/` | LazyVim starter config (with `lazy-lock.json`) | `home/olivia/dotfiles/nvim` |
 | `~/.config/fastfetch/config.jsonc` | fastfetch config | `home/olivia/dotfiles/fastfetch` |
 | `~/.config/whkdrc` | komorebi/whkd tiling keybinds: Alt+H/J/K/L focus, Alt+Shift+H/J/K/L move, Alt+Q close, Alt+M minimize | first as KWin shortcuts; now replaced by Krohnkite on Meta (Fedora setup, see FEDORA.md). Alt+Q/Alt+M kept. |
-| `~/.gitconfig` | only `user.email`; no `user.name`; credential helper wincred | `dev.nix` (email only) |
-| `~/.ssh/config` | host `github-artlivia` (deploy key `id_ed25519_artlivia`); keys `id_unraid`, `id_ed25519_unraid` | `dev.nix` SSH hosts; **keys are copied by hand, never committed** |
+| `~/.gitconfig` | only `user.email`; no `user.name`; credential helper wincred | `home/shared/git.nix` (email only) |
+| `~/.ssh/config` | host `github-artlivia` (deploy key `id_ed25519_artlivia`); keys `id_unraid`, `id_ed25519_unraid` | `home/shared/git.nix` SSH hosts; **keys are copied by hand, never committed** |
 | VS Code | 43 extensions | at first 8 declared in `dev.nix` + Settings Sync; since 2026-11-09 all 42 in `extensions.json` declared (`pkgs/vscode-marketplace`) |
 | Fonts | JetBrainsMono Nerd Font (used by WezTerm) | `fonts.packages` |
 | Firefox | profile `9ylnf32e.default-release`, Firefox 159.0.1, 110 extensions (20 on), 15 themes, Sidebery, `userChrome.css` | see [FIREFOX.md](FIREFOX.md) |

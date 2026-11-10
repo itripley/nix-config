@@ -15,17 +15,20 @@ git add -A && git commit -m "…"  # record it
 - `nix flake check` (≈15 s) evaluates the whole system and lints the repo; `nix fmt` formats it.
   CI runs the same check on every push.
 - From Windows, check edits before rebooting into NixOS: `pwsh -File scripts\verify.ps1`.
+- **The MacBook** has its own loop: `sudo darwin-rebuild switch --flake ~/nixos-config#macbook-olivia`.
+  Its commands are in the README's [macOS](../README.md#macos) section, and its troubleshooting
+  [below](#macbook). A change in `home/shared/` affects both machines, so switch both.
 
 ## Common tasks
 
 | Task | How |
 |---|---|
-| Add/remove an app | Edit `home/olivia/apps.nix` (user apps) or a `modules/nixos/*.nix` file (system services). Find names at https://search.nixos.org. |
+| Add/remove an app | Edit `home/olivia/apps.nix` (user apps) or a `modules/nixos/*.nix` file (system services). A CLI tool for both machines goes in `home/shared/cli.nix`. Find names at https://search.nixos.org. |
 | Try an app without installing | `nix shell nixpkgs#<name>` (gone when the shell closes). |
 | Add a Flatpak | Add its Flathub ID to `home/olivia/flatpak.nix`. |
 | Run an AppImage | `chmod +x Foo.AppImage && ./Foo.AppImage` (binfmt handles it). |
 | Update everything | `nh os switch --update` (updates `flake.lock`, then rebuilds). Commit the new lock. |
-| Update one input | `nix flake update home-manager`, then `nh os switch`. |
+| Update one input | `nix flake update home-manager`, then `nh os switch`. `home-manager` and `nixpkgs-unstable` are shared with the Mac, so switch it too. |
 | Update Claude Desktop / ArtCraft / Serein / Vicinae | `nix flake update claude-desktop` (or `artcraft`, `serein`, `vicinae`), then `nh os switch`. Third-party flakes: glance at the input's commits first (DESIGN §8). |
 | Add another ArtCraft app | Add it to `programs.artcraft.apps` in `modules/nixos/desktop.nix`: `vectorcraft`, `designcraft`, `lightcraft`, `effectcraft`, `pdfcraft`. |
 | Pin an ArtCraft version | Use `<app>_<x>_<y>_<z>` in that list, e.g. `"photocraft_0_20_1"`; plain `<app>` is the newest in the lock. |
@@ -228,7 +231,7 @@ preferences from a newer version; skip it unless something specific is missing.
 | Resolve can't import a clip | Free Resolve on Linux lacks H.264/H.265/AAC decode | `ffmpeg -i in.mp4 -c:v dnxhd -profile:v dnxhr_hq -c:a pcm_s16le out.mov`. |
 | Ollama runs on CPU | ROCm not picked up | `journalctl -u ollama`; `ollama ps` shows the processor. |
 | A game won't start | Proton compatibility / anti-cheat | Check protondb.com; try Proton-GE (Steam → Properties → Compatibility). Kernel anti-cheat titles → Windows. |
-| Mason LSP binary "not found"/won't run | Unpatched binary | `programs.nix-ld` should cover it; otherwise add the LSP to `programs.neovim.extraPackages` in `dev.nix`. |
+| Mason LSP binary "not found"/won't run | Unpatched binary | `programs.nix-ld` should cover it; otherwise add the LSP to `programs.neovim.extraPackages` in `home/shared/neovim.nix` (both machines) or `dev.nix` (desktop only). |
 | Firefox add-ons missing after migration | Add-on DB not reconciled | See [FIREFOX.md](FIREFOX.md#testing-done-and-not-done). Re-run the script (it backs up first) or reinstall from Firefox Sync's add-on list. |
 | Bitwarden extension can't reach the desktop app | Integration off | Desktop app: *Allow browser integration*; extension: enable *Unlock with desktop app*. |
 | `home-manager` activation fails: "would be clobbered" | A real file where HM wants a link | HM renames it to `*.hm-backup`; if it still fails, move the file away and rebuild. |
@@ -237,6 +240,20 @@ preferences from a newer version; skip it unless something specific is missing.
 | Claude Desktop won't start or shows a blank window | Wayland flags, or a stale profile after an update | Run `claude-desktop` in a terminal to see the error; `journalctl --user -b \| grep -i claude`. |
 | `ldd` says `GLIBC_2.4x not found` for Serein or Claude Desktop | They're linked against unstable's newer glibc; the system `ldd` uses stable's | Not a real problem. Check with the binary's own loader: `$(patchelf --print-interpreter <bin>) --list <bin>`. |
 | Rebuild fails after an update | Upstream package change | Roll back (boot menu or `--rollback`), then `git checkout flake.lock` to return to the last good pins. |
+
+## MacBook
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| Switch aborts: "Unexpected files in /etc" | nix-darwin won't overwrite an `/etc` file it doesn't recognise | Look at the file. If nothing in it matters, rename it to `<name>.before-nix-darwin` and switch again. To take it over without the manual step, declare its hash in `environment.etc."<path>".knownSha256Hashes` (done for `sudo_local`). |
+| Switch aborts in "Homebrew bundle…" over an untrusted tap | Homebrew 6+ refuses third-party taps that aren't trusted | `trusted = true` on that tap in `modules/darwin/homebrew.nix`. |
+| `brew bundle check` says "No Brewfile found" | The shell started before the switch that set `HOMEBREW_BUNDLE_FILE` | Open a new terminal tab. |
+| A Dock pin or System Settings change reverts after a switch | It's declared in `modules/darwin/defaults.nix` | Change it there instead. |
+| `darwin-rebuild --list-generations`: permission denied | It takes the profile lock | Use `sudo`, or `ls -l /nix/var/nix/profiles/system-*-link`. |
+| WezTerm: "… is not a valid Config field" | An older WezTerm (e.g. Homebrew's 20240203) is running the repo's config | Open WezTerm from `~/Applications/Home Manager Apps` (nixpkgs build). |
+| docker runs Homebrew's plugins | `cliPluginsExtraDirs` in `~/.docker/config.json` wins over `~/.docker/cli-plugins` | Remove that entry (done on 2026-11-10). |
+| `brew uninstall` removed extra formulae | It autoremoves dependency-only formulae by default | Set `HOMEBREW_NO_AUTOREMOVE=1` for the command; reinstall anything needed with `brew install`. |
+| A Homebrew service breaks after a cleanup | Its LaunchAgent or LaunchDaemon runs a Homebrew path | `grep -l /opt/homebrew ~/Library/LaunchAgents/*.plist /Library/Launch*/*.plist` before uninstalling; keep that formula declared. |
 
 ## Leftover data from removed apps
 

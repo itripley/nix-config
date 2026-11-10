@@ -65,13 +65,13 @@ and video-wallpaper plugin (GPL) are code and are committed.
 | wezterm, zen-browser, git, fish, neovim, lazygit, fastfetch, lutris, steam, obs-studio, docker, cloudflare-warp, dotnet-sdk | already in the config |
 | Flatpaks: Bitwarden, Tidal-hifi, Plexamp, VS Code, Vesktop, LocalSend, Prism Launcher, Plex | already in the config (as nixpkgs packages) |
 | ulauncher | replaced by Vicinae: `vicinae` flake input + `programs.vicinae` (`plasma.nix`), Meta+Space through `hotkeys.commands` → `vicinae toggle` |
-| thunar, btop, w3m, gnome-boxes, distrobox, pokemon-colorscripts | `apps.nix` |
+| thunar, btop, w3m, gnome-boxes, distrobox, pokemon-colorscripts | `apps.nix` (btop and pokemon-colorscripts are in `home/shared/` since 2026-11-10) |
 | ente (Ente Photos rpm) | `unstable.ente-desktop` (stable's 1.7.22 is pinned to EOL Electron 41) |
 | Flatpaks DistroShelf, Warehouse, High Tide | `distroshelf`, `warehouse`, `high-tide` from nixpkgs |
 | wine, winetricks | `wineWow64Packages.stable`, `winetricks` |
-| cargo, go, lazydocker (~/.local/bin) | `rustup`, `go`, `lazydocker` (`dev.nix`); `~/.cargo/bin` and `~/go/bin` on PATH |
+| cargo, go, lazydocker (~/.local/bin) | `rustup`, `go`, `lazydocker` (`home/shared/cli.nix`); `~/.cargo/bin` and `~/go/bin` on PATH (`home/shared/shell.nix`) |
 | virtqemud (GNOME Boxes VMs) | `virtualisation.libvirtd` + `libvirtd` group |
-| fish greeting `pokemon-colorscripts -r` | `programs.fish.functions.fish_greeting` (`default.nix`) |
+| fish greeting `pokemon-colorscripts -r` | `programs.fish.functions.fish_greeting` (`home/shared/shell.nix`) |
 | Vesktop at login | `xdg.autostart.entries` (`default.nix`) |
 
 Copied once into the home folder (app state, not config, so not in the repo): Ulauncher's

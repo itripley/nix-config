@@ -45,8 +45,8 @@ just a CLI environment).
 | Input | Why |
 |---|---|
 | `nixpkgs` → **nixos-26.05** (stable) | Fewer surprises for a first NixOS system. Stable still gets Firefox and security updates. |
-| `nixpkgs-unstable`, exposed as `pkgs.unstable.*` | Only for fast-moving tools where a release-branch version is too old: `claude-code`. |
-| `home-manager` (release-26.05) | User-level config (apps, dotfiles, Firefox, Plasma) in the same repo, applied in the same rebuild. |
+| `nixpkgs-unstable`, exposed as `pkgs.unstable.*` | Only for fast-moving tools where a release-branch version is too old. On the desktop that's `claude-code`; on the Mac it's croc, colima, docker-buildx, kubernetes-helm and ente-cli, kept at least as new as Homebrew had them. One input for both hosts. |
+| `home-manager` (release-26.05) | User-level config (apps, dotfiles, Firefox, Plasma) in the same repo, applied in the same rebuild. One input for both hosts: a NixOS module on the desktop, a nix-darwin module on the Mac. |
 | `plasma-manager` | Declares KDE settings (theme, keyboard, shortcuts) that would otherwise live in hand-edited `~/.config` files. |
 | `disko` | See §2. |
 | `nix-flatpak` | Declarative Flatpaks for apps that aren't in nixpkgs. The list is empty since 2026-11-09 (JDownloader and Stremio removed); kept so new ones are one line. |
@@ -58,8 +58,8 @@ just a CLI environment).
 | `vicinae` flake ([vicinaehq/vicinae](https://github.com/vicinaehq/vicinae)) | The launcher's own flake, set up per [its NixOS guide](https://docs.vicinae.com/nixos). nixpkgs has the package but no NixOS module: without upstream's module the input server lacks `cap_dac_override` (a `security.wrappers` entry), so paste-to-window and snippet expansion fall back to copying. Its Home Manager module replaces home-manager's `programs.vicinae`. Its `nixpkgs` deliberately does **not** follow ours, so builds match `vicinae.cachix.org` (added to `nix.settings`); the cost is its own nixpkgs and Qt in the closure. `nix flake update vicinae` picks up new releases. |
 
 Every input except nix-flatpak and Vicinae follows our `nixpkgs` (Serein and Claude Desktop follow
-`nixpkgs-unstable`; Vicinae keeps its own for the binary cache, see above), so there's one package set
-per channel instead of several copies. `flake.lock` pins exact revisions, so evaluation is reproducible until you choose to update.
+`nixpkgs-unstable`, nix-darwin follows `nixpkgs-darwin`; Vicinae keeps its own for the binary cache,
+see above), so there's one package set per channel instead of several copies. `flake.lock` pins exact revisions, so evaluation is reproducible until you choose to update.
 
 **Unfree / insecure:** `allowUnfree = true` (Steam, Resolve, VS Code, Plex, …). One insecure package
 is permitted, `openssl-1.1.1w`, because **Sublime Text 4 still links the end-of-life OpenSSL 1.1**.
@@ -71,23 +71,29 @@ unfree, and on a single-user desktop the list would just be upkeep.
 ## 5. home-manager as a NixOS module
 
 **Decision:** home-manager runs inside the NixOS config (`home-manager.nixosModules.home-manager`)
-with `useGlobalPkgs` and `useUserPackages`.
+with `useGlobalPkgs` and `useUserPackages`. On the Mac it runs the same way inside nix-darwin
+(`home-manager.darwinModules.home-manager`), with the same settings (`homeManagerModule` in
+`flake.nix`).
 
-**Why:** one command (`nh os switch`) updates system and user config together. They always share
+**Why:** one command (`nh os switch`, or `darwin-rebuild switch` on the Mac) updates system and user config together. They always share
 one nixpkgs and its settings (unfree, overlays). `backupFileExtension = "hm-backup"` means a file
 already in the way gets renamed instead of failing the activation.
 
 ## 6. Dotfiles: live links, not store copies
 
 **Decision:** WezTerm, Neovim and fastfetch configs are linked with `mkOutOfStoreSymlink` into the
-checkout at `~/nixos-config`, instead of being copied into the read-only Nix store.
+checkout at `~/nixos-config`, instead of being copied into the read-only Nix store. The links are in
+`home/shared/default.nix`, so both machines use the same files from `home/olivia/dotfiles/`. Where
+the platforms differ (the WezTerm font size, the fish path), the Lua config branches on the
+platform.
 
 **Why:**
 - LazyVim writes `lazy-lock.json` into its config directory; a read-only store copy breaks plugin updates.
 - Edits apply immediately, with no rebuild for a colour or keybind tweak.
 - The files stay version-controlled in this repo.
 
-**Trade-off:** the repo must live at `~/nixos-config` (the README's install step 6 puts it there).
+**Trade-off:** the repo must live at `~/nixos-config` on both machines (the README's install step 6
+and the Mac bootstrap put it there).
 `userChrome.css` is the exception: it's a normal Nix-managed file because it's tiny and changes rarely.
 
 ## 7. Desktop: KDE Plasma 6 on Wayland
@@ -135,6 +141,11 @@ The Nix store is **world-readable**, and this repo may be pushed somewhere. So:
   code and the other settings are in the repo, pinned by hash.
 - WezTerm wallpapers, the Plasma theme artwork (`themes/art/`) and the TX-02 font (`dotfiles/fonts/`)
   are gitignored. They're third-party art and a licensed font, not secrets, but shouldn't be republished.
+- **On the Mac,** the same rules apply: SSH keys are copied by hand, and the gh token lives in the
+  keychain (`gh auth login`). The Cloudflare tunnel token stays in its LaunchDaemon plist, and the
+  VS Code API key in `settings.json`, which isn't managed. None of them is in the repo.
+- If a secret ever has to be declarative, the plan is **sops-nix**: one tool for NixOS, nix-darwin
+  and home-manager, with only the encrypted file in the repo. Nothing needs it yet.
 
 **Root-equivalent access** (checked in the 2026-11-09 audit):
 - `nix.settings.trusted-users` is left at `root` only. Trusting `@wheel` would let anything running
@@ -204,4 +215,22 @@ x86_64-linux system without building it.
   module. Casks keep Spotlight, code signing and the apps' own updaters working; brew/Xcode builds
   expect `/opt/homebrew`. No nix-homebrew: Homebrew itself stays a normal install. Activation never
   upgrades or removes anything (`cleanup = "none"`), so declaring the existing apps changed nothing
-  on disk, and removals stay a manual, asked-for step.
+  on disk, and removals stay a manual, asked-for step. Formulae that services run by path (node for
+  openclaw, cloudflared for the tunnel) stay in Homebrew even though Nix has them.
+- **Shared home-manager modules, platform files around them.** `home/shared/` holds what works the
+  same on both (CLI tools, fish, git/ssh, Neovim, the dotfile links). `home/olivia/` (desktop) and
+  `home/darwin/` (Mac) import it and add their own: gitFull + libsecret and gcc on the desktop; zsh,
+  gh credentials and Mac-only tools on the Mac. The usernames differ (`olivia` / `olivi`), so
+  usernames and home paths only appear in the per-host files.
+- **Nix before Homebrew on PATH.** zsh's profile and fish's init run `brew shellenv` first and then
+  put the Nix profiles in front, so Nix's git, node and gh win while Homebrew-only tools stay
+  reachable.
+- **WezTerm from nixpkgs**, not Homebrew's cask: the repo's config uses options newer than
+  Homebrew's 20240203 release, and the desktop runs the same build. It's a plain package, not
+  `programs.wezterm`, for the same reason as on the desktop: the config folder is live-linked.
+- **macOS defaults: only captured values.** `system.defaults` declares just the settings that
+  already differed from the macOS defaults, checked one by one before the switch, so adopting them
+  changed nothing. Anything declared is reverted on the next switch if changed in System Settings.
+- **Touch ID taken over by hash.** nix-darwin refuses to overwrite an unknown `/etc` file; the old
+  `sudo_local` was declared with its exact `knownSha256Hashes`, so the switch moved it aside safely.
+  `pam_reattach` makes Touch ID work in tmux.

@@ -14,13 +14,42 @@ went, what was checked, and what stays manual. Why it's built this way is in
 | macOS | 26.6.2 (25G83), Xcode Command Line Tools 26.6 |
 | User | `olivi` (uid 501, admin), login shell `/bin/zsh`. The NixOS user is `olivia`. |
 | Hostname | was `olivias-MacBook-Pro` / "olivia’s MacBook Pro"; now `macbook-olivia` (all three names) |
-| Homebrew | `/opt/homebrew`, 46 leaf formulae (226 total), 36 casks, 5 taps, no running services |
+| Homebrew | `/opt/homebrew`, 46 leaf formulae (226 total), 36 casks, 5 taps. `brew services` showed nothing running, but two LaunchDaemons run Homebrew binaries: httpd and the Cloudflare tunnel (found during the cleanup). |
 | Before Nix | no Nix; Touch ID for sudo already set by hand in `/etc/pam.d/sudo_local` |
 
 Backups taken before any change, outside the repo, in `~/nix-migration-backup-2026-11-10/`:
 dotfiles tarball (no SSH keys), `Brewfile.before`, `defaults export` of the Dock, Finder, global,
 trackpad, screenshot, clock, WindowManager and loginwindow domains, and copies of
 `/etc/{pam.d/sudo_local,zshrc,zprofile,bashrc,shells}`.
+
+## Current state (2026-11-10)
+
+| | |
+|---|---|
+| System | nix-darwin generation 10 (`darwin-rebuild` from `nix-darwin-26.05` with `nixpkgs-26.05-darwin`), Nix 2.34.9 |
+| home-manager | 98 commands in `/etc/profiles/per-user/olivi/bin`; zsh, fish, git, ssh and the dotfile links managed |
+| Homebrew | 26 leaf formulae (191 total), 36 casks (28 declared plus 8 stale records), 5 taps (3 declared). Declared in `modules/darwin/homebrew.nix`. |
+| CI | `nix flake check` on `macos-latest` on every push |
+
+## Where things went
+
+| Before | Now |
+|---|---|
+| Homebrew CLI tools: git, gh, neovim, fish, btop, fastfetch, croc, docker (+ buildx, compose, credential helper), colima, helm, imagemagick, mc, pipx, pv, rsync, rust, unar, ente-cli | nixpkgs, in `home/shared/cli.nix` or `home/darwin/cli.nix` (some from `pkgs.unstable` to stay as new as Homebrew's). The brew copies were uninstalled. |
+| Homebrew build tooling, php/httpd, Python 3.11/3.13, rbenv, mpv, tailscale, chezmoi, projectm, mole, cliclick, opencode | still Homebrew, declared as `brews` ("review later") |
+| node, cloudflared | in both: Nix for the shell, Homebrew for the services that run it by path |
+| 28 casks with their apps present, 3 taps | declared `casks` and trusted `taps` |
+| 8 casks whose apps are gone | not declared; still in brew's records |
+| Keynote (App Store) | `masApps` |
+| Taphouse (App Store) | manual: no longer in the store |
+| Homebrew WezTerm 20240203 | nixpkgs WezTerm in `~/Applications/Home Manager Apps` (old app removed) |
+| `.zshrc`, `.zprofile`, `.zshenv`, fish `config.fish` | `home/darwin/shell.nix` + `home/shared/shell.nix` (mise, LM Studio and cargo kept; Rancher, OrbStack and Resolve lines dropped) |
+| `.gitconfig`, `~/.config/git/ignore`, `~/.ssh/config` | `home/shared/git.nix` + `home/darwin/git.nix` (the old file is `~/.gitconfig.before-hm`) |
+| chezmoi copies of the nvim and wezterm configs | live links into this repo's `home/olivia/dotfiles/`; don't run `chezmoi apply` over them |
+| `~/.docker/config.json` `cliPluginsExtraDirs` (Homebrew's plugins) | removed; docker uses the Nix plugins linked into `~/.docker/cli-plugins` |
+| Dock, Finder, trackpad, clock, Stage Manager, login and screenshot settings | `modules/darwin/defaults.nix` |
+| Hand-written `/etc/pam.d/sudo_local` (Touch ID) | nix-darwin `touchIdAuth` + `reattach` |
+| Hand-installed JetBrainsMono Nerd Font (96 files) | `fonts.packages`, in `/Library/Fonts/Nix Fonts` |
 
 ## Nix installation
 
