@@ -21,7 +21,7 @@ hosts/desktop-olivia/
 hosts/macbook-olivia/
   configuration.nix               the Mac (nix-darwin): hostname, primaryUser, nix settings
 modules/darwin/                   the Mac's nix-darwin modules
-  homebrew.nix
+  homebrew.nix  defaults.nix
 modules/nixos/                    system level (root, services, hardware)
   boot.nix  amd.nix  desktop.nix  audio.nix  networking.nix  storage.nix  gaming.nix  services.nix
 home/shared/                      home-manager modules both hosts import
@@ -140,6 +140,27 @@ The Mac's nix-darwin host (DESIGN §11, [MACOS.md](MACOS.md)).
 - `system.configurationRevision` comes from the flake's `rev`/`dirtyRev`, so `darwin-version
   --configuration-revision` shows which commit a generation was built from.
 - `system.stateVersion = 7`: never change it.
+
+## `modules/darwin/defaults.nix`
+
+macOS settings through `system.defaults`, captured 2026-11-10. Only values that differed from the
+macOS defaults are declared, so the first switch changed nothing except rewriting the Dock list.
+Anything here that's changed in System Settings, including Dock pins, is reverted on the next
+switch; lasting changes go in this file. A rollback doesn't unset defaults: restore with `defaults
+import` from the backup folder (MACOS.md).
+
+| Setting | Value |
+|---|---|
+| `dock` | right side, tile size 34, no autohide or magnification, minimize into the app icon. `persistent-apps`: the 19 pinned apps, with WezTerm from `~/Applications/Home Manager Apps`. |
+| `finder` | list view (`Nlsv`), path bar, new windows open Recents, no drives or servers on the desktop |
+| `NSGlobalDomain` | automatic light/dark, natural scrolling off, trackpad speed 0.875 |
+| `trackpad` | tap to click, secondary click in the bottom-right corner, pinch zoom and three-finger drag off. nix-darwin writes both the built-in and Bluetooth trackpad domains. |
+| `menuExtraClock` | AM/PM and weekday |
+| `WindowManager` | Stage Manager off, no tiled-window margins |
+| `CustomUserPreferences` | Values with no typed option. `AppleKeyboardUIMode = 1`: the typed option only allows 0, 2 and 3. Also: no minimize on title-bar double-click, large menu bar font, don't reopen windows at login (`TALLogoutSavesState`), cursor in screenshots. |
+
+Not managed: the `-currentHost` global trackpad keys (nix-darwin has no per-host domain; they're
+already set), key repeat (at the default), wallpaper, login items, notifications.
 
 ## `modules/darwin/homebrew.nix`
 

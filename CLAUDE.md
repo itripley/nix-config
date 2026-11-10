@@ -18,6 +18,7 @@ The full reasoning is in `docs/`. Read the relevant doc before changing an area:
 | CLI tool for both machines | `home/shared/cli.nix` (changes the desktop too: compare its toplevel `drvPath`) |
 | Mac-only CLI tool | `home/darwin/cli.nix` |
 | Mac GUI app (Homebrew cask), Homebrew-only formula, App Store app | `modules/darwin/homebrew.nix` |
+| macOS setting (Dock, Finder, trackpad, …) | `modules/darwin/defaults.nix` (System Settings changes are reverted on switch) |
 | Shell, git/ssh, Neovim settings for both machines | `home/shared/shell.nix`, `git.nix`, `neovim.nix` (Mac-only additions: `home/darwin/shell.nix`, `git.nix`) |
 | System service, hardware, boot, network, mounts | the matching `modules/nixos/*.nix` |
 | New module | new file, then add it to `imports` in `hosts/desktop-olivia/configuration.nix` or `home/olivia/default.nix` |

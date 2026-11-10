@@ -53,7 +53,7 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
 | 5 | Shared home modules + CLI packages | done: generation 3, `13f0528` |
 | 6 | Shell, git, ssh, editor config taken over | done: generations 4–5, `fa820cb` |
 | 7 | Homebrew casks, brews, App Store apps (declared) | done: generations 6–7, `286d6f5` |
-| 8 | macOS defaults | |
+| 8 | macOS defaults | done: generation 8, `a252741` |
 | 9 | Touch ID for sudo (nix-darwin managed) | |
 | 10 | Fonts | |
 | 11 | README, docs, CI | |
@@ -113,3 +113,16 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
     gb storefronts. It looks withdrawn from the store, so it stays a manual install.
   - Brew prints a warning about a libtiff ↔ webp circular dependency. It comes from stale keg
     records and doesn't block anything; it was left alone.
+- **Docker plugins** (after step 7, with Olivia's OK): `cliPluginsExtraDirs` was removed from
+  `~/.docker/config.json`, and nothing else in the file changed. The original is
+  `docker-config.json.before` in the backup folder. `docker info` now lists buildx 0.38.1 and
+  compose 5.6.1 from `~/.docker/cli-plugins` (Nix).
+- **Step 8** (generation 8): before the switch, all 34 `defaults write` calls in the built
+  activation script were compared with the live values, and every one matched. The only visible
+  change was the Dock app list, rewritten with the same 19 apps (Seanime, uninstalled, dropped) and
+  one Dock restart. The Dock as it was before is saved as
+  `defaults/com.apple.dock.before-step8.plist`.
+  - Left unmanaged: the `-currentHost` global trackpad keys (`com.apple.mouse.tapBehavior` = 1,
+    `trackpadCornerClickBehavior` = 1, `enableSecondaryClick` = 0). nix-darwin only writes the
+    user domain. The trackpad domains it does write give the same behaviour.
+  - Key repeat is at the macOS default, so it isn't set.
