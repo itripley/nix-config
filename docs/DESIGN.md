@@ -158,7 +158,8 @@ The Nix store is **world-readable**, and this repo may be pushed somewhere. So:
   `overlays/packages.nix`. That way they build on their own (`nix build .#<name>`) and can be
   overridden like any nixpkgs package.
 - **Checks instead of full CI builds.** `nix flake check` evaluates the whole system and lints the
-  repo (statix, deadnix, nixfmt) in about 15 s. GitHub Actions runs the same on every push. CI
+  repo (statix, deadnix, nixfmt) in about 15 s. GitHub Actions runs the same on every push, on
+  `ubuntu-latest` (desktop) and `macos-latest` (the Mac), since each runner checks its own system. CI
   doesn't build the system: it's 40+ GiB, and unfree apps like Resolve aren't in the binary cache.
   `nix fmt` formats everything except the generated `hardware-configuration.nix`. statix's
   "repeated keys" warning is off (`statix.toml`), so each setting stays next to its own comment.

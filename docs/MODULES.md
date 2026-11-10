@@ -13,7 +13,7 @@ pkgs/obsidian-plugins/            Obsidian plugins + themes, pinned (used by hom
 pkgs/vscode-marketplace/          VS Code extensions, pinned (used by home/olivia/dev.nix)
 flake.lock                        exact pinned revisions of every input
 statix.toml                       linter config (`nix flake check`)
-.github/workflows/check.yml       CI: `nix flake check` on every push
+.github/workflows/check.yml       CI: `nix flake check` on every push, on Linux and macOS
 hosts/desktop-olivia/
   configuration.nix               host entry: imports, user, nix settings, nh, nix-ld
   disko.nix                       partitioning of the Samsung disk
@@ -181,7 +181,7 @@ by hand, outside Nix.
 | `onActivation.autoUpdate = false`, `upgrade = false` | A switch only installs what's missing (`brew bundle --no-upgrade`, `HOMEBREW_NO_AUTO_UPDATE`), so it's repeatable and never surprises with upgrades. Upgrading is a manual `brew upgrade`. |
 | `global.brewfile = true` + `mas` in `systemPackages` | A plain `brew bundle check --no-upgrade` uses the generated Brewfile, and can check the App Store entries. Activation brings its own `mas`. |
 | `taps` (pear-devs/pear, viceverse-cz/serein, anomalyco/tap), `trusted = true` | Only the taps a declared cask or brew comes from. Homebrew 6+ refuses untrusted third-party taps, which would abort activation. serein's tap lives at a non-standard URL (`clone_target`). |
-| `brews` | Kept in Homebrew, "review later": build tooling for brew/Xcode builds that expect `/opt/homebrew` paths (cmake, automake, llvm@20, vcpkg, …), php/httpd, Python 3.11/3.13, rbenv, mpv, tailscale, chezmoi, projectm, mole. Also `cliclick` (not in nixpkgs) and `opencode` (nixpkgs' is older). |
+| `brews` | Kept in Homebrew, "review later": build tooling for brew/Xcode builds that expect `/opt/homebrew` paths (cmake, automake, llvm@20, vcpkg, …), php/httpd, Python 3.11/3.13, rbenv, mpv, tailscale, chezmoi, projectm, mole. Also `cliclick` (not in nixpkgs) and `opencode` (nixpkgs' is older). `node` and `cloudflared` are in Nix too, but stay here because the openclaw LaunchAgent and the Cloudflare tunnel LaunchDaemon run Homebrew's paths. |
 | `casks` | The 28 GUI apps still installed. GUI apps stay casks for Spotlight, code signing and their own updaters. |
 | `masApps` | Keynote. Taphouse can't be declared, since the store no longer lists it (MACOS.md step 7). Needs an App Store sign-in. |
 

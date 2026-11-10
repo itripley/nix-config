@@ -56,7 +56,8 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
 | 8 | macOS defaults | done: generation 8, `a252741` |
 | 9 | Touch ID for sudo (nix-darwin managed) | done: generation 9, `9607781` |
 | 10 | Fonts | done: generation 10, `996c8e0` |
-| 11 | README, docs, CI | README macOS section and CLAUDE.md done; macOS CI job: waiting on Olivia |
+| 11 | README, docs, CI | done: README macOS section, CLAUDE.md, CI matrix with `macos-latest` (`fff9b9e`) |
+| 12 | Homebrew cleanup (Olivia's OK) | done: 21 formulae now from Nix uninstalled; node and cloudflared kept (`657592e`) |
 
 ## Checked
 
@@ -161,5 +162,30 @@ Not declared, on purpose or because it can't be:
 - **Personal or licensed fonts:** TX-02 (licensed), bianzhidai, Poppins, SF Movie Poster,
   Sixtyfour, Golos, Bitsumishi, deception scanline, all in `~/Library/Fonts`. The WezTerm backdrops
   go into the gitignored `home/olivia/dotfiles/wezterm/backdrops/`.
-- **Homebrew leftovers:** the 8 stale casks, and the brew copies of tools that now come from Nix.
-  They're still installed, and nothing removes them (`cleanup = "none"`).
+- **Homebrew leftovers:** the 8 stale casks (audacity, ente-auth, keka, plugdata, quitty, renpy,
+  shutter-encoder, tailscale-app; their apps are gone). They're still in brew's records, and
+  nothing removes them (`cleanup = "none"`).
+
+## Homebrew cleanup (2026-11-10)
+
+With Olivia's OK, after step 11:
+
+- **Kept in Homebrew, now declared:** `node` and `cloudflared`, because services use Homebrew's
+  paths. The openclaw gateway LaunchAgent runs `/opt/homebrew/opt/node/bin/node` with the npm
+  globals in `/opt/homebrew/lib/node_modules`. The Cloudflare tunnel LaunchDaemon runs
+  `/opt/homebrew/bin/cloudflared`, with its token in the plist (not in the repo).
+- **Uninstalled** with plain `brew uninstall`, after `brew uses --installed` showed no dependents:
+  btop, colima, croc, docker, docker-buildx, docker-compose, docker-credential-helper, ente-cli,
+  fastfetch, fish, gh, git, helm, imagemagick, midnight-commander, neovim, pipx, pv, rsync, rust,
+  unar. Their config files stay (`/opt/homebrew/etc/fish`, `/opt/homebrew/etc/gitconfig`).
+- **Removed automatically by brew afterwards** (unintended: `HOMEBREW_NO_AUTOREMOVE` wasn't set):
+  14 dependency-only formulae, which nothing installed on request still needed. They were
+  diffutils, libde265, libgit2, libheif, lima, llvm@22 (1.6 GB, from `rust`), lpeg, luv, popt,
+  s-lang, tree-sitter, unibilium, utf8proc and yyjson. Nix's colima brings its own `lima-full`
+  2.2.0. Anything else that turns out to need one of them can get it back with `brew install`.
+- **Checked afterwards:** every tool resolves to `/etc/profiles/per-user/olivi/bin`, and the
+  rustup toolchain stays the default. `brew bundle check --no-upgrade` is satisfied, and httpd and
+  the cloudflared tunnel are still running.
+  - The openclaw gateway was already failing before the cleanup: exit 78 (`EX_CONFIG`) from its
+    `~/.openclaw` wrapper script, 39,580 launchd runs in 39 days of uptime. It was left alone.
+- The old `/Applications/WezTerm.app` was already gone; only the Home Manager copy is left.
