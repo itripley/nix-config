@@ -1,13 +1,18 @@
-# Evaluates the whole system and lints the repo on every push/PR. It doesn't build the system
+# Evaluates both hosts and lints the repo on every push/PR. It doesn't build the systems
 # (40+ GiB, and unfree apps like Resolve aren't in the binary cache), only `nix flake check`:
 # checks.toplevel-eval (every .drv instantiated) + checks.lint (statix, deadnix, nixfmt).
+# Each runner checks its own system: ubuntu → desktop-olivia, macos (arm64) → macbook-olivia.
 name: check
 on:
   push:
   pull_request:
 jobs:
   flake-check:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v31
