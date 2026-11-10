@@ -19,6 +19,30 @@ git add -A && git commit -m "…"  # record it
   Its commands are in the README's [macOS](../README.md#macos) section, and its troubleshooting
   [below](#macbook). A change in `home/shared/` affects both machines, so switch both.
 
+## Working from two machines
+
+The desktop and the Mac share one repo, and `home/shared/` plus the live-linked dotfiles are used by
+both, so work done on one has to reach the other through GitHub:
+
+- **Before editing:** `git pull` (or at least `git status`, to spot work left uncommitted there).
+- **After a change works:** commit and push, so the other machine's next pull is a fast-forward.
+- **Switch both** after a change in `home/shared/`, `flake.nix` or `flake.lock`. The Mac's
+  `nix flake check` doesn't cover the desktop, and the desktop's doesn't cover the Mac; CI runs
+  both on every push.
+- **`lazy-lock.json` is shared.** LazyVim on either machine rewrites
+  `home/olivia/dotfiles/nvim/lazy-lock.json` after plugin updates. Commit it like any other change;
+  the other machine picks up the same plugin versions on its next start.
+- **If a pull refuses** ("Your local changes … would be overwritten by merge"), there's uncommitted
+  work on that machine. Don't discard it. Commit it on a branch and push it, then merge it where the
+  newer work is, and push `main`. This is what was done on 2026-11-10:
+  ```sh
+  git add -A && git switch -c desktop-wip && git commit -m "…" && git push -u origin desktop-wip
+  git switch main      # back to the old main; the files stay as they are until the next switch
+  # on the other machine: git fetch && git merge origin/desktop-wip, resolve, check, push
+  git pull             # now a fast-forward
+  ```
+  Before pushing a branch to this public repo, grep the staged diff for passwords, tokens and keys.
+
 ## Common tasks
 
 | Task | How |
@@ -211,6 +235,7 @@ preferences from a newer version; skip it unless something specific is missing.
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
+| `git pull`: "Your local changes … would be overwritten" | Uncommitted work on this machine | See [Working from two machines](#working-from-two-machines). Never `git checkout --` or `git reset --hard` it away. |
 | No internet while NetBird is connected | NetBird auto-selected the server's **Exit Node (unraid)** (`0.0.0.0/0`); if that peer isn't reachable, everything goes into the tunnel and fails (`write: required key not available` in `journalctl -u netbird`) | `netbird networks deselect "Exit Node (unraid)" "Exit Node (unraid)-v6"` (kept across restarts). Check with `netbird networks list`. To stop new devices auto-selecting it, turn off *auto apply* for that route in the NetBird dashboard. |
 | Plex LAN casting / plex-mpv-shim can't connect | Router DNS-rebind protection on `*.plex.direct` | `cat /etc/resolv.conf` should list 1.1.1.1 first (`networking.nix`). WARP or NetBird DNS taking over can also mask or cause it. Long-term: whitelist `plex.direct` in the router. Also set `allow_http: true` in `~/.config/plex-mpv-shim/conf.json`. |
 | `netbird up` logs in to app.netbird.io | Daemon still running with old settings | `sudo systemctl restart netbird` (a switch does this automatically when `networking.nix` changes it). One-off: `netbird up --management-url https://netbird.weblivia.dev`. |
@@ -219,7 +244,7 @@ preferences from a newer version; skip it unless something specific is missing.
 | `vicinae.service` restart-loops: *A server is already running (pid …)* | A Vicinae server started outside the unit (e.g. an older one from before a switch) is still running | Log out and back in, or `pkill -f vicinae-server`; the unit then starts the current one. Check the running build with `readlink /proc/<pid>/exe`. |
 | Vicinae copies instead of pasting; snippets don't expand | Input server not running (needs its setcap wrapper) | `ls -l /run/wrappers/bin/vicinae-input-server` (from the vicinae NixOS module); `journalctl --user -u vicinae \| grep -i input`. |
 | Wallpaper black, cursor default, no splash | `themes/art/` empty (fresh clone) | Copy the artwork back (`home/olivia/themes/README.md`), then log out/in. |
-| Build fails: *rei2.png* / *avatar.png* is gitignored art, add it to the store | `themes/art/sddm/` art not in the store (fresh install, or the file changed) | Copy it back (`home/olivia/themes/README.md`), then `nix store add-file ~/nixos-config/home/olivia/themes/art/sddm/<file>`. If the file itself changed, update its hash in `desktop.nix` (`nix hash file <file>`). |
+| Build fails: *rei2.png* / *avatar.png* is gitignored art, add it to the store | `themes/art/sddm/` art not in the store: a fresh install, the file changed, or garbage collection (`nh clean`) removed it before any switched-to system used it | Copy it back (`home/olivia/themes/README.md`), then `nix store add-file ~/nixos-config/home/olivia/themes/art/sddm/<file>`. If the file itself changed, update its hash in `desktop.nix` (`nix hash file <file>`). |
 | Login screen is plain Breeze, or a black screen with a cursor | SilentSDDM theme not loaded | Reboot once after the switch. `journalctl -b -u display-manager \| grep -i -e qml -e silent`; check the theme with `test-sddm-silent`. |
 | Lock screen not animated | QtMultimedia / plugin not found | `ls ~/.local/share/plasma/wallpapers/`; `kdePackages.qtmultimedia` must be in `desktop.nix`; check `journalctl --user -b \| grep -i smart.video`. |
 | Windows don't tile | Krohnkite disabled | System Settings → Window Management → KWin Scripts → enable Krohnkite (should be set by `kwinrc.Plugins.krohnkiteEnabled`). |

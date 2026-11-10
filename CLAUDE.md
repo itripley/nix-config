@@ -109,6 +109,10 @@ their own `Docs: …` commit. Never push.
 
 ## Gotchas
 
+- **Two machines, one repo:** the desktop and the Mac each have a checkout. Before editing, run
+  `git fetch` and `git status`; the other machine may have pushed, or may hold uncommitted work. Never
+  discard someone's uncommitted changes. Commit them on a branch and merge
+  (docs/OPERATIONS.md, "Working from two machines").
 - **Live dotfiles:** `home/olivia/dotfiles/{nvim,wezterm,fastfetch}` are out-of-store symlinks
   into this checkout. Edits there change the running apps immediately, with no rebuild. The
   checkout must stay at `~/nixos-config`.

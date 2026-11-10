@@ -91,6 +91,8 @@ platform.
 
 **Why:**
 - LazyVim writes `lazy-lock.json` into its config directory; a read-only store copy breaks plugin updates.
+  The lock is in the repo and shared by both machines, so they run the same plugin versions once it's
+  committed and pulled.
 - Edits apply immediately, with no rebuild for a colour or keybind tweak.
 - The files stay version-controlled in this repo.
 

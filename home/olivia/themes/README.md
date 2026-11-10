@@ -30,4 +30,6 @@ nix store add-file $A/sddm/rei2.png; nix store add-file $A/sddm/avatar.png
 
 Without `art/`, everything else still builds; the links just point at nothing and Plasma falls back
 to its defaults for those pieces. The exception is `art/sddm/`: until both files are added to the
-store, the system build stops with a message saying which one is missing.
+store, the system build stops with a message saying which one is missing. Added files are only kept
+until a switched-to system uses them; before that, garbage collection (`nh clean`) can remove them, and
+they have to be added again.
