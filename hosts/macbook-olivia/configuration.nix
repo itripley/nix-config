@@ -15,8 +15,15 @@
   # The existing macOS account; home-manager reads its home from here
   users.users.olivi.home = "/Users/olivi";
 
-  # Leave the hand-written /etc/pam.d/sudo_local (Touch ID) alone for now
-  security.pam.services.sudo_local.enable = false;
+  # Touch ID for sudo, also inside tmux (pam_reattach)
+  security.pam.services.sudo_local = {
+    touchIdAuth = true;
+    reattach = true;
+  };
+  # The hand-written file it replaces (just pam_tid.so); renamed to .before-nix-darwin on switch
+  environment.etc."pam.d/sudo_local".knownSha256Hashes = [
+    "5bef9b2acbc58dfbb2ae23eca69788ab2c75b8368a33810625a0ba7fe46dc433"
+  ];
 
   # fish for WezTerm at a stable path (/run/current-system/sw/bin/fish), with the Nix environment
   programs.fish.enable = true;
