@@ -1,5 +1,7 @@
 { inputs, ... }:
 {
+  imports = [ ../../modules/darwin/homebrew.nix ];
+
   nixpkgs.hostPlatform = "aarch64-darwin"; # Apple M1
 
   networking.hostName = "macbook-olivia";
