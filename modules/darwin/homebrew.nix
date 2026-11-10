@@ -58,6 +58,10 @@
       "chezmoi"
       "tailscale"
       "projectm"
+      # Also in Nix, but services run Homebrew's paths: the openclaw gateway LaunchAgent
+      # (/opt/homebrew/opt/node, plus its npm globals) and the Cloudflare tunnel LaunchDaemon
+      "node"
+      "cloudflared"
       "cliclick" # not in nixpkgs
       "anomalyco/tap/opencode" # nixpkgs' is older; unstable isn't cached
     ];
