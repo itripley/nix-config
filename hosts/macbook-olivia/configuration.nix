@@ -7,6 +7,8 @@
 
   # nix-darwin applies user-level settings (homebrew, system.defaults) to this user
   system.primaryUser = "olivi";
+  # The existing macOS account; home-manager reads its home from here
+  users.users.olivi.home = "/Users/olivi";
 
   # Leave the hand-written /etc/pam.d/sudo_local (Touch ID) alone for now
   security.pam.services.sudo_local.enable = false;

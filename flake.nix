@@ -94,6 +94,16 @@
         nixpkgs.config = nixpkgsConfig;
       };
 
+      # home-manager settings both hosts use (the NixOS and nix-darwin modules take the same ones)
+      homeManagerModule = {
+        home-manager = {
+          useGlobalPkgs = true;
+          useUserPackages = true;
+          backupFileExtension = "hm-backup";
+          extraSpecialArgs = { inherit inputs; };
+        };
+      };
+
       # Tooling for working on this repo (formatter, lint, dev shell) on both hosts; stable is enough
       system = "x86_64-linux";
       toolingNixpkgs = {
@@ -120,12 +130,9 @@
           ./hosts/desktop-olivia/configuration.nix
 
           home-manager.nixosModules.home-manager
+          homeManagerModule
           {
             home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              backupFileExtension = "hm-backup";
-              extraSpecialArgs = { inherit inputs; };
               sharedModules = [
                 plasma-manager.homeModules.plasma-manager
                 nix-flatpak.homeManagerModules.nix-flatpak
@@ -144,6 +151,10 @@
         modules = [
           nixpkgsModule
           ./hosts/macbook-olivia/configuration.nix
+
+          home-manager.darwinModules.home-manager
+          homeManagerModule
+          { home-manager.users.olivi = import ./home/darwin; }
         ];
       };
 
