@@ -23,9 +23,9 @@ hosts/macbook-olivia/
 modules/nixos/                    system level (root, services, hardware)
   boot.nix  amd.nix  desktop.nix  audio.nix  networking.nix  storage.nix  gaming.nix  services.nix
 home/shared/                      home-manager modules both hosts import
-  default.nix  cli.nix
+  default.nix  cli.nix  shell.nix  git.nix  neovim.nix
 home/darwin/                      the Mac user's home-manager config (olivi)
-  default.nix  cli.nix
+  default.nix  cli.nix  shell.nix  git.nix
 home/olivia/                      user level (home-manager)
   default.nix  apps.nix  dev.nix  firefox.nix  plasma.nix  flatpak.nix  warp-gui.nix  obsidian.nix
   mpv.nix
@@ -139,14 +139,31 @@ The Mac's nix-darwin host (DESIGN §11, [MACOS.md](MACOS.md)).
   --configuration-revision` shows which commit a generation was built from.
 - `system.stateVersion = 7`: never change it.
 
-## `home/shared/default.nix`, `home/shared/cli.nix`
+## `home/shared/`
 
 Home-manager modules imported by **both** `home/olivia/default.nix` (desktop) and
 `home/darwin/default.nix` (Mac). Only things that work the same on Linux and macOS go here.
 Platform-specific config stays in the host's own home directory (DESIGN §11).
 
+- `default.nix`: imports the others. It also has the **`xdg.configFile` live links** for `wezterm`,
+  `nvim` and `fastfetch`, pointing into `~/nixos-config/home/olivia/dotfiles/` (DESIGN §6). The path
+  is built from `home.homeDirectory`, because nix-darwin has no `programs.nh`. The dotfiles stay
+  under `home/olivia/` on both machines.
 - `cli.nix`: Python + uv, docker-compose, tmux, mc, fastfetch, jq, gh, btop, and from Fedora: Go,
   rustup (cargo/rustc), lazydocker. All of them are in the binary cache for both systems.
+- `shell.nix`: fish, with `fish_greeting = "pokemon-colorscripts -r"`, and `home.sessionPath`
+  (`~/.cargo/bin`, `~/go/bin`), as on Fedora.
+- `git.nix`: `programs.git` (email, `init.defaultBranch = main`) and `programs.ssh`. The ssh hosts
+  are `github-artlivia` (deploy key) and `unraid` (root@192.168.1.65 with `id_unraid`), both with
+  `IdentitiesOnly`, plus `AddKeysToAgent` for every host. It uses HM's new `settings` format
+  (upstream OpenSSH directive names); `enableDefaultConfig = false` opts out of the legacy defaults.
+  The keys themselves are copied by hand, never declared.
+- `neovim.nix`: Neovim as the default editor, with vi/vim aliases. `extraPackages` are the tools
+  LazyVim needs that work on both platforms: ripgrep, fd, unzip, tree-sitter, lazygit,
+  lua-language-server, nil and nixfmt. `sideloadInitLua = true`, because HM 26.05 always generates
+  `nvim/init.lua`, which can't be written into the live-linked LazyVim folder. The C compiler is
+  platform-specific: gcc/gnumake on the desktop (`dev.nix`, `lib.mkBefore` keeps the old PATH
+  order), the Xcode command line tools' clang on the Mac.
 - A change here changes **both** machines. Check the desktop with `nix eval
   .#nixosConfigurations.desktop-olivia.config.system.build.toplevel.drvPath` before and after.
   Moving packages between modules changes only the order inside `home-manager-path` (also
@@ -162,6 +179,21 @@ shared modules.
   on, so GUI apps from Nix are copied to `~/Applications/Home Manager Apps` (Spotlight finds them).
 - `users.users.olivi.home` in the host config is what home-manager's nix-darwin module reads.
 
+## `home/darwin/shell.nix`, `home/darwin/git.nix`
+
+| Setting | Why |
+|---|---|
+| zsh `profileExtra` | zsh is the login shell. `brew shellenv` runs first, then the Nix profiles (user, system, default) are put in front, with `typeset -U path` removing duplicates. Nix's git, node, gh … win; Homebrew's own tools stay reachable. |
+| zsh `history.path = ~/.zsh_history` | Keeps the existing history. With `stateVersion` 26.05 HM would default to the XDG location. |
+| zsh `enableCompletion = false` | nix-darwin's `/etc/zshrc` already runs `compinit` with the Nix profiles on `fpath`; a second run only slows startup. |
+| zsh `initContent`: `mise activate` | Carried over from the old `.zshrc`. The Rancher Desktop, OrbStack and DaVinci Resolve lines were dropped, since their targets are gone. |
+| `programs.fish.shellInit` | The same order for fish, which WezTerm runs: `brew shellenv`, then `fish_add_path --move --prepend` for the Nix profiles. |
+| `home.sessionPath = ~/.lmstudio/bin` | LM Studio's `lms` CLI. |
+| `programs.man.generateCaches = false` | fish turns it on, but HM uses macOS's own `man` here, so it only produced a warning. |
+| git: `user.name`, `lfs.enable`, `ignores` | The old `.gitconfig` and `~/.config/git/ignore`. `lfs.enable` provides git-lfs, so it isn't in `cli.nix`. |
+| git: credential helpers for github.com and gist | `gh auth git-credential`, as `gh auth setup-git` had set it up. The empty first entry clears the system `osxkeychain` helper for those hosts. The token stays in the keychain. |
+| `programs.ssh.includes = ~/.colima/ssh_config` | `ssh colima` reaches the VM. The dead OrbStack include was dropped. |
+
 ## `home/darwin/cli.nix`
 
 Mac-only CLI tools, chosen so nothing ends up older than what Homebrew had (checked 2026-11-10).
@@ -175,7 +207,12 @@ Mac-only CLI tools, chosen so nothing ends up older than what Homebrew had (chec
 | `docker-client`, `unstable.docker-buildx`, `docker-credential-helpers` | the Docker CLI for Colima (buildx 0.38; stable is 0.31) |
 | `unstable.kubernetes-helm` | helm 4, as Homebrew had (stable is 3) |
 | `unstable.ente-cli` | 0.3.0, as Homebrew had |
-| `cloudflared`, `imagemagick`, `pv`, `rsync` (macOS ships openrsync), `unar`, `pipx`, `git-lfs` | stable is current enough |
+| `cloudflared`, `imagemagick`, `pv`, `rsync` (macOS ships openrsync), `unar`, `pipx` | stable is current enough |
+| `wezterm` | the desktop's build (`0-unstable-2026-03-31`). The repo's config needs options newer than Homebrew's 20240203 release. A plain package, as on the desktop; `copyApps` puts it in `~/Applications/Home Manager Apps`. |
+
+`home.file.".docker/cli-plugins/…"` links `docker-buildx` and `docker-compose` from Nix, replacing
+dangling Rancher Desktop links. docker only uses them once `cliPluginsExtraDirs` (Homebrew's plugin
+folder) is removed from `~/.docker/config.json`; see [MACOS.md](MACOS.md#checked).
 
 Not here: `cliclick` (not in nixpkgs) and `opencode` (unstable isn't cached and builds from
 source; stable is older than Homebrew's). Both stay Homebrew brews.
@@ -283,10 +320,9 @@ off. Used for one-time imports (SSH keys, wallpapers, Firefox profile).
 ## `home/olivia/default.nix`
 
 - Imports the other HM modules (including `mpv.nix`); `home.stateVersion = "26.05"` (never bump, same as the system one).
-- **`xdg.configFile` live links** for `wezterm`, `nvim`, `fastfetch` → `~/nixos-config/home/olivia/dotfiles/…` (DESIGN §6).
+- Imports `../shared` first: the live links for `wezterm`, `nvim` and `fastfetch`, plus fish, git/ssh and Neovim (`home/shared/`).
 - **`xdg.dataFile."fonts/nixos-config"`** → live link to `home/olivia/dotfiles/fonts/` (gitignored, like the wallpapers), which fontconfig reads as part of `~/.local/share/fonts`. It holds **TX-02** (30 styles), the font for WezTerm (`dotfiles/wezterm/config/fonts.lua`, with JetBrainsMono Nerd Font as fallback for icons) and Obsidian (`obsidian.nix`). The font is licensed, so the files are copied in by hand and never committed; a new font dropped in that folder works without a rebuild.
   The checkout path comes from `osConfig.programs.nh.flake` (configuration.nix); `plasma.nix` uses it too.
-- `programs.fish.functions.fish_greeting = "pokemon-colorscripts -r"`, `home.sessionPath` (`~/.cargo/bin`, `~/go/bin`): as on Fedora.
 - `services.easyeffects`: background audio effects; RNNoise noise suppression for the Seiren Mini
   replaces NVIDIA Broadcast / AMD Noise Suppression.
 
@@ -300,7 +336,7 @@ Notable choices:
   also bundles JDK 17 and 8 (~0.7 GiB) for 1.16 and older; add them back to the list for those versions.
 - `unstable.claude-code`: from unstable because it moves fast.
 - `inputs.claude-desktop.packages.<system>.default`: Claude Desktop (official Linux beta) from its flake (DESIGN §4).
-- "From the old Fedora install" block: High Tide, pokemon-colorscripts (btop moved to `home/shared/cli.nix`).
+- "From the old Fedora install" block: High Tide (btop and pokemon-colorscripts moved to `home/shared/`).
   See [FEDORA.md](FEDORA.md).
 - Removed on 2026-11-09: Zen, Thunar, w3m, Ente, GNOME Boxes, distrobox, DistroShelf, Signal, Vesktop,
   Element, Cinny, Dissent, figma-linux, Krita, GIMP, Pinta, Kdenlive, LosslessCut, XnView MP,
@@ -331,9 +367,8 @@ Notable choices:
 
 | Setting | Why |
 |---|---|
-| `programs.git`, `package = gitFull`, `credential.helper = libsecret` | Email from Windows. `gitFull` includes the libsecret helper, so HTTPS credentials are stored in KWallet (the wincred equivalent). |
-| `programs.ssh.settings` | Hosts `github-artlivia` (deploy key) and `unraid` (root@192.168.1.65 with `id_unraid`), `IdentitiesOnly` so the right key is offered. `AddKeysToAgent` for all hosts. Uses HM's new `settings` format (upstream OpenSSH directive names); the old `matchBlocks` is deprecated. `enableDefaultConfig = false` opts out of HM's legacy defaults. |
-| `programs.neovim` + `extraPackages` | LazyVim needs a C compiler (treesitter), ripgrep/fd (search), lazygit, and LSPs; Nix provides them on Neovim's PATH. `sideloadInitLua = true` because HM 26.05 always generates `nvim/init.lua`, which can't be written into the live-linked LazyVim folder. |
+| `programs.git`: `package = gitFull`, `credential.helper = libsecret` | The desktop's additions to `home/shared/git.nix`. `gitFull` includes the libsecret helper, so HTTPS credentials are stored in KWallet (the wincred equivalent). |
+| `programs.neovim.extraPackages`: gcc, gnumake | The C compiler LazyVim's treesitter needs on Linux. The rest of the Neovim setup is in `home/shared/neovim.nix`. `lib.mkBefore` keeps the original PATH order. |
 | `programs.vscode`, `package = vscode.fhs` | The FHS variant lets marketplace extensions with native binaries work (C#, C# Dev Kit, Python, debugpy, Claude Code ship Linux binaries). **All 42 extensions from Windows** plus nix-ide are declared, from `pkgs/vscode-marketplace` at the Windows versions; settings still come through Settings Sync (`settings.json` isn't managed). The extensions dir stays mutable (home-manager's default), so an extension installed or auto-updated from VS Code works alongside the declared ones; a fresh install always gets the declared set. Custom CSS and JS (`be5invis.vscode-custom-css`) and Custom UI Font patch VS Code's own `workbench.html` / `workbench.desktop.main.css`, which are read-only in the store, so they're installed but can't apply. |
 | `wezterm` (plain package) | The terminal. Not `programs.wezterm`, which would generate `wezterm.lua` into the live-linked config folder. Font: TX-02 (`default.nix`), with JetBrainsMono Nerd Font from `desktop.nix` as the icon fallback. |
 | Dev tools | Node (LTS), Godot 4 + Mono (brings its own .NET 8 SDK, so no separate `dotnet-sdk`). Add `dotnet-sdk` back if you need the `dotnet` CLI outside Godot (e.g. VS Code's C# extension loading a project). The CLI tools both machines use (Python + uv, docker-compose, tmux, mc, fastfetch, jq, gh, btop, Go, rustup, lazydocker) are in `home/shared/cli.nix`. |

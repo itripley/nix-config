@@ -51,7 +51,7 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
 | 3 | Minimal nix-darwin: hostname, `primaryUser`, `nix.settings`, no channels | done: generation 1, `2256d0e` |
 | 4 | home-manager (no file takeover yet) | done: generation 2, `39c8bbd`; rollback rehearsed (2 → 1 → 2) |
 | 5 | Shared home modules + CLI packages | done: generation 3, `13f0528` |
-| 6 | Shell, git, ssh, editor config taken over | |
+| 6 | Shell, git, ssh, editor config taken over | done: generations 4–5, `fa820cb` |
 | 7 | Homebrew casks, brews, App Store apps (declared) | |
 | 8 | macOS defaults | |
 | 9 | Touch ID for sudo (nix-darwin managed) | |
@@ -80,3 +80,20 @@ switch. nix-darwin 26.05 recognised all of them by hash, so nothing had to be re
   shellenv`) until step 6. **Desktop:** same 68 packages. Its toplevel `drvPath` changed only because
   the package order in `home-manager-path`, `man-paths` and `olivia-fish-completions` moved
   (nix-diff). Its next `nh os switch` rebuilds those few derivations with identical contents.
+- **Step 6** (generations 4 and 5): home-manager took over `~/.zshrc`, `~/.zprofile`, `~/.zshenv`,
+  fish's `config.fish` and `~/.ssh/config`. The old files are next to them as `*.hm-backup` (and in
+  the step 0 tarball). `~/.gitconfig` was renamed by hand to `~/.gitconfig.before-hm`, since git
+  config now lives in `~/.config/git/config`. In a new login shell, `which -a` finds git, nvim, gh,
+  node and fish in `/etc/profiles/per-user/olivi/bin` first, with Homebrew's copies after them.
+  `git config --list --show-origin` shows the name, email and the `gh auth git-credential` helpers.
+  `ssh -G unraid` resolves to root@192.168.1.65 with `id_unraid`, and `ssh -G colima` resolves
+  through the colima include. The 14 backdrops were copied into the gitignored
+  `dotfiles/wezterm/backdrops/`.
+  - **WezTerm:** Homebrew's 20240203 release rejected the repo's config
+    (`show_close_tab_button_in_tabs` is not a valid Config field). Generation 5 adds nixpkgs WezTerm
+    (`0-unstable-2026-03-31`, the desktop's build) in `~/Applications/Home Manager Apps`. It opens
+    fish with TX-02 and the backdrops. The old `/Applications/WezTerm.app` is still installed.
+  - **Docker plugins:** `~/.docker/config.json` (not managed: docker writes the current context
+    there) has `cliPluginsExtraDirs` pointing at `/opt/homebrew/lib/docker/cli-plugins`. That
+    directory wins over `~/.docker/cli-plugins`, so docker still runs Homebrew's buildx 0.37.1, not
+    Nix's 0.38.1. Compose is 5.5.1 either way. Removing that entry hands the plugins to Nix.
