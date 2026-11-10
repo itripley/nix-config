@@ -6,7 +6,7 @@ local platform = require('utils.platform')
 local font_family = 'TX-02'
 -- local font_family = 'CartographCF Nerd Font'
 
-local font_size = platform.is_mac and 12 or 10.5
+local font_size = platform.is_mac and 14 or 10.5
 
 return {
    -- TX-02 has no Nerd Font icons; take them from JetBrainsMono

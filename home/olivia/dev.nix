@@ -1,61 +1,19 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 {
+  # git, ssh hosts and Neovim are shared with the Mac (home/shared/); the Linux parts stay here
   programs.git = {
-    enable = true;
     package = pkgs.gitFull; # includes git-credential-libsecret (KWallet-backed)
-    settings = {
-      user.email = "oliviacmcarmo@gmail.com";
-      credential.helper = "libsecret";
-      init.defaultBranch = "main";
-    };
+    settings.credential.helper = "libsecret";
   };
 
-  programs.ssh = {
-    enable = true;
-    enableDefaultConfig = false;
-    # Keys are not in the repo; copy them from /mnt/windows/Users/olivi/.ssh after install
-    settings = {
-      "github-artlivia" = {
-        # remote: git@github-artlivia:itripley/artlivia.git
-        HostName = "github.com";
-        User = "git";
-        IdentityFile = "~/.ssh/id_ed25519_artlivia";
-        IdentitiesOnly = true;
-      };
-      "unraid" = {
-        HostName = "192.168.1.65";
-        User = "root";
-        IdentityFile = "~/.ssh/id_unraid";
-        IdentitiesOnly = true;
-      };
-      "*" = {
-        AddKeysToAgent = "yes";
-      };
-    };
-  };
-
-  # LazyVim config is linked from dotfiles/nvim (see default.nix)
-  programs.neovim = {
-    enable = true;
-    defaultEditor = true;
-    viAlias = true;
-    vimAlias = true;
-    # HM 26.05 always generates init.lua (provider toggles). ~/.config/nvim is a live link
-    # to dotfiles/nvim (LazyVim's own init.lua), so pass HM's lines via the wrapper instead.
-    sideloadInitLua = true;
-    extraPackages = with pkgs; [
+  # C compiler + make for LazyVim's treesitter, ahead of the shared tools as before
+  programs.neovim.extraPackages = lib.mkBefore (
+    with pkgs;
+    [
       gcc
       gnumake
-      unzip
-      ripgrep
-      fd
-      tree-sitter
-      lazygit
-      lua-language-server
-      nil
-      nixfmt
-    ];
-  };
+    ]
+  );
 
   # FHS build so marketplace extensions with native binaries work.
   # All extensions from Windows plus nix-ide, pinned in pkgs/vscode-marketplace/sources.json.

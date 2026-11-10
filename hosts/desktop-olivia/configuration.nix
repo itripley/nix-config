@@ -54,7 +54,7 @@
   # `nh os switch` / `nh os boot` — nicer nixos-rebuild, plus automatic GC
   programs.nh = {
     enable = true;
-    # The checkout. Also where home-manager's live dotfile links point (osConfig.programs.nh.flake)
+    # The checkout. home-manager's live dotfile links point here too (~/nixos-config)
     flake = "${config.users.users.olivia.home}/nixos-config";
     clean = {
       enable = true;

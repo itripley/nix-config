@@ -4,9 +4,8 @@
   home.packages = with pkgs; [
     # Browsers: Firefox in firefox.nix, Chromium below (programs.chromium)
 
-    # From the old Fedora install (btop: home/shared/cli.nix)
+    # From the old Fedora install (btop, pokemon-colorscripts: home/shared/)
     high-tide # TIDAL client (was a Flatpak)
-    pokemon-colorscripts # fish greeting (default.nix)
 
     # Chat & social
     # Serein, native Discord client (flake input). nixpkgs-unstable's cargoUseSystemLibs hook

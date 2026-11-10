@@ -13,6 +13,11 @@
   # Leave the hand-written /etc/pam.d/sudo_local (Touch ID) alone for now
   security.pam.services.sudo_local.enable = false;
 
+  # fish for WezTerm at a stable path (/run/current-system/sw/bin/fish), with the Nix environment
+  programs.fish.enable = true;
+  # macOS's own zsh prompt, instead of nix-darwin's default
+  programs.zsh.promptInit = ''PS1="%n@%m %1~ %# "'';
+
   nix.settings = {
     experimental-features = [
       "nix-command"

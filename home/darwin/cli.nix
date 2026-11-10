@@ -18,6 +18,14 @@
     unar
     pipx
     unstable.ente-cli
-    git-lfs
+    # The desktop's build: the repo's WezTerm config needs options newer than the 20240203
+    # release. Copied to ~/Applications/Home Manager Apps. Plain package, as on the desktop.
+    wezterm
   ];
+
+  # docker looks in ~/.docker/cli-plugins first (these replace dangling Rancher Desktop links)
+  home.file.".docker/cli-plugins/docker-buildx".source =
+    "${pkgs.unstable.docker-buildx}/libexec/docker/cli-plugins/docker-buildx";
+  home.file.".docker/cli-plugins/docker-compose".source =
+    "${pkgs.docker-compose}/libexec/docker/cli-plugins/docker-compose";
 }

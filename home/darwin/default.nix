@@ -3,6 +3,8 @@
   imports = [
     ../shared
     ./cli.nix
+    ./shell.nix
+    ./git.nix
   ];
 
   home.username = "olivi";
