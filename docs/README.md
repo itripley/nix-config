@@ -26,11 +26,11 @@ Installation steps are in the top-level [README](../README.md).
   Homebrew (declared, then cleaned up), macOS defaults, Touch ID sudo and fonts. All the steps are
   done, and CI checks the Mac on `macos-latest`. What stays manual:
   [MACOS.md](MACOS.md#stays-manual).
-- **Desktop: needs a `nh os switch` to pick up the shared modules.** On 2026-11-10 fish, git/ssh,
-  Neovim, the dotfile links and 12 CLI tools moved from `home/olivia/` into `home/shared/`. It
-  evaluates to the same 68 packages, and the gitconfig and Neovim wrapper are identical; only the
-  package order in a few derivations changed. Not switched yet, because it was done from the Mac.
-  Hand checks: [VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand).
+- **Desktop switched to `main` and rebooted (2026-11-10).** That includes the shared modules
+  (`home/shared/`), the Fedora login screen (SilentSDDM), Fedora's power settings, Breeze for GTK apps
+  and the Windows settings sweep. Olivia checked the fish greeting, git, ssh, Neovim, the login
+  screen, the power settings and the GTK theme. The sweep's own hand checks (mpv, plex-mpv-shim, OBS,
+  Chromium, RGB) are still open in [VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand).
 - **Installed** on the Samsung 850 EVO and in daily use; `hardware-configuration.nix` is the generated one.
 - Every app from the original lists builds. Upstream build failures are patched in
   `overlays/build-fixes.nix` ([VERIFICATION.md](VERIFICATION.md#first-real-build-2026-11-08)).
@@ -47,19 +47,11 @@ Installation steps are in the top-level [README](../README.md).
 - **Everything after the audit is committed, booted and in use** (`45b44c5`…`cb317e2`: Vicinae,
   Obsidian, VS Code extensions, TX-02, WezTerm tabs, the Serein patch, the idle-static fix). After the
   2026-11-09 reboot the running system was exactly that commit's build, and `power_save` is `0`.
-- **Not switched to yet:** the Fedora login screen (SilentSDDM, `desktop.nix`), and Fedora's power
-  settings and Breeze for GTK apps (`plasma.nix`), committed in `31b3316`. Builds; needs `nh os switch`
-  and a reboot. The login screen's two images were already added to the store on 2026-11-09. They're
-  only needed again if garbage collection removed them before the first switch; the build then stops
-  and says so ([OPERATIONS.md](OPERATIONS.md#troubleshooting)).
-- **The desktop worked in parallel with the Mac.** Its uncommitted work was committed on the
-  `desktop-wip` branch and merged into `main` on the Mac (`07f7a8b`), so the desktop's `git pull` is a
-  fast-forward. The `desktop-wip` branch is still on GitHub; delete it after the desktop has pulled
-  (`git push origin --delete desktop-wip`). How to avoid this next time:
-  [OPERATIONS.md](OPERATIONS.md#working-from-two-machines).
-- **Not switched to yet: the Windows settings sweep** (mpv, plex-mpv-shim, OBS plugins, Chromium
-  extensions, RGB colors). Builds; needs `nh os switch`. Its hand steps for plex-mpv-shim, Pear Desktop
-  and Claude Code are done; Prism is left ([OPERATIONS.md](OPERATIONS.md#settings-copied-from-windows-by-hand)).
+- **The desktop worked in parallel with the Mac on 2026-11-10.** Its uncommitted work went on a
+  `desktop-wip` branch, was merged on the Mac (`07f7a8b`) and pulled as a fast-forward. The branch
+  is deleted. How to avoid it next time: [OPERATIONS.md](OPERATIONS.md#working-from-two-machines).
+- The Windows sweep's hand steps for plex-mpv-shim, Pear Desktop and Claude Code are done; Prism is
+  left ([OPERATIONS.md](OPERATIONS.md#settings-copied-from-windows-by-hand)).
 - **Open: audio routing doesn't work.** As of 2026-11-09 Olivia can't get the routing she wants out of
   the Game/Music/Chat sinks, EasyEffects, linuxmeeter (since uninstalled) and qpwgraph together. Observed state and next
   steps: [VERIFICATION.md](VERIFICATION.md#audio-routing-not-working-2026-11-09).
@@ -116,6 +108,7 @@ Installation steps are in the top-level [README](../README.md).
 | 2026-11-10 | CI checks both hosts (`ubuntu-latest` + `macos-latest`). MacBook Homebrew cleanup: 21 formulae now from Nix uninstalled (plus 14 dependencies brew autoremoved); node and cloudflared kept for the services that use them | `fff9b9e`, `657592e`, [MACOS.md](MACOS.md#homebrew-cleanup-2026-11-10) |
 | 2026-11-10 | MacBook: 7 stale cask records uninstalled (apps already gone). plugdata kept because its audio plugins are still installed. All docs brought up to date for the two-host repo | `20179f6`, [MACOS.md](MACOS.md#homebrew-cleanup-2026-11-10) |
 | 2026-11-10 | Desktop work done in parallel (SilentSDDM, EasyEffects module, Plasma power/GTK, Firefox, plex-mpv-shim) committed as `desktop-wip` on the desktop and merged on the Mac. Conflicts in `home/olivia/default.nix` and four docs, kept both sides; desktop package sets identical to the branch (nix-diff: order only) | `07f7a8b`, [OPERATIONS.md](OPERATIONS.md#working-from-two-machines) |
+| 2026-11-10 | Desktop pulled the merge, switched and rebooted: shared modules, SilentSDDM login screen, power and GTK settings, Windows sweep all live; hand checks passed; `desktop-wip` deleted | [VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand) |
 
 ## Conventions
 
