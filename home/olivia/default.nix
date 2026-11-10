@@ -10,6 +10,7 @@
     ./warp-gui.nix
     ./obsidian.nix
     ./mpv.nix
+    ./easyeffects.nix
   ];
 
   home.username = "olivia";
@@ -24,6 +25,5 @@
   xdg.dataFile."fonts/nixos-config".source =
     config.lib.file.mkOutOfStoreSymlink "${osConfig.programs.nh.flake}/home/olivia/dotfiles/fonts";
 
-  # Mic noise suppression (RNNoise) and EQ: replaces NVIDIA Broadcast / AMD Noise Suppression
-  services.easyeffects.enable = true;
+  # EasyEffects (mic noise suppression, EQ presets): easyeffects.nix
 }

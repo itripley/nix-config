@@ -46,12 +46,17 @@ The old Linux install (Fedora 43 KDE Plasma, home `olivi`) is on the 119 GB driv
 | Tiling padding 4 | `configFile.kwinrc.Tiling` |
 | Animated lock screen (Smart Video Wallpaper Reborn + `~/Videos/lockscreen.gif`) | `themes/plasma-wallpapers/…`, `kdePackages.qtmultimedia` (system), `configFile.kscreenlockerrc` |
 | WezTerm as KDE's terminal | `configFile.kdeglobals.General` |
+| Login screen: SilentSDDM `rei` preset (`/etc/sddm.conf` `Current=silent`), edited: scale 1.25, own `rei2.png` background instead of the video, JetBrainsMonoNerdFont, round avatar (`/var/lib/AccountsService/icons/olivi`) | `programs.silentSDDM` (`desktop.nix`, added 2026-11-09), art in `themes/art/sddm/`. Scale 1.25 dropped: the theme now applies the display scale itself. |
 | Meta+Return WezTerm, Meta+F Thunar | `shortcuts."services/…"._launch` |
+| Power (`powerdevilrc`): dim after 15 min, screen off after 30 (5 when locked), never sleep | `powerdevil.AC` (added 2026-11-09) |
+| GTK apps in Breeze (`gtk-3.0/settings.ini` `gtk-theme-name=Breeze`) | `configFile."gtk-3.0/settings.ini"` + dconf `gtk-theme` (added 2026-11-09) |
 
 Not carried over: the "Lagtrain" global theme and "Layan" Aurorae theme (installed but not in use),
 the kinetic_scale/kinetic_squash effects and wobbly windows (configured but switched off), Klassy's
-auto-generated icon themes, and the panel layout (stock Plasma: two floating panels; set it up in the
-GUI if the defaults differ).
+auto-generated icon themes, and the panel layout. The panels were **not** stock (corrected
+2026-11-09): on screen 0 a centred, floating 38 px panel with launcher, activity pager, task manager
+(13 pinned apps), tray, clock and a pager showing numbers for the current screen only; on screen 1 a
+floating 38 px panel that auto-hides. NixOS has its own panels set up in the GUI.
 
 **Artwork stays out of git.** The repo is public, so the splash, cursor (no license file), wallpapers
 and GIF live in the gitignored `themes/art/` like the WezTerm backdrops. `themes/README.md` has the
@@ -103,6 +108,33 @@ installed) to `wezterm start --cwd %f`.
 | Affinity (Wine) | `home/olivi/.AffinityLinux` | its own Wine build and prefix; reinstall rather than copy |
 | Display scale | Fedora: 1.25 (main) / 1.2 (second) | NixOS currently 1.1 / 1. Set in System Settings → Display; not managed by the config. |
 | Default text editor | Fedora: Sublime for text/JSON/YAML/Markdown | Set in System Settings → Default Applications. Declaring it with `xdg.mimeApps` would make `mimeapps.list` read-only for the GUI. |
+
+### Second pass (2026-11-09)
+
+The first inventory missed the login screen, so the whole drive was swept again. System side: every
+file under `/etc`, `/usr`, `/opt` and `/var/lib` was checked against Fedora's RPM database (read
+from a copy, so nothing was written to the drive), listing files no package owns and `/etc` files
+that differ from their package. Home side: every KDE and app config was diffed key by key against
+NixOS.
+
+| Found | Outcome |
+|---|---|
+| SilentSDDM login screen (hand-installed in `/usr/share/sddm/themes`) | added (`programs.silentSDDM`) |
+| Power settings: never sleep, longer screen timeouts | added (`powerdevil.AC`) |
+| GTK apps in Breeze | added (dconf + `settings.ini`) |
+| Krohnkite *Set master* unbound on Fedora; on NixOS it's on **Meta+Return**, the WezTerm key | not changed yet. Unbind with `shortcuts.kwin.KrohnkiteSetMaster` if they clash. |
+| Volume step 2% (`plasmaparc`) | not carried over (5% default) |
+| Ollama listened on the LAN (`OLLAMA_HOST=192.168.1.100:11434`, systemd override) | not carried over: NixOS listens on `127.0.0.1`. LAN access would need `services.ollama.host` and the firewall port. |
+| Panels (see above) | not carried over |
+| `tidal-cli-client` (global npm), `betterlockscreen`, `pulsectl` (pip), DaVinci panel udev rules | not carried over: TIDAL has High Tide/tidal-hifi; the rest is the X11 lock experiment or hardware not in use |
+| pulsemeeter | installed but never configured (no devices, no routes) |
+| `.gnupg` | public keys only, no private keys |
+| Data: Steam 25 GB (Dark Souls II installed), Lutris 2.8 GB, `~/Games` 670 MB, `~/build` 378 MB, Resolve's project database 39 MB | still on the drive |
+
+Checked and nothing to do: fonts (`/usr/local/share/fonts` is JetBrainsMono Nerd Font), the KDE
+store downloads (all carried over or skipped above), keyboard and mouse, fish, autostart, user
+services, WARP's service, printing (no printer or scanner was set up), Bluetooth (no adapter in this
+PC), `thermald` (Intel only).
 
 **2026-11-09:** Zen, Thunar (and its Meta+F shortcut), w3m, Ente, GNOME Boxes (and libvirtd),
 distrobox, DistroShelf, Warehouse, Wine, winetricks and the Vesktop autostart were removed again. The tables above

@@ -57,6 +57,8 @@ just a CLI environment).
 | `nix-darwin` (nix-darwin-26.05) | The Mac's system config (§11). Its `nixpkgs` follows `nixpkgs-darwin`, the pairing its README prescribes. |
 | `vicinae` flake ([vicinaehq/vicinae](https://github.com/vicinaehq/vicinae)) | The launcher's own flake, set up per [its NixOS guide](https://docs.vicinae.com/nixos). nixpkgs has the package but no NixOS module: without upstream's module the input server lacks `cap_dac_override` (a `security.wrappers` entry), so paste-to-window and snippet expansion fall back to copying. Its Home Manager module replaces home-manager's `programs.vicinae`. Its `nixpkgs` deliberately does **not** follow ours, so builds match `vicinae.cachix.org` (added to `nix.settings`); the cost is its own nixpkgs and Qt in the closure. `nix flake update vicinae` picks up new releases. |
 
+| `silent-sddm` flake ([uiriansan/SilentSDDM](https://github.com/uiriansan/SilentSDDM)) | The SDDM theme Fedora used for its login screen; not in nixpkgs. Upstream's own NixOS module (`programs.silentSDDM`) builds the theme against our `pkgs` with a preset, extra backgrounds and setting overrides, and wires up SDDM. Its `nixpkgs` follows ours only so the lock has no extra copy. Pinned at `d179078` (2026-11-04), 86 commits past Fedora's `e334d92`: auto-scaling, a Qt 6.12 video-background fix, the module itself. Every setting Fedora changed still exists there. `nix flake update silent-sddm` moves it. |
+
 Every input except nix-flatpak and Vicinae follows our `nixpkgs` (Serein and Claude Desktop follow
 `nixpkgs-unstable`, nix-darwin follows `nixpkgs-darwin`; Vicinae keeps its own for the binary cache,
 see above), so there's one package set per channel instead of several copies. `flake.lock` pins exact revisions, so evaluation is reproducible until you choose to update.
@@ -105,7 +107,8 @@ Connect was already in use, and Plasma handles 165 Hz + VRR well on AMD.
 
 Carried over: pt+us layouts from Windows. The look and keys come from the old Fedora install
 ([FEDORA.md](FEDORA.md)): Catppuccin Macchiato + Klassy, Krohnkite tiling on Meta+H/J/K/L, and
-a launcher on Meta+Space (Ulauncher there, Vicinae here), so layouts switch with Alt+Shift. (The first version used Breeze Dark and
+a launcher on Meta+Space (Ulauncher there, Vicinae here), so layouts switch with Alt+Shift. The
+login screen is Fedora's too: SilentSDDM's `rei` preset with its edits (`desktop.nix`). (The first version used Breeze Dark and
 the Windows komorebi Alt+H/J/K/L binds; Fedora's setup replaced both.)
 
 ## 8. Apps: same app first, then native replacement, then escape hatches
@@ -141,6 +144,11 @@ The Nix store is **world-readable**, and this repo may be pushed somewhere. So:
   code and the other settings are in the repo, pinned by hash.
 - WezTerm wallpapers, the Plasma theme artwork (`themes/art/`) and the TX-02 font (`dotfiles/fonts/`)
   are gitignored. They're third-party art and a licensed font, not secrets, but shouldn't be republished.
+  The login screen's art (`themes/art/sddm/`) has to be in the store, because the greeter runs as
+  `sddm` and can't read `/home/olivia`. A flake can't see gitignored files, so `desktop.nix` uses
+  `requireFile`: the repo holds only the hash, and the file is added once with `nix store add-file`.
+  That's fine for art (the store is world-readable, which is why it never works for secrets). Once the
+  system uses it, the store path is a GC root like any other.
 - **On the Mac,** the same rules apply: SSH keys are copied by hand, and the gh token lives in the
   keychain (`gh auth login`). The Cloudflare tunnel token stays in its LaunchDaemon plist, and the
   VS Code API key in `settings.json`, which isn't managed. None of them is in the repo.

@@ -117,7 +117,21 @@ in
       };
     };
 
+    # Fedora's power settings: dim after 15 min, screen off after 30 (5 when locked), never sleep
+    powerdevil.AC = {
+      autoSuspend.action = "nothing";
+      dimDisplay.idleTimeout = 900;
+      turnOffDisplay = {
+        idleTimeout = 1800;
+        idleTimeoutWhenLocked = 300;
+      };
+    };
+
     configFile = {
+      # Breeze for GTK apps, as on Fedora (colors follow the Plasma scheme). dconf below is
+      # what GTK reads on Wayland; this file is the fallback.
+      "gtk-3.0/settings.ini".Settings.gtk-theme-name = "Breeze";
+
       kwinrc = {
         Plugins = {
           krohnkiteEnabled = true;
@@ -194,6 +208,9 @@ in
       };
     };
   };
+
+  # GTK theme for Wayland GTK apps (Plasma's GTK bridge never sets it here; see configFile above)
+  dconf.settings."org/gnome/desktop/interface".gtk-theme = "Breeze";
 
   # Vicinae launcher (replaces Fedora's Ulauncher). The server runs from login as a user
   # service; Meta+Space toggles its window (hotkeys above). Uses KWin's layer-shell support.

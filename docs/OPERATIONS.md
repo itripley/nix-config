@@ -104,6 +104,9 @@ the next switch puts the configured value back.
 - Changing the wallpaper, colors or cursor in System Settings works until the next `nh os switch`,
   which re-applies `plasma.nix`. Make lasting changes in `plasma.nix`.
 - Wallpapers are per screen: the first entry in `workspace.wallpaper` is screen 0 (DP-1).
+- The login screen (SilentSDDM) is `programs.silentSDDM` in `desktop.nix`; options are in
+  [its wiki](https://github.com/uiriansan/SilentSDDM/wiki/Options). Preview a change without logging
+  out: `test-sddm-silent`. SDDM itself only picks up changes after a reboot.
 
 ## Obsidian
 
@@ -216,6 +219,8 @@ preferences from a newer version; skip it unless something specific is missing.
 | `vicinae.service` restart-loops: *A server is already running (pid …)* | A Vicinae server started outside the unit (e.g. an older one from before a switch) is still running | Log out and back in, or `pkill -f vicinae-server`; the unit then starts the current one. Check the running build with `readlink /proc/<pid>/exe`. |
 | Vicinae copies instead of pasting; snippets don't expand | Input server not running (needs its setcap wrapper) | `ls -l /run/wrappers/bin/vicinae-input-server` (from the vicinae NixOS module); `journalctl --user -u vicinae \| grep -i input`. |
 | Wallpaper black, cursor default, no splash | `themes/art/` empty (fresh clone) | Copy the artwork back (`home/olivia/themes/README.md`), then log out/in. |
+| Build fails: *rei2.png* / *avatar.png* is gitignored art, add it to the store | `themes/art/sddm/` art not in the store (fresh install, or the file changed) | Copy it back (`home/olivia/themes/README.md`), then `nix store add-file ~/nixos-config/home/olivia/themes/art/sddm/<file>`. If the file itself changed, update its hash in `desktop.nix` (`nix hash file <file>`). |
+| Login screen is plain Breeze, or a black screen with a cursor | SilentSDDM theme not loaded | Reboot once after the switch. `journalctl -b -u display-manager \| grep -i -e qml -e silent`; check the theme with `test-sddm-silent`. |
 | Lock screen not animated | QtMultimedia / plugin not found | `ls ~/.local/share/plasma/wallpapers/`; `kdePackages.qtmultimedia` must be in `desktop.nix`; check `journalctl --user -b \| grep -i smart.video`. |
 | Windows don't tile | Krohnkite disabled | System Settings → Window Management → KWin Scripts → enable Krohnkite (should be set by `kwinrc.Plugins.krohnkiteEnabled`). |
 | Keyboard layout won't switch | Using the old key | It's **Alt+Shift** now; Win+Space opens Vicinae. |
