@@ -4,6 +4,7 @@
   programs.git = {
     enable = true;
     settings = {
+      user.name = "olivia"; # same author name from both machines
       user.email = "oliviacmcarmo@gmail.com";
       init.defaultBranch = "main";
     };

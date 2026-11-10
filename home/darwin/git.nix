@@ -12,7 +12,6 @@ in
     lfs.enable = true;
     ignores = [ "**/.claude/settings.local.json" ];
     settings = {
-      user.name = "olivia";
       credential."https://github.com".helper = gh;
       credential."https://gist.github.com".helper = gh;
     };

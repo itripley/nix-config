@@ -43,6 +43,14 @@
   # No legacy channels: <nixpkgs> and `nix shell nixpkgs#…` resolve to this flake's nixpkgs
   nix.channel.enable = false;
 
+  # Weekly (Sunday 03:15): drop generations older than 14 days and collect garbage
+  nix.gc = {
+    automatic = true;
+    options = "--delete-older-than 14d";
+  };
+  # Weekly (Sunday 04:15) store dedup, instead of auto-optimise-store (DESIGN §11)
+  nix.optimise.automatic = true;
+
   # `darwin-version` shows which commit a generation was built from
   system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
 

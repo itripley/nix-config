@@ -12,9 +12,6 @@
       typeset -U path
       path=(/etc/profiles/per-user/$USER/bin /run/current-system/sw/bin /nix/var/nix/profiles/default/bin $path)
     '';
-    initContent = ''
-      eval "$(${config.home.homeDirectory}/.local/bin/mise activate zsh)"
-    '';
   };
 
   programs.fish.shellInit = ''
