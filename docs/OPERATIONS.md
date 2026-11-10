@@ -37,7 +37,7 @@ both, so work done on one has to reach the other through GitHub:
   newer work is, and push `main`. This is what was done on 2026-11-10:
   ```sh
   git add -A && git switch -c desktop-wip && git commit -m "…" && git push -u origin desktop-wip
-  git switch main      # back to the old main; the files stay as they are until the next switch
+  git switch main      # the checkout goes back to the old main; the running system is untouched
   # on the other machine: git fetch && git merge origin/desktop-wip, resolve, check, push
   git pull             # now a fast-forward
   ```
