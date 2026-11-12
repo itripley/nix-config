@@ -577,6 +577,13 @@ Notable choices:
   innoextract, LM Studio, codex, opencode. Warehouse followed the same day.
 - linuxmeeter (Voicemeeter-style mixer, packaged in `pkgs/linuxmeeter`) was added and uninstalled on
   2026-11-09, never committed. See [VERIFICATION.md](VERIFICATION.md#app-changes-2026-11-09).
+- `tidal-hifi` is wrapped (`symlinkJoin` + `wrapProgram`, so the package isn't rebuilt) to start with
+  `--no-sandbox`. Before 9.0 it appends that switch at runtime, after Chromium's zygote has already
+  started sandboxed. The processes forked from it then crash on `/dev/shm` (ESRCH) and the window
+  stays blank (upstream #958, fixed by #1007 in 9.0.0). Its own `disableSandbox` setting is on by
+  default, so this changes nothing about the sandbox, only when it's switched off. Stable has 7.0.1 and
+  unstable 8.1.3, both affected. The `assert` fails the build once nixpkgs has 9.0: then drop the wrapper.
+  See [VERIFICATION.md](VERIFICATION.md#tidal-hifi-blank-window-2026-11-12).
 - No `netbird-ui` here: the NetBird module provides it (wrapped for the daemon socket).
 - No `obsidian` here: `obsidian.nix` installs it through `programs.obsidian`.
 - No `mpv` here: `mpv.nix` installs it through `programs.mpv`.

@@ -429,6 +429,32 @@ in the table below: a real USB install of a new PC, adopting an installed NixOS,
 NixOS-WSL on Windows (bootstrap.ps1 has only been parsed), a new Mac through the script, and
 standalone home-manager on another distro (activation and `non-nixos-gpu-setup`).
 
+## tidal-hifi blank window (2026-11-12)
+
+Symptom: tidal-hifi 7.0.1 opened a blank window and KDE showed a crash dialog. `coredumpctl list tidal-hifi`
+had SIGTRAP dumps of `tidal-hifi --type=zygote` at every launch since the first one on 2026-11-09. The dumps
+had no usable backtrace (stripped binary, child in its own PID namespace).
+
+- A scratch `--user-data-dir` crashed the same way, so it isn't the profile or its GPU caches.
+- `--disable-gpu` crashed the same way too, so it isn't the GPU or Mesa. No other Electron app had dumps.
+- Every run logged `Unable to access(W_OK|X_OK) /dev/shm: No such process (3)`. `/dev/shm` itself is
+  fine (tmpfs, 1777). This matches upstream #958 and the explanation in PR #1007 and #1018: the
+  `disableSandbox` setting appends `no-sandbox` after the sandboxed zygote has started.
+- `tidal-hifi --no-sandbox` with a scratch profile: no crashes, no `/dev/shm` error.
+- Later the same day it was stuck on the logo at every start. Over the remote-debugging port, the page's
+  `GET /v1/users/<id>?countryCode=…` failed with `net::ERR_BLOCKED_BY_CLIENT`. tidal-hifi's **Ad block**
+  setting (`adBlock` in `~/.config/tidal-hifi/config.json`) cancels every URL matching
+  `/\/users\/.*\d\?country/` (`ts-dist/main.js` in 7.0.1), and the player won't start without that
+  response. Keep Ad block off.
+- Exit crashes (KDE's crash dialog): with `--no-sandbox` there were still SIGTRAP dumps on quit
+  (the main process and the `--no-zygote-sandbox` zygote), but only while Ad block was on, or when
+  the stuck app was killed while debugging. With Ad block off, a normal quit of the real profile
+  (14:00) and a SIGTERM quit of a scratch profile left no dumps. The cores are truncated, so there's no
+  backtrace. If the dialog comes back, look at `coredumpctl list tidal-hifi` and the
+  `journalctl --user` lines just before the dump.
+- Testing from a Claude Code shell needs `LD_LIBRARY_PATH` reset first: that shell inherits an unstable
+  `alsa-lib` (glibc 2.43), and tidal-hifi then fails with `GLIBC_2.43 not found`. The real launch doesn't have it.
+
 ## Still to check by hand
 
 The Mac's checks are in [MACOS.md](MACOS.md#checked); all of them are done.
@@ -437,6 +463,7 @@ The Mac's checks are in [MACOS.md](MACOS.md#checked); all of them are done.
 |---|---|
 | Desktop after the rename to `nix-config` | `nh os switch` (until then `NH_FLAKE` is the old `~/nixos-config`, a symlink to the new folder, so nh still finds the repo). In a new terminal: `echo $NH_FLAKE` → `/home/olivia/nix-config`, and `readlink -f ~/.config/nvim` ends in `nix-config/home/olivia/dotfiles/nvim`. Then `rm ~/nixos-config` (only the symlink) and check that nvim, WezTerm and fastfetch still load their configs. nix-diff before the switch: only the checkout path changes (nh's variable, the dotfile, font, theme and wallpaper links, the login-art message). |
 | Desktop after the any-machine restructure | `nh os switch`. The diff lists no packages added or removed (order only, above). Then: `systemctl status openrgb-colors` ran, `/mnt/windows` opens, `timedatectl` shows `RTC in local TZ: yes`, `ollama ps` still uses the GPU, the login screen still has the Rei background. |
+| tidal-hifi `--no-sandbox` wrapper | `nh os switch`, quit tidal-hifi (tray too: `pkill -f share/tidal-hifi`) and start it again. The TIDAL home page loads, a track plays, and `coredumpctl list tidal-hifi --since -5min` shows no new dumps. `pgrep -af tidal-hifi` shows `--no-sandbox` on the main process. |
 | Mac after the restructure | `git pull`, `sudo darwin-rebuild switch --flake ~/nix-config#macbook-olivia`. Nothing should change except the revision; `darwin-version --configuration-revision` shows the new commit. |
 | Mac after the rename to `nix-config` | Before pulling: `mv ~/nixos-config ~/nix-config && ln -s nix-config ~/nixos-config`, then `cd ~/nix-config && git remote set-url origin https://github.com/itripley/nix-config.git && git pull`, then `sudo darwin-rebuild switch --flake ~/nix-config#macbook-olivia`. Check that `readlink ~/.config/nvim` points into `nix-config`, then `rm ~/nixos-config`. Without the move, the switch would point the dotfile links at a folder that doesn't exist. |
 | A new PC from the USB installer | Run `bootstrap.sh` on the installer. The USB is marked `(this installer)`, the typed confirmation names the right disk, it installs and boots, and `hosts/<name>/` is committed and pushed afterwards. Best first done in a VM (the installer ISO in QEMU/virt-manager with UEFI firmware and a spare virtual disk). |
