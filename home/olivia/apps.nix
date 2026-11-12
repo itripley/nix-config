@@ -38,7 +38,21 @@
     # Playback & media
     # mpv (MPC-BE + madVR + LAV): mpv.nix
     mpc-qt
-    plex-desktop
+    # Launcher renamed to the window's Wayland app ID (tv.plex.Plex) so the task manager groups
+    # the window with it. Check again on the next Plex update (the assert says so).
+    (
+      assert lib.assertMsg (lib.versionOlder plex-desktop.version "1.113.0")
+        "home/olivia/apps.nix: plex-desktop is ${plex-desktop.version}; check whether its launcher still needs renaming to tv.plex.Plex.desktop";
+      symlinkJoin {
+        name = "plex-desktop-${plex-desktop.version}";
+        paths = [ plex-desktop ];
+        postBuild = ''
+          rm $out/share/applications/plex-desktop.desktop
+          cp ${plex-desktop}/share/applications/plex-desktop.desktop \
+            $out/share/applications/tv.plex.Plex.desktop
+        '';
+      }
+    )
     plexamp
     plex-mpv-shim
     # Launched with --no-sandbox: before 9.0 its zygotes crash and the window stays blank.
