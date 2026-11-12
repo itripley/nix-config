@@ -584,6 +584,15 @@ Notable choices:
   default, so this changes nothing about the sandbox, only when it's switched off. Stable has 7.0.1 and
   unstable 8.1.3, both affected. The `assert` fails the build once nixpkgs has 9.0: then drop the wrapper.
   See [VERIFICATION.md](VERIFICATION.md#tidal-hifi-blank-window-2026-11-12).
+- `plex-desktop` is wrapped (`symlinkJoin`, so the package isn't rebuilt) to install its launcher as
+  `tv.plex.Plex.desktop` instead of `plex-desktop.desktop`. Plex 1.112.0 runs as a native Wayland
+  window with the app ID `tv.plex.Plex`, and Plasma's task manager matches a Wayland window to the
+  launcher with that file name. With the nixpkgs name the window got its own task entry with the
+  generic Wayland icon, apart from the pinned launcher. `StartupWMClass=Plex` is kept, so an X11 run
+  still groups. The `assert` fails the build from 1.113.0 on, and the `rm` fails if nixpkgs renames
+  the launcher: then check whether the wrapper is still needed (fix upstream: `name` and
+  `startupWMClass` in nixpkgs `pkgs/by-name/pl/plex-desktop/package.nix`).
+  See [VERIFICATION.md](VERIFICATION.md#plex-separate-task-entry-2026-11-12).
 - No `netbird-ui` here: the NetBird module provides it (wrapped for the daemon socket).
 - No `obsidian` here: `obsidian.nix` installs it through `programs.obsidian`.
 - No `mpv` here: `mpv.nix` installs it through `programs.mpv`.

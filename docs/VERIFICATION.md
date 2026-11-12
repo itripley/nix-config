@@ -455,6 +455,23 @@ had no usable backtrace (stripped binary, child in its own PID namespace).
 - Testing from a Claude Code shell needs `LD_LIBRARY_PATH` reset first: that shell inherits an unstable
   `alsa-lib` (glibc 2.43), and tidal-hifi then fails with `GLIBC_2.43 not found`. The real launch doesn't have it.
 
+## Plex separate task entry (2026-11-12)
+
+Symptom: starting Plex from its pinned task manager icon opened the window as a second task entry with
+the generic Wayland icon.
+
+- A KWin script listing every window (`workspace.windowList()`) showed the Plex window (pid of
+  `bin/Plex`) with `resourceClass` and `desktopFileName` both `tv.plex.Plex`. So 1.112.0 runs as a
+  native Wayland window, even though its `Plex.sh` exports `DISABLE_WAYLAND=1`.
+- nixpkgs installs the launcher as `plex-desktop.desktop` with `StartupWMClass=Plex`, which fits an X11
+  window. There was no `tv.plex.Plex.desktop`, so the task manager had no launcher for the window.
+- Fix: the wrapper in `apps.nix` installs the same file as `tv.plex.Plex.desktop`. The built system has
+  only that Plex launcher (contents unchanged, `StartupWMClass=Plex` kept for X11). `nvd diff`
+  against the running system: only `plex-desktop` changes (+1 path, +2.2 KiB).
+- Not changed in nixpkgs yet. An upstream fix would rename the desktop item to `tv.plex.Plex`.
+- Hand check passed after `nh os switch` (2026-11-12): re-pinned from the app menu, the window opens
+  under the pinned icon with no second Wayland-icon entry.
+
 ## Still to check by hand
 
 The Mac's checks are in [MACOS.md](MACOS.md#checked); all of them are done.
