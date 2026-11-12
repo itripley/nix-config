@@ -41,7 +41,18 @@
     plex-desktop
     plexamp
     plex-mpv-shim
-    tidal-hifi
+    # Launched with --no-sandbox: before 9.0 its zygotes crash and the window stays blank.
+    # Drop the wrapper once nixpkgs has 9.0 (the assert says so).
+    (
+      assert lib.assertMsg (lib.versionOlder tidal-hifi.version "9.0.0")
+        "home/olivia/apps.nix: tidal-hifi is ${tidal-hifi.version}; drop the --no-sandbox wrapper";
+      symlinkJoin {
+        name = "tidal-hifi-${tidal-hifi.version}";
+        paths = [ tidal-hifi ];
+        nativeBuildInputs = [ makeWrapper ];
+        postBuild = "wrapProgram $out/bin/tidal-hifi --add-flags --no-sandbox";
+      }
+    )
     pear-desktop
     ffmpeg-full
     yt-dlp
