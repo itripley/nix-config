@@ -334,8 +334,11 @@ directory (DESIGN §11, §12).
   under `home/olivia/` on both machines.
 - `cli.nix`: Python + uv, docker-compose, tmux, mc, fastfetch, jq, gh, btop, and from Fedora: Go,
   rustup (cargo/rustc), lazydocker. All of them are in the binary cache for both systems.
-- `shell.nix`: fish, with `fish_greeting = "pokemon-colorscripts -r"`, and `home.sessionPath`
-  (`~/.cargo/bin`, `~/go/bin`), as on Fedora.
+- `shell.nix`: fish, with `fish_greeting = "krabby random 1-4 --no-mega --no-gmax --no-regional"` (a
+  random Pokémon from generations 1–4, no mega, gigantamax or regional forms; krabby's default
+  `shiny_rate` of 1/128 in `~/.config/krabby/config.toml` gives the shiny chance), and
+  `home.sessionPath` (`~/.cargo/bin`, `~/go/bin`), as on Fedora. krabby replaced Fedora's
+  `pokemon-colorscripts -r` on 2026-11-13.
 - `git.nix`: `programs.git` (`user.name = "olivia"`, email, `init.defaultBranch = main`) and
   `programs.ssh`. The name was only set on the Mac until 2026-11-10; the desktop had none, so git
   fell back to the account's full name (`Olivia`) and commits from the two machines had different
@@ -568,7 +571,7 @@ Notable choices:
   also bundles JDK 17 and 8 (~0.7 GiB) for 1.16 and older; add them back to the list for those versions.
 - `unstable.claude-code`: from unstable because it moves fast.
 - `inputs.claude-desktop.packages.<system>.default`: Claude Desktop (official Linux beta) from its flake (DESIGN §4).
-- "From the old Fedora install" block: High Tide (btop and pokemon-colorscripts moved to `home/shared/`).
+- "From the old Fedora install" block: High Tide (btop and pokemon-colorscripts moved to `home/shared/`; pokemon-colorscripts is krabby since 2026-11-13).
   See [FEDORA.md](FEDORA.md).
 - Removed on 2026-11-09: Zen, Thunar, w3m, Ente, GNOME Boxes, distrobox, DistroShelf, Signal, Vesktop,
   Element, Cinny, Dissent, figma-linux, Krita, GIMP, Pinta, Kdenlive, LosslessCut, XnView MP,
