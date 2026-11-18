@@ -12,6 +12,7 @@
     ../../modules/nixos/storage.nix
     ../../modules/nixos/gaming.nix
     ../../modules/nixos/services.nix
+    ../../modules/nixos/ssh.nix
     ./machine.nix
   ];
 
