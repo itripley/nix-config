@@ -173,6 +173,9 @@ The Nix store is **world-readable**, and this repo may be pushed somewhere. So:
 - The `docker` group is root-equivalent too (it can mount `/` into a container). It's **kept on
   purpose**, so Docker works without sudo. Rootless Docker (`virtualisation.docker.rootless`) is the
   alternative if that trade-off ever stops being worth it.
+- **SSH into the desktop** (`ssh.nix`, 2026-11-18) is key-only and never as root, with one key: the
+  Unraid Claude container's. olivia is in `wheel` and `docker`, so whoever holds that key on Unraid
+  can reach root on the desktop. Remove its line from `ssh.nix` to revoke it.
 - The root password set by `nixos-install` is kept: `systemd-boot.editor = false` blocks
   `init=/bin/sh`, so root's password is the way into emergency mode short of the USB installer.
 

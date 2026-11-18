@@ -475,7 +475,7 @@ AMD Radeon support. The desktop imports it; `bootstrap.sh` adds it to a new PC w
 | `services.netbird`, `services.cloudflare-warp` | Same overlay/VPN clients as on Windows. |
 | `services.netbird.clients.default.config.ManagementURL` | NetBird is self-hosted at `netbird.weblivia.dev` (from the Windows client's `C:\ProgramData\Netbird\default.json`). Without it the daemon uses NetBird's cloud and `netbird up` fails. The module merges this into `/var/lib/netbird/config.json` when the daemon starts; a `restartTriggers` entry makes `nh os switch` restart it when that changes (the module doesn't). The server's *Exit Node (unraid)* route is deselected on the client, as on Windows (see OPERATIONS troubleshooting). It's an object because NetBird serialises Go's `url.URL`. The tray app is the module's wrapped `netbird-ui` (the plain one was dropped from `apps.nix` to avoid two menu entries). |
 | Tray autostart (`makeAutostartItem` for NetBird) | Graphical on/off toggles at login. WARP's own `warp-taskbar` is replaced by a consumer GUI (see `home/olivia/warp-gui.nix`); NetBird's tray app doesn't, so `networking.nix` adds an autostart entry. Both icons may sit under the tray's ^ arrow: right-click the tray → *Configure System Tray* → set them to *Always shown*. |
-| Firewall: TCP 53317, 3000; UDP 53317, 32410, 32412–32414 | LocalSend; plex-mpv-shim's HTTP control port; Plex GDM discovery. Everything else stays closed (Steam, KDE Connect and Avahi open their own). |
+| Firewall: TCP 53317, 3000; UDP 53317, 32410, 32412–32414 | LocalSend; plex-mpv-shim's HTTP control port; Plex GDM discovery. Everything else stays closed (Steam, KDE Connect, Avahi and `ssh.nix` open their own). |
 
 ## `modules/nixos/storage.nix`
 
@@ -514,6 +514,16 @@ authenticate. **Windows `C:`** (`/mnt/windows`) is desktop-only, in `hosts/deskt
 
 OpenRGB and the `openrgb-colors` oneshot moved to `hosts/desktop-olivia/machine.nix` on 2026-11-10:
 they're tied to this PC's RGB devices.
+
+## `modules/nixos/ssh.nix`
+
+Desktop only (imported from `hosts/desktop-olivia/configuration.nix`, not WSL or other PCs).
+
+| Setting | Why |
+|---|---|
+| `services.openssh` (opens TCP 22) | Lets the Claude container on the Unraid server log in to the desktop. |
+| `PasswordAuthentication`, `KbdInteractiveAuthentication` off; `PermitRootLogin = "no"` | Key login only, never as root. |
+| `users.users.olivia.openssh.authorizedKeys.keys` | One key: `claude-unraid-manager -> nixos`, the public half of the container's key (the private key stays on Unraid). Remove the line to revoke it. |
 
 ## `home/olivia/default.nix`
 

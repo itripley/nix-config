@@ -134,6 +134,7 @@ with `scripts/bootstrap.sh` ([OPERATIONS.md](OPERATIONS.md#setting-up-a-new-mach
 | 2026-11-12 | Plex: window no longer opens as a separate task entry with the Wayland icon; launcher installed as `tv.plex.Plex.desktop` to match the window's app ID (assert from 1.113.0); hand check passed | `a58fa5f`, `apps.nix`, [VERIFICATION.md](VERIFICATION.md#plex-separate-task-entry-2026-11-12) |
 | 2026-11-12 | Main screen's taskbar pins declared (14 apps, set at every login by a desktop script; second screen unmanaged, Atomic Agent left out); three pins that pointed at `/nix/store` paths now use their launcher IDs | `plasma.nix`, MODULES.md, DESIGN §7 |
 | 2026-11-13 | Fish greeting: pokemon-colorscripts replaced by krabby (generations 1–4, no mega/gigantamax/regional forms, built-in 1/128 shiny chance); both machines | `home/shared/shell.nix`, MODULES.md |
+| 2026-11-18 | Desktop: SSH server (key only, no root) so the Unraid Claude container can log in as olivia; desktop only | `modules/nixos/ssh.nix`, MODULES.md, DESIGN §9, [VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand) |
 
 ## Conventions
 
