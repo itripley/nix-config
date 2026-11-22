@@ -8,14 +8,12 @@
     high-tide # TIDAL client (was a Flatpak)
 
     # Chat & social
-    # Serein, native Discord client (flake input). nixpkgs-unstable's cargoUseSystemLibs hook
-    # forces a system AWS-LC that isn't there; opt out so it builds the vendored one.
-    # postPatch lowers the hard-coded 760x520 minimum window size.
+    # Serein, native Discord client (flake input).
+    # postPatch lowers the hard-coded 600x520 minimum window size.
     (inputs.serein.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
-      dontCargoUseSystemLibs = true;
       postPatch = (old.postPatch or "") + ''
         substituteInPlace apps/desktop/src/app_settings.rs \
-          --replace-fail 'MIN_WINDOW_SIZE: [u32; 2] = [760, 520];' \
+          --replace-fail 'MIN_WINDOW_SIZE: [u32; 2] = [600, 520];' \
                          'MIN_WINDOW_SIZE: [u32; 2] = [400, 300];'
       '';
     }))
