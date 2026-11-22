@@ -135,6 +135,7 @@ with `scripts/bootstrap.sh` ([OPERATIONS.md](OPERATIONS.md#setting-up-a-new-mach
 | 2026-11-12 | Main screen's taskbar pins declared (14 apps, set at every login by a desktop script; second screen unmanaged, Atomic Agent left out); three pins that pointed at `/nix/store` paths now use their launcher IDs | `plasma.nix`, MODULES.md, DESIGN §7 |
 | 2026-11-13 | Fish greeting: pokemon-colorscripts replaced by krabby (generations 1–4, no mega/gigantamax/regional forms, built-in 1/128 shiny chance); both machines | `home/shared/shell.nix`, MODULES.md |
 | 2026-11-18 | Desktop: SSH server (key only, no root) so the Unraid Claude container can log in as olivia; desktop only | `modules/nixos/ssh.nix`, MODULES.md, DESIGN §9, [VERIFICATION.md](VERIFICATION.md#still-to-check-by-hand) |
+| 2026-11-22 | Serein updated `c028eee` → `058e335` (110 commits); window-size patch now matches upstream's new 600×520 minimum, still lowered to 400×300; redundant `dontCargoUseSystemLibs` dropped (upstream sets it) | `apps.nix`, MODULES.md, DESIGN §4 |
 
 ## Conventions
 

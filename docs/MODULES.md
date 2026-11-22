@@ -620,9 +620,13 @@ Notable choices:
 - `inputs.serein.packages.<system>.default`: Serein, a native Rust Discord client, from its own flake
   (DESIGN §4). Compiles locally on first build and on each `nix flake update serein`.
   Its `postPatch` lowers the hard-coded minimum window size (`MIN_WINDOW_SIZE` in
-  `apps/desktop/src/app_settings.rs`) from 760×520 to 400×300 logical pixels, so it can be made
-  smaller than ~836×572 px on DP-1 (1.1× scale). `--replace-fail` stops the build if upstream
-  changes that line. Below ~760 px wide Serein's layout is untested upstream (VERIFICATION #17).
+  `apps/desktop/src/app_settings.rs`) from upstream's 600×520 (760×520 before `058e335`) to
+  400×300 logical pixels, so it can be made smaller than ~660×572 px on DP-1 (1.1× scale).
+  `--replace-fail` stops the build if upstream changes that line; then match the new value.
+  Below 600 px wide Serein's layout is untested upstream (VERIFICATION #17). The build doesn't
+  run Serein's tests (`doCheck = false`); one geometry test assumes the upstream minimum.
+  `dontCargoUseSystemLibs` (VERIFICATION #15) is now set by Serein's own package, so the
+  override no longer needs it.
 
 ## `home/olivia/dev.nix`
 
