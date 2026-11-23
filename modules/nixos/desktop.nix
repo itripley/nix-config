@@ -71,6 +71,17 @@
   # KDE PIM (Akonadi + a MariaDB server) for KMail/KOrganizer/Kontact:
   programs.kde-pim.enable = false;
 
+  # Crash reporter only with a screen: between two desktops it has none, crashes itself, and
+  # reports that too
+  systemd.user.services."drkonqi-coredump-launcher@" = {
+    overrideStrategy = "asDropin";
+    enableDefaultPath = false;
+    unitConfig.ConditionEnvironment = [
+      "|WAYLAND_DISPLAY"
+      "|DISPLAY"
+    ];
+  };
+
   programs.kdeconnect.enable = true; # opens its firewall ports
   programs.partition-manager.enable = true;
   services.printing.enable = true;

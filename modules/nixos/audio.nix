@@ -63,6 +63,8 @@ in
         "default.clock.min-quantum" = 64;
         "default.clock.max-quantum" = 2048;
       };
+      # The X11 bell module crashes PipeWire when Xwayland goes away (logging out of Plasma)
+      "15-no-x11-bell"."context.properties"."module.x11.bell" = false;
       "20-virtual-sinks"."context.modules" = map virtualSink [
         "Game"
         "Music"
