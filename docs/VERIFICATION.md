@@ -488,6 +488,40 @@ the generic Wayland icon.
   The wallpaper's desktop script is unchanged, so it still runs only when its own content changes.
 - Not run against the live panel yet: see the hand check below.
 
+## niri + Pond desktop (2026-11-23)
+
+Checked before switching, without activating anything:
+
+- **niri accepts Pond's config:** `niri validate` (26.04, the stable package) passes on upstream's `config/niri`, on the path-patched copy in the package, and on ripley's assembled `~/.config/niri` (store links + seeded `cfg/`).
+- **Package:** both native plugins resolve their libraries (`ldd`); the Python env imports `gi.repository` Gio/GLib and PyQt6 (JPEG/AVIF readers present); no unhandled `/usr/` paths (the build checks).
+- **Render test:** in a headless sway (`WLR_BACKENDS=headless`) with a private D-Bus session bus, no system bus and a scratch `$HOME`, `qs -p …/shell` loaded with no QML errors and drew the clock, workspace minimap, notifications, bottom controls and Pond's first-run manual. The only warnings came from what the sandbox lacked: the system bus (UPower, NetworkManager, Bluetooth), PipeWire, `niri msg`, Pond's `pm`, and the blur protocol (sway has none). `qs -p …/lockscreen` + `ipc call lockscreen lock` drew the lock screen (username via getent, date and time, daylight sky).
+- **Isolation:** `nvd diff` shows only additions (niri, Pond, ripley's home, portals; +1.2 GiB), nothing removed or upgraded. olivia's home-manager generation is the same store path as the running one; `/etc/pam.d/sddm` and `login` are unchanged.
+
+## niri + Pond in olivia's account (2026-11-23)
+
+After Olivia's first login to niri as ripley ("only displaying on my second monitor, the Sun"; then "i want logins and files"). Nothing was activated.
+
+- **Monitors, from the journal:** niri lit all three connectors: DP-1 (Dell) at 2560×1440 @ 60 Hz, DP-2 (Sun), and HDMI-A-2, which reported "connected" with no EDID and got a 640×480 workspace. niri logged no error for the Dell, and focus starts on it by default (first in make order), so the log doesn't say why it showed nothing. Olivia's Plasma session was still running behind it (Switch User). The one kernel error is at the end of the session (20:55:16, shutdown): DisplayPort link training failed on link 0. `display.kdl` declares the Dell's 165 Hz mode, position and focus and turns HDMI-A-2 off, but **whether that fixes the Dell is unproven until the hand check**. The session ended with a reboot from the lock screen; the journal has no failed unlock, and no successful one either.
+- **`display.kdl`:** `niri validate` passes on olivia's assembled config; Pond's own `validate_layout` accepts the rectangles; its `patch_output` edits the DP-1 block in place and keeps `focus-at-startup`.
+- **Logins:** Electron 43 asked directly (`safeStorage.getSelectedStorageBackend()`, headless sway, private session bus): plain `niri` → `basic_text`; through `pond-app` → `kwallet6`; Plasma's variables → `kwallet6`; `niri` + `KDE_FULL_SESSION` → `kwallet` (KDE 4). The wallet unlock itself (`pond-kwallet`) needs a real login.
+- **Launcher:** the fork didn't link at first (numen from GCC 16). With the override it builds and runs (`v0.29.0`, GCC 15.3). In headless sway with a virtual keyboard (it exits on a seat with no keyboard): Pond's layout, olivia's apps, Gramercy, theme switching, an app started through it gets `niri:KDE`, and its data lands in `pond-launcher` folders only.
+- **Font:** `Pond Gramercy` resolves to ABC Gramercy Trial Regular and Book in fontconfig, in Pond's Quickshell (`fontInfo`) and in the launcher.
+- **Plasma unchanged:** in olivia's home files the diff is Pond's own (niri, quickshell, kitty defaults, fonts, cursor, three services under `niri.service.wants`), `NotShowIn=niri` on plasma-manager's autostart entry, and the condition on `vicinae.service` (`systemd-analyze condition`: passes in Plasma; the same form with Plasma's own name fails, so it does gate). In the profile: five commands and three `OnlyShowIn=niri` entries; no MIME types, D-Bus services or autostart. `/etc/pam.d/sddm` and `login` are identical. `nvd diff`: additions only, −215 MiB (ripley's full ibm-plex and Nautilus went). Nautilus's D-Bus file-manager service, from the niri module, comes after Dolphin's in the search order, so "Show in folder" stays Dolphin.
+- **bootstrap.sh:** `add_pond_font` in a scratch copy: stops with a message without the zip, adds it with it, skips hosts without `niri.nix` (tested before the rename from `add_ripley_font`).
+- **Rule slip:** `--impure` was used once to look up an input's path and once to start a launcher build (stopped, redone through the flake). Nothing in the repo depends on it.
+
+## Crash notification after leaving Plasma (2026-11-23)
+
+- **Cause:** journal and `coredumpctl`, 22:52:41 to 22:52:50. PipeWire SIGSEGV in `libpipewire-module-x11-bell`, EasyEffects, xdg-desktop-portal-kde and ksecretd aborts, then 34 DrKonqi launchers, all with neither `DISPLAY` nor `WAYLAND_DISPLAY` (`COREDUMP_ENVIRON`; needs `journalctl --all`, long fields are blank otherwise). Nothing has crashed under niri since.
+- **Fix, built, not activated:** `/etc` gains only the drop-in and `15-no-x11-bell.conf`. The condition passes in a session and fails for an unset variable (`systemd-analyze --user condition`). A private PipeWire instance loads x11-bell without the file and not with it.
+- EasyEffects, the portal and ksecretd can still abort at logout; they just aren't reported.
+- **niri (Olivia, 21:57 and 22:52):** worked. Dell 165 Hz, Sun 75 Hz, HDMI-A-2 off, `pond-kwallet` finished, upstream Vicinae skipped. Which of the monitor changes fixed the Dell isn't known.
+
+## Portal from the other desktop (2026-11-23)
+
+- **Cause:** at 22:52:40.898 the portal stopped with Plasma and at .943 it was started again, before the session was gone; the process (PID 22960) had `XDG_CURRENT_DESKTOP=KDE` under niri. Color scheme: KDE backend 2 (light), gtk backend 1 (dark), dconf `prefer-dark`. The journal shows the same restart at 21:57. Olivia confirmed it: setting Firefox to dark fixed Sidebery's edges.
+- **Fix, built, not activated:** the script's dry run in that session printed "portal was started for 'KDE', this is 'niri'" and would restart it. `systemd-analyze --user verify` finds no ordering cycle for Plasma's or niri's targets. niri → Plasma hasn't been seen to go wrong; the check covers it anyway.
+
 ## Still to check by hand
 
 The Mac's checks are in [MACOS.md](MACOS.md#checked); all of them are done.
@@ -514,6 +548,12 @@ The Mac's checks are in [MACOS.md](MACOS.md#checked); all of them are done.
 | GTK theme (after the switch, restart GTK apps) | ✅ Checked by Olivia after the 2026-11-10 switch (`Breeze`). `dconf read /org/gnome/desktop/interface/gtk-theme` → `'Breeze'`; a GTK3 app (e.g. the file chooser in a GTK app, or `gtk3-demo` via `nix shell nixpkgs#gtk3`) looks like Breeze in Catppuccin colors, not Adwaita. |
 | Login screen (after `nh os switch` + reboot) | ✅ Checked by Olivia after the 2026-11-10 reboot. Looks like Fedora's: Rei background, JetBrainsMono clock, round avatar on the left. Size: if it's bigger or smaller than on Fedora, set `settings.General.scale` (Fedora had 1.25, before the theme applied display scaling). Typing the password and Alt+Shift layout switching work; the session menu offers Plasma. `test-sddm-silent` previews it before the reboot. |
 | SSH from Unraid (after `nh os switch`) | `systemctl status sshd` is active; the Unraid Claude container logs in as olivia with its key; `ssh -o PubkeyAuthentication=no olivia@desktop-olivia` from another machine is refused (no password prompt). |
+| Portal, niri → Plasma | Under niri done 2026-11-23 (`portal-check` restarted it, color scheme `u 1`). After going back to Plasma: `journalctl --user -u portal-check`, and Firefox on automatic looks right. |
+| ripley removed (after `nh os switch`) | `id ripley` finds no user; the login screen doesn't list it. `/home/ripley` stays on disk until `sudo rm -r /home/ripley`. |
+| Crash loop gone (after `nh os switch`, then log out and in once so PipeWire restarts) | Log out of Plasma into niri: no crash notification; `coredumpctl list --since -5min` shows no pipewire and no drkonqi. |
+| niri + Pond (log out of Plasma, log in as olivia, pick "Niri" in SDDM's session menu) | Wallpaper, sidebar and the first-run manual appear. Mod+Space opens Pond's launcher (cards, Gramercy) with the same apps as Plasma; Mod+Return opens kitty (blurred, translucent); Mod+L locks and the password unlocks; volume and media keys show Pond's OSD; Mod+K / Alt+Shift switch pt↔us; the Wi-Fi, Bluetooth and audio panels list devices; the brightness slider moves the monitor (DDC). Then back to Plasma: nothing looks different, Meta+Space opens the usual Vicinae. |
+| Monitors under niri | The Dell shows the wallpaper and sidebar at 165 Hz and has the focus; the Sun is on its right; no third workspace. `niri msg outputs` lists DP-1 and DP-2 enabled, HDMI-A-2 disabled. If the Dell is still dark, note what it shows (no signal / black / another input) and the time: niri's log is in the journal (`journalctl _UID=1001`). |
+| Logins under niri | Start VS Code, Claude and Chromium from Pond's launcher: still signed in, and no wallet password prompt (`journalctl --user -u pond-kwallet`). Firefox opens the usual profile. Settings > Appearance changes the launcher's theme too. If something looks signed out, close it without signing in or out and note how it was started. |
 | Plasma shortcuts | System Settings → Shortcuts; adjust `plasma.nix` if a KWin action name differs. |
 | ROCm in Resolve / Blender / Ollama | Render with HIP in Blender, run a model and check `ollama ps` shows GPU. |
 | Seiren Mini + EasyEffects | Record a test clip. |

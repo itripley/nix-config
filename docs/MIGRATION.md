@@ -117,6 +117,16 @@ history, open tabs) moves over. See [FIREFOX.md](FIREFOX.md) for what, how and w
 | Static DNS 1.1.1.1 | same | router DNS-rebind protection breaks `*.plex.direct` |
 | Mapped drives X:, Y:, Z: | `/mnt/unraid/{appdata,downloads,files}` | CIFS automount, creds in `/etc/nixos/smb-secrets` |
 
+## Second desktop (niri + Pond)
+
+Not from Windows: niri with Pond's interface in olivia's account, next to Plasma (DESIGN §13), so every app here is in both. Only under niri, from `home/pond`:
+
+| App | |
+|---|---|
+| Pond shell, lock screen, wallpaper | `pkgs/pond-interface` |
+| Pond's launcher | Butterfly's Vicinae fork (`pond-launcher` input); Plasma keeps upstream Vicinae |
+| kitty, Nautilus | Pond's Mod+Return / Mod+E |
+
 ## Stays on Windows (no native Linux version)
 
 Adobe Creative Cloud (Photoshop, Premiere, Media Encoder), FL Studio, Avid Media Composer,

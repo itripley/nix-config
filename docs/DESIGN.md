@@ -338,3 +338,28 @@ steps, including writing the new host's folder.
 
 **Limits:** BIOS-only PCs (systemd-boot needs UEFI), hybrid NVIDIA laptops (`hardware.nvidia.prime`
 bus ids by hand), non-x86_64 NixOS PCs, and native Windows apps (Nix doesn't run on Windows).
+
+## 13. Second desktop: niri + Pond, next to Plasma
+
+Olivia wanted a second desktop that can't affect Plasma: niri, set up exactly like Butterfly's
+Pond distro. Pond's niri config is a thin layer over its Quickshell shell (wallpaper, sidebar,
+lock screen, volume/brightness keys), so "Pond's niri config" means the whole
+[pond-interface](https://github.com/bflycomputer/pond-interface), packaged in
+`pkgs/pond-interface`.
+
+- **In olivia's own account (2026-11-23).** The first version was a separate user, `ripley`, which
+  isolates completely, but after the first login Olivia wanted their apps, logins and files there.
+  Two accounts can't share those: file ownership, browser profile locks, and a KWallet that's
+  encrypted per user. So Pond moved into olivia's home, and the isolation moved into how it's wired
+  (`home/pond`, MODULES): services hang off `niri.service`, its apps are hidden from Plasma, its
+  launcher has its own data, and Pond only writes to its own folders. The differences in olivia's
+  generation are listed in VERIFICATION. The cost is one desktop at a time: log out of one before
+  the other.
+- **Logins need KDE in the desktop's name.** See `home/pond` in MODULES. It's set for apps only.
+- **Pond's files laid out as Pond lays them out.** The "shell" layer stays read-only in the store
+  and follows updates; the personal `cfg/*.kdl` files are seeded once, because Pond's settings
+  app edits them.
+- **Pond's launcher under niri, upstream Vicinae in Plasma.** Pond's is a fork of it, as a flake
+  input pinned to the commit Pond ships.
+- **Built from unstable**, the one package that has to be: its Qt minimum is 6.12. Pinned to a
+  commit like the other third-party sources; updating is a `rev`/`hash` bump.

@@ -231,6 +231,8 @@ printf 'username=YOUR_USER\npassword=YOUR_PASS\n' | sudo tee /mnt/etc/nixos/smb-
 #    out login-art.nix in hosts/desktop-olivia/configuration.nix
 nix --experimental-features "nix-command flakes" store add-file home/olivia/themes/art/sddm/rei2.png
 nix --experimental-features "nix-command flakes" store add-file home/olivia/themes/art/sddm/avatar.png
+#    Same for Pond's title font (gitignored; niri.nix needs it): docs/MODULES.md, home/pond/fonts.nix
+nix --experimental-features "nix-command flakes" store add-file home/pond/fonts/dinamo-gramercy-trial.zip
 
 # 6. Install (--no-channel-copy: the flake pins nixpkgs, so the ISO's channel isn't copied).
 #    It asks for a root password at the end; emergency mode uses it.

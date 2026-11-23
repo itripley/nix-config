@@ -11,6 +11,7 @@ overlays/packages.nix             adds this repo's own packages (pkgs/) to the p
 pkgs/warp-cloudflare-gui/         consumer WARP tray toggle (used by home/olivia/warp-gui.nix)
 pkgs/obsidian-plugins/            Obsidian plugins + themes, pinned (used by home/olivia/obsidian.nix)
 pkgs/vscode-marketplace/          VS Code extensions, pinned (used by home/olivia/dev.nix)
+pkgs/pond-interface/              Pond's desktop layer (used by home/pond)
 flake.lock                        exact pinned revisions of every input
 statix.toml                       linter config (`nix flake check`)
 .github/workflows/check.yml       CI: `nix flake check` on every push, on Linux and macOS
@@ -33,6 +34,7 @@ modules/nixos/                    system level (root, services, hardware)
   boot.nix  desktop.nix  audio.nix  networking.nix  storage.nix  gaming.nix  services.nix
   amd.nix  nvidia.nix             GPU support, imported by the hosts that have one
   login-art.nix                   Fedora's login background + avatar (gitignored art)
+  niri.nix                        second desktop: niri + Pond, next to Plasma
   disk-layout.nix                 the desktop's btrfs layout for new PCs (disk id per host)
 home/shared/                      home-manager modules every machine imports
   default.nix  cli.nix  shell.nix  git.nix  neovim.nix
@@ -43,6 +45,9 @@ home/darwin/                      the Mac user's home-manager config (olivi)
 home/olivia/                      the desktop user's home-manager config (olivia)
   default.nix  apps.nix  dev.nix  firefox.nix  plasma.nix  flatpak.nix  warp-gui.nix  obsidian.nix
   mpv.nix  easyeffects.nix
+home/pond/                        niri + Pond in olivia's account; runs only under niri
+  default.nix  fonts.nix  display.kdl
+  fonts/                          licensed title font (gitignored)
 home/standalone.nix               standalone home-manager (machines whose OS isn't managed here)
   plex-mpv-shim/mpv.conf          the shim's mpv settings from Windows (mpv.nix)
   obsidian/                       Obsidian seed settings and CSS snippets (obsidian.nix)
@@ -448,12 +453,24 @@ AMD Radeon support. The desktop imports it; `bootstrap.sh` adds it to a new PC w
 | `xkb.layout = "pt,us"`, `grp:alt_shift_toggle` | Same layouts and order as Windows. Alt+Shift switches (Win+Space went to the launcher, as on Fedora). Also applies to the login screen and TTY (`console.useXkbConfig`). |
 | `environment.systemPackages`: `klassy`, `kdePackages.krohnkite`, `kdePackages.qtmultimedia` | KWin decoration, tiling script and the QML module the animated lock screen needs. System-wide so KWin/plasmashell find them. |
 | `programs.kdeconnect` | Was in use on Windows; this also opens its firewall ports. |
+| `drkonqi-coredump-launcher@`: `ConditionEnvironment` = a display is set | After a Plasma logout the user manager lives on without a display. DrKonqi was started for whatever crashed at logout, crashed for lack of one, and was started for its own crash: 34 times in 9 s until niri came up and showed the last one as a notification. Skipped without a display; crashes are still in `coredumpctl`. |
 | `partition-manager`, `printing` | KDE disk tool; CUPS printing. |
 | `services.orca`, `services.speechd`, `programs.kde-pim` = `false` | Plasma (and NixOS' graphical-desktop defaults) turn these on with `mkDefault`. Not used here: the Orca screen reader and speech-dispatcher with its voices (~1.2 GiB, ran at every login), and KDE PIM (Akonadi + a MariaDB server, for KMail/KOrganizer/Kontact). Turning them off saved ~1.3 GiB. Switch back on for a screen reader / text-to-speech or the KDE PIM apps. |
 | `services.flatpak`, `programs.appimage` (+binfmt) | Escape hatches for apps outside nixpkgs (DESIGN §8). |
 | `programs.artcraft` (`apps = photocraft, filmcraft`) | ArtCraft apps from the `artcraft` flake's module (DESIGN §4). The module also turns on `fonts.fontDir` and links `/usr/share/fonts` to the system fonts, because the apps' text tools only look there, not through fontconfig. |
 | `programs.silentSDDM` | The Fedora login screen: [SilentSDDM](https://github.com/uiriansan/SilentSDDM) from the `silent-sddm` flake's module (DESIGN §4), preset `rei` with Fedora's edits as `settings` (appended to `configs/rei.conf`): the static `rei2.png` instead of the `rei.mp4` video on the login and lock screens, JetBrainsMono Nerd Font everywhere (system font, so the greeter sees it), round avatar. Fedora's `scale = 1.25` is left out: the theme now multiplies it by the display scale itself. The module sets SDDM's theme, `extraPackages` (QtMultimedia, SVG, virtual keyboard, image formats), `GreeterEnvironment`/`InputMethod`, adds Red Hat Display to `fonts.packages` and installs `test-sddm-silent`. SDDM stays on Wayland/KWin (its default when `services.xserver` is off). `rei2.png` and `avatar.png` are gitignored art from `themes/art/sddm/`, pulled in with `requireFile` by hash (DESIGN §9), in **`login-art.nix`** since 2026-11-10, with the settings that use them; without that module the preset's own video background shows. Its `profileIcons.olivia` writes `/var/lib/AccountsService/users/olivia` (`f+`, so it replaces that file) and links the icon. Adds ~90 MiB, mostly Qt multimedia dev outputs the module drags in through `systemPackages`. |
 | fonts: JetBrainsMono Nerd Font, Noto (+CJK, emoji), corefonts | WezTerm's font; full Unicode coverage including Japanese/Chinese; Microsoft core fonts for websites and documents that expect them. |
+
+## `modules/nixos/niri.nix`
+
+A second desktop: niri with Pond's interface, next to Plasma (DESIGN §13). Pick "Niri" in SDDM's session menu; log out of Plasma first.
+
+| Setting | Why |
+|---|---|
+| `programs.niri.enable` | niri 26.04 from stable: its session in SDDM's menu ("Niri"), `niri.service`, xdg-desktop-portal-gnome + -gtk with a `niri-portals.conf`, polkit, `swaylock` PAM, XDG autostart for WM sessions. Portals are picked per desktop, so Plasma keeps its own. |
+| `home-manager.users.olivia.imports = [ home/pond ]` | Pond in olivia's account, with the same apps, logins and files as Plasma. Here and not in `home/olivia`, so only PCs that import this module get it. |
+| `services.gnome.gnome-keyring.enable = false` | The niri module turns it on with `mkDefault`. Its PAM hook (login, sddm) would also start it in olivia's Plasma logins, next to KWallet, both claiming the Secret Service. Off: `/etc/pam.d/sddm` and `login` stay as they were. |
+| `xdg.portal.config.niri."org.freedesktop.impl.portal.Secret" = mkForce "kwallet"` | The niri module points the Secret portal at gnome-keyring; KWallet ships one (`kwallet.portal`), so both desktops use KWallet. |
 
 ## `modules/nixos/audio.nix`
 
@@ -462,6 +479,7 @@ AMD Radeon support. The desktop imports it; `bootstrap.sh` adds it to a new PC w
 | PipeWire with ALSA (+32-bit), PulseAudio and **JACK** | One audio server for everything; JACK stays on for any JACK app (it was for Renoise, Cardinal, VCV Rack and plugdata, removed 2026-11-09). |
 | `security.rtkit` | Realtime scheduling for audio threads, which prevents dropouts. |
 | **No idle power-down of the onboard analog out:** `snd_hda_intel power_save=0 power_save_controller=N` (`boot.extraModprobeConfig`) and WirePlumber rule `51-analog-no-suspend` (`session.suspend-timeout-seconds = 0` for `alsa_output.pci-0000_0e_00.6.*`) | The speakers played static whenever nothing had played for a while (reported 2026-11-09). By default WirePlumber closes an idle output after 5 s, and the kernel then powers the Realtek ALC897 codec down after 10 s (`power_save` was 10); the undriven line-out hisses into powered speakers. Keeping the output open means the codec stays on and outputs digital silence. Only the analog out is kept open; HDMI still suspends. Costs well under a watt. |
+| `module.x11.bell = false` | PipeWire 1.6.6 crashes in this module (`x11_io_error_exit_handler`) when Xwayland goes away, so at each Plasma logout (seen 2026-11-23 at 21:57 and 22:52). Only the X11 beep is lost. |
 | **Low-latency clock:** rate 48000 (44.1k/96k allowed), quantum 256, min 64, max 2048 | 256 samples ≈ 5.3 ms is safe for daily use; apps like a DAW can request down to 64. Allowed rates avoid resampling 44.1 kHz music. |
 | **Virtual sinks Game / Music / Chat** | The Voicemeeter replacement. Each is a `libpipewire-module-loopback`: an output device apps can be assigned to, which forwards to the real default output. Loopbacks were chosen over plain null-sinks because **a null-sink is silent** unless something routes it onward. Each bus gets its own volume slider in Plasma; use qpwgraph for custom routing. |
 
@@ -534,6 +552,35 @@ olivia on a NixOS PC (given to her by `desktop.nix`).
   `flatpak.nix` (the system's Flatpak), `warp-gui.nix` (the system's WARP daemon).
 - `home.stateVersion = "26.05"` (never bump, same as the system one).
 - `plasma.nix` builds its theme paths from `osConfig.programs.nh.flake` (`common.nix`).
+
+## `home/pond/default.nix`
+
+niri with Pond's interface (`pkgs/pond-interface`) for an account. It shares the home with Plasma, so whatever it starts hangs off `niri.service`, and what it installs is either read only by niri/Pond or hidden from Plasma. Pond itself only writes to `~/.config/{pond-interface,niri}`, `~/.local/state/pond-interface` and `~/.cache/pond-interface` (checked in its source; no gsettings).
+
+| Setting | Why |
+|---|---|
+| `~/.config/niri/config.kdl`, `niri/shell/` → store | Pond's own layer ("don't modify these" upstream): spawns the shell; launcher, lock and media binds; cursor; layer rules; default layout and animations. Follows package updates. |
+| `~/.config/niri/cfg/*.kdl`, seeded by `home.activation.pondPersonalConfig` | Pond's personal layer (keybinds, input, display, layout/animation overrides, rules, misc). Copied once if missing, never overwritten: Pond's settings app writes `display.kdl` and `input.kdl`, and niri reloads on save. Delete a file to get the current default back on the next switch. |
+| `cfg/display.kdl`, from `display.kdl` here | This PC's monitors, laid out as in Plasma: DP-1 (Dell) 2560×1440 @ 165 Hz, `focus-at-startup`; DP-2 (Sun) 1600×1200 @ 75 Hz on its right, bottoms level; **HDMI-A-2 off**, because with nothing usable on it the port can report a 640×480 screen without an EDID, and niri then gives it a workspace. |
+| `cfg/misc.kdl`: `XDG_CURRENT_DESKTOP "niri:KDE"`, `KDE_SESSION_VERSION "6"` for what niri starts; the launcher's `launchPrefix` (`pond-app`) sets the same for apps | **Logins.** Chromium and Electron choose where they store logins from the desktop's name (`base/nix/xdg_util.cc`): only a `KDE` entry with session version 6 means KWallet 6, as in Plasma. Plain `niri` means no wallet, and they'd look signed out. (`KDE_FULL_SESSION` doesn't do it: that path returns KDE 4.) Qt apps get the KDE theme from it too. niri itself, the portals and autostart keep `niri`, so `OnlyShowIn=KDE` autostart entries stay off and `niri-portals.conf` is used. |
+| `pond-kwallet.service` | Hands the login password to KWallet (`pam_kwallet_init`), as Plasma's `plasma-kwallet-pam.service` does. Without it the wallet stays locked under niri. Before autostart, 10 s timeout. |
+| `portal-check.service` (both desktops, `WantedBy=graphical-session.target`) | At a Plasma logout an app asked for the portal 45 ms after it was stopped, so it came back with `XDG_CURRENT_DESKTOP=KDE` and stayed for niri: KDE's backends, which answer "light" there (Firefox/Sidebery had light edges, 2026-11-23), and can't share niri's screen. The check compares the running portal's desktop with the session's and restarts it only if they differ. It covers niri → Plasma too, so it isn't under `niri.service`; in a normal Plasma login it does nothing. Not ordered before autostart: Plasma starts that before `graphical-session.target` (a cycle). `PORTAL_CHECK_DRY_RUN=1` only prints. |
+| `pond-launcher.service`: Pond's launcher | [Butterfly's Vicinae fork](https://github.com/bflycomputer/vicinae) (Pond's look and themes, closes on a click outside), flake input `pond-launcher` at the commit Pond's own package pins. Patched to keep its data in `pond-launcher` folders instead of `vicinae`, because olivia's upstream Vicinae (0.30) uses those and the fork is at 0.29: no shared settings or databases. Pond calls it by full path. numen is rebuilt with GCC 15: the fork builds with GCC 15, and unstable's default GCC 16 numen doesn't link into it. Updating: the new commit in `flake.nix`, then `nix flake lock`; try without the numen override. The input server is the wrapped upstream one (same source). |
+| `vicinae.service`: `ConditionEnvironment=!XDG_CURRENT_DESKTOP=niri` | olivia's Vicinae stays Plasma's; both would claim the same socket. |
+| `polkit-gnome`, `WantedBy=niri.service` | niri has no polkit agent; Pond uses polkit-gnome. Plasma has its own. |
+| `autostart/plasma-manager-autostart.desktop`: `NotShowIn=niri` | plasma-manager's login script configures plasmashell. The other autostart apps (Bitwarden, WARP, NetBird, KDE Connect) start in both. |
+| `pond-tools` in `home.packages` | `qs`, kitty (Mod+Return) and Nautilus (Mod+E) as bare binaries, with `.desktop` files that say `OnlyShowIn=niri` and have no MIME types or D-Bus services. Installing the packages themselves would put them in Plasma's menu, its default apps and "Show in folder". |
+| `~/.local/share/fonts/pond`, `fontconfig/conf.d/60-pond-gramercy.conf` | Pond's fonts (`fonts.nix`) and the rule that replaces `Pond Gramercy` (`assign`, because Qt takes the first family after substitution). |
+| `~/.local/share/icons/capitaine-cursors` | Pond's cursor. Pond's niri config names it; Plasma keeps Bocchi. |
+| kitty: `pond-defaults.conf` → store; `kitty.conf`, `current-theme.conf`, `themes/` seeded | Pond's kitty (70 % opacity, JetBrains Mono, its theme). `kitty.conf` starts with `include pond-defaults.conf`, which upstream installs as `/etc/xdg/kitty/kitty.conf`. |
+
+GTK apps keep olivia's own theme (Breeze, dark) in both desktops: Pond's Adwaita settings live in the same files as Plasma's.
+
+## `home/pond/fonts.nix`
+
+The fonts Pond names, as one folder: Onest and Advent Pro (from the package), IBM Plex Mono, JetBrains Mono, and for its title font (`Pond Gramercy`, Butterfly's cut of Dinamo's ABC Gramercy, not public) the text cut from Dinamo's trial package (`DINAMO Trial Fonts.zip`), which has the `Book` and `Regular` styles Pond asks for by name.
+
+The zip is licensed (a trial, for testing), so it's gitignored in `home/pond/fonts/` and pulled in with `requireFile` like the login art (DESIGN §9): `nix store add-file home/pond/fonts/dinamo-gramercy-trial.zip`. `bootstrap.sh` adds it. The font folder links to the zip, so garbage collection can't remove it.
 
 ## `home/linux/default.nix`
 
@@ -770,6 +817,17 @@ for each, and `vscode-utils.extensionsFromVscodeMarketplace` builds them. Versio
 nixpkgs had. Marketplace rather than nixpkgs' `vscode-extensions`: nixpkgs has only 12 of the 42,
 most older than on Windows (C# Dev Kit 3.10 vs 3.40), and the FHS build runs the marketplace
 binaries as they are. `nix build .#vscode-marketplace` fetches and unpacks all of them.
+
+## `pkgs/pond-interface/package.nix`
+
+Pond's desktop layer, [bflycomputer/pond-interface](https://github.com/bflycomputer/pond-interface) (BSD-3-Clause, Butterfly Interaction Inc.) at `7825829` (2026-11-20): the Quickshell shell, lock screen, wallpaper/daylight sky, screenshot preview and niri/kitty config. Built from **`pkgs.unstable`** (`overlays/packages.nix`): the `Pond.System` plugin's CMake asks for Qt 6.12 (stable has 6.11), and the plugins must match the Qt that Quickshell (0.3.2) runs on.
+
+- **Native QML modules:** `Pond.System` (logind, caps lock, network status; KF6 NetworkManagerQt) and `Pond.Screenshot.Native`, two small CMake projects. The pure-QML modules (`Pond.Wallpaper`, `Pond.Daylight`, `Pond.Screenshot`) are linked from the share tree into `lib/qt6/qml/Pond`.
+- **Paths:** `/usr/share/pond-interface` → the store; `/usr/bin/{qs,vicinae,nmcli,iw,id,getent,systemctl,timedatectl}` → bare names found on PATH; xkb rules and `zone.tab` → `xkeyboard_config`, `tzdata`. `postPatch` fails the build if any other `/usr/` path turns up after an update.
+- **`bin/qs`:** Quickshell wrapped with Pond's QML modules on `QML_IMPORT_PATH`, the GLib typelibs, and on PATH what the shell runs: Python with PyGObject + PyQt6 (settings, wallpaper, Bluetooth and screenshot helpers), nmcli, iw, pactl, brightnessctl, ddcutil, zenity, wl-clipboard, fastfetch.
+- **Fonts:** Onest and Advent Pro from google/fonts (the commit Pond's Arch port pins). Pond's own title font, Pond Gramercy, isn't public; `home/pond/fonts.nix` maps it to ABC Gramercy. `launcher` (from `home/pond`) is Pond's Vicinae fork; without it the paths become plain `vicinae`.
+- **Doesn't work here:** the updates badge (Pond's `pm` package manager) and the timezone setting (NixOS sets it in `desktop.nix`).
+- **Updating:** bump `rev`, `version` and `hash`; build; `niri validate` the new `config/niri`.
 
 ## `scripts/bootstrap.sh`
 
