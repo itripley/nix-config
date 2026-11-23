@@ -46,6 +46,13 @@
     # gives the input server the capability it needs to paste and expand snippets. No
     # nixpkgs follows on purpose: the package then matches vicinae.cachix.org (common.nix).
     vicinae.url = "github:vicinaehq/vicinae";
+    # Pond's launcher: Butterfly's Vicinae fork, at the commit Pond's own package pins
+    # (bflycomputer/pond-pkgbuilds, pond-launcher). niri only (home/pond). Its flake targets
+    # nixos-unstable, so share ours.
+    pond-launcher = {
+      url = "github:bflycomputer/vicinae/68847f4b70ecf2a723859d39032e857dccb7691c";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     # SilentSDDM login theme (as on Fedora). Its module builds against our pkgs; follows only
     # keeps flake.lock from pulling a second nixpkgs.
     silent-sddm = {
@@ -250,6 +257,7 @@
           warp-cloudflare-gui
           obsidian-plugins
           vscode-marketplace
+          pond-interface
           ;
       };
 

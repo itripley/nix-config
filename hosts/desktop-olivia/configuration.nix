@@ -6,6 +6,7 @@
     ../../modules/nixos/boot.nix
     ../../modules/nixos/amd.nix
     ../../modules/nixos/desktop.nix
+    ../../modules/nixos/niri.nix
     ../../modules/nixos/login-art.nix
     ../../modules/nixos/audio.nix
     ../../modules/nixos/networking.nix

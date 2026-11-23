@@ -13,3 +13,6 @@ home/olivia/themes/art/*
 !home/olivia/themes/art/.gitkeep
 # `nixos-rebuild build-vm` disk image
 *.qcow2
+# Pond's title font (home/pond/fonts.nix), licensed: copy the zip in by hand
+home/pond/fonts/*
+!home/pond/fonts/.gitkeep

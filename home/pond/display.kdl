@@ -1,0 +1,24 @@
+// Monitors, laid out as in Plasma: the Dell is the main screen, the Sun on its right, bottoms
+// level. Pond's Settings > Display edits this file.
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Outputs
+
+// Dell S2721DGF
+output "DP-1" {
+    mode "2560x1440@165.080"
+    scale 1
+    position x=0 y=0
+    focus-at-startup
+}
+
+// Sun GDM-5410
+output "DP-2" {
+    mode "1600x1200@75.000"
+    scale 1
+    position x=2560 y=240
+}
+
+// Nothing plugged in, but it sometimes reports a 640x480 screen with no EDID, which gets its own
+// workspace. Delete this block to use the port.
+output "HDMI-A-2" {
+    off
+}

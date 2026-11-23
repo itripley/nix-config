@@ -87,6 +87,16 @@ Copy it in (home/olivia/themes/README.md), or comment out that import, then run 
   say "Login-screen art added to the store"
 }
 
+# niri.nix's desktop (home/pond) has a licensed font, gitignored, also pulled in with requireFile
+add_pond_font() {
+  grep -qE '^\s*\.\./\.\./modules/nixos/niri\.nix' "hosts/$1/configuration.nix" || return 0
+  local zip=home/pond/fonts/dinamo-gramercy-trial.zip
+  [[ -f $zip ]] || die "hosts/$1 imports niri.nix, but $zip is missing (licensed font, gitignored).
+Copy it in (docs/MODULES.md, home/pond/fonts.nix), or comment out that import, then run this again."
+  nixf store add-file "$zip" >/dev/null
+  say "Pond's font added to the store"
+}
+
 # Unraid credentials for storage.nix, never in the repo
 smb_secrets() { # root of the target system ("" for this one)
   local file=$1/etc/nixos/smb-secrets user pass
@@ -272,6 +282,7 @@ nixos_installer() {
   fi
   preflight "$name"
   add_login_art "$name"
+  add_pond_font "$name"
   confirm_wipe "$name"
 
   say "Partitioning (disko asks once more)"
@@ -317,6 +328,7 @@ nixos_installed() {
   say "Wrote hosts/$name. Read it before going on; the bootloader becomes systemd-boot on $esp"
   preflight "$name"
   add_login_art "$name"
+  add_pond_font "$name"
   confirm "Build it and make it the next boot entry?" || die "stopped; hosts/$name is left for you to edit"
   smb_secrets ""
   sudo nixos-rebuild boot --flake ".#$name"
