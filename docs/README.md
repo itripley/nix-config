@@ -140,6 +140,8 @@ with `scripts/bootstrap.sh` ([OPERATIONS.md](OPERATIONS.md#setting-up-a-new-mach
 | 2026-11-23 | niri + Pond moved into olivia's account (same apps, logins and files), wired to run only under niri; KWallet unlocked there and visible to Chromium/Electron. Monitors declared (Olivia saw niri only on the Sun; HDMI-A-2's phantom screen off), Pond's own launcher (Butterfly's Vicinae fork), ABC Gramercy as Pond's title font. The first account, `ripley`, removed | `home/pond`, `niri.nix`, `pond-launcher` in `flake.nix`, DESIGN §13, [VERIFICATION.md](VERIFICATION.md#niri--pond-in-olivias-account-2026-11-23) |
 | 2026-11-23 | Crash notification after switching from Plasma to niri: DrKonqi only with a display, PipeWire's X11 bell module off | `desktop.nix`, `audio.nix`, [VERIFICATION.md](VERIFICATION.md#crash-notification-after-leaving-plasma-2026-11-23) |
 | 2026-11-23 | Light edges in Firefox's Sidebery under niri: the portal was still Plasma's. `portal-check` restarts it when it belongs to another desktop | `home/pond`, [VERIFICATION.md](VERIFICATION.md#portal-from-the-other-desktop-2026-11-23) |
+| 2026-11-23 | Drives and trash in Files (Nautilus) under niri: GVfs, for Nautilus only | `niri.nix`, `home/pond`, [VERIFICATION.md](VERIFICATION.md#drives-in-files-2026-11-23) |
+| 2026-11-23 | WezTerm's backgrounds in kitty, random and with WezTerm's keys | `dotfiles/kitty/`, `home/pond` |
 
 ## Conventions
 
