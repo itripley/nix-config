@@ -151,6 +151,7 @@ with `scripts/bootstrap.sh` ([OPERATIONS.md](OPERATIONS.md#setting-up-a-new-mach
 | 2026-11-24 | fastfetch: Pond's layout, colours and symbols with the NixOS snowflake as ASCII art, instead of the box and the cat. WezTerm opens at 100 columns | `dotfiles/fastfetch/`, `dotfiles/fonts/fastfetch-flowers`, `dotfiles/wezterm/config`, `home/linux`, `modules/darwin/common.nix` |
 | 2026-11-24 | WezTerm opens at 28 rows, so fastfetch fits | `dotfiles/wezterm/config/appearance.lua` |
 | 2026-11-24 | kitty: TX-02, as in WezTerm | `dotfiles/kitty/font.conf`, `home/pond` |
+| 2026-11-24 | kitty: a bit less blur (opacity 0.70 → 0.78) | `dotfiles/kitty/backgrounds.conf` |
 
 ## Conventions
 
