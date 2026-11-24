@@ -142,6 +142,7 @@ with `scripts/bootstrap.sh` ([OPERATIONS.md](OPERATIONS.md#setting-up-a-new-mach
 | 2026-11-23 | Light edges in Firefox's Sidebery under niri: the portal was still Plasma's. `portal-check` restarts it when it belongs to another desktop | `home/pond`, [VERIFICATION.md](VERIFICATION.md#portal-from-the-other-desktop-2026-11-23) |
 | 2026-11-23 | Drives and trash in Files (Nautilus) under niri: GVfs, for Nautilus only | `niri.nix`, `home/pond`, [VERIFICATION.md](VERIFICATION.md#drives-in-files-2026-11-23) |
 | 2026-11-23 | WezTerm's backgrounds in kitty, random and with WezTerm's keys | `dotfiles/kitty/`, `home/pond` |
+| 2026-11-24 | niri: Olivia's scaling, scroll binds and mouse speed as the starting values of a new install | `home/pond` |
 
 ## Conventions
 
