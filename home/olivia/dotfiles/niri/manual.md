@@ -28,7 +28,7 @@ niri reloads those files when they're saved. Settings writes the mouse and displ
 To use Plasma, log out here first, then pick it on the login screen. Only one desktop runs at a time.
 
 ## Terminal
-kitty, with the same backgrounds as WezTerm.
+kitty, with the same backgrounds as WezTerm. Each tab has its own; the keys change the current tab's.
 
 - [Alt+/] Random background
 - [Alt+,] Previous background
