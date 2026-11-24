@@ -145,6 +145,7 @@ with `scripts/bootstrap.sh` ([OPERATIONS.md](OPERATIONS.md#setting-up-a-new-mach
 | 2026-11-24 | niri: Olivia's scaling, scroll binds and mouse speed as the starting values of a new install | `home/pond` |
 | 2026-11-24 | kitty: tab bar always shown, with a + button | `dotfiles/kitty/tabs.conf`, `home/pond` |
 | 2026-11-24 | Files: Windows disk and Unraid bookmarks on a new install | `home/pond` |
+| 2026-11-24 | Mouse: top side button is the middle click (the wheel click is dead) | `machine.nix` |
 
 ## Conventions
 
