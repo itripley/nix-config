@@ -44,6 +44,7 @@ return {
 
    -- window
    initial_cols = 100, -- fastfetch's longest row needs about 90
+   initial_rows = 28, -- and its output plus the prompt doesn't fit the default 24
    window_padding = {
       left = 0,
       right = 0,
