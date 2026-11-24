@@ -208,7 +208,7 @@ in
     seed ${share}/config/kitty/themes/default.conf "$HOME/.config/kitty/themes/default.conf"
     if [ ! -e "$HOME/.config/kitty/kitty.conf" ]; then
       run mkdir -p "$HOME/.config/kitty"
-      run sh -c '{ echo "include pond-defaults.conf"; cat "$1"; echo; echo "include ~/nix-config/home/olivia/dotfiles/kitty/backgrounds.conf"; } > "$2"' sh \
+      run sh -c '{ echo "include pond-defaults.conf"; cat "$1"; echo; echo "include ~/nix-config/home/olivia/dotfiles/kitty/backgrounds.conf"; echo "include ~/nix-config/home/olivia/dotfiles/kitty/tabs.conf"; } > "$2"' sh \
         ${share}/config/kitty/kitty.conf "$HOME/.config/kitty/kitty.conf"
     fi
   '';
