@@ -81,6 +81,12 @@ let
   pond = pkgs.pond-interface.override { inherit launcher; };
   share = "${pond}/share/pond-interface";
 
+  # Sidebar of Nautilus: GVfs hides mounts under /mnt
+  bookmarks = pkgs.writeText "bookmarks" ''
+    file:///mnt/unraid unraid
+    file:///mnt/windows windows
+  '';
+
   # Pond's personal files with olivia's changes, for a new account. --replace-fail: a Pond update
   # that moves these lines fails the build instead of dropping a change.
   personal = pkgs.runCommand "pond-personal" { } ''
@@ -197,6 +203,7 @@ in
     for f in ${personal}/*.kdl ${share}/config/niri/cfg/*.kdl; do
       seed "$f" "$HOME/.config/niri/cfg/$(basename "$f")"
     done
+    seed ${bookmarks} "$HOME/.config/gtk-3.0/bookmarks"
     seed ${share}/config/kitty/current-theme.conf "$HOME/.config/kitty/current-theme.conf"
     seed ${share}/config/kitty/themes/default.conf "$HOME/.config/kitty/themes/default.conf"
     if [ ! -e "$HOME/.config/kitty/kitty.conf" ]; then
