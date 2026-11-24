@@ -7,6 +7,8 @@ home/olivia/dotfiles/wezterm/backdrops/*
 # ~/.local/share/fonts by home/olivia/default.nix)
 home/olivia/dotfiles/fonts/*
 !home/olivia/dotfiles/fonts/.gitkeep
+# Pond's symbol, for fastfetch: BSD-3-Clause, so it can be in git
+!home/olivia/dotfiles/fonts/fastfetch-flowers/
 # Theme artwork (splash, cursor, wallpapers, lock-screen GIF) is third-party art, not
 # republished here: copy it in by hand (see home/olivia/themes/README.md)
 home/olivia/themes/art/*

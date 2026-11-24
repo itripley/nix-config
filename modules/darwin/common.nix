@@ -12,8 +12,15 @@
     reattach = true;
   };
 
-  # Into /Library/Fonts/Nix Fonts. WezTerm's icon fallback, as on the desktop (desktop.nix)
-  fonts.packages = [ pkgs.nerd-fonts.jetbrains-mono ];
+  # Into /Library/Fonts/Nix Fonts. WezTerm's icon fallback, as on the desktop (desktop.nix), and
+  # fastfetch's symbols
+  fonts.packages = [
+    pkgs.nerd-fonts.jetbrains-mono
+    (pkgs.runCommand "fastfetch-flowers" { } ''
+      install -Dm644 ${../../home/olivia/dotfiles/fonts/fastfetch-flowers/fastfetch-flowers.ttf} \
+        $out/share/fonts/truetype/fastfetch-flowers.ttf
+    '')
+  ];
 
   # fish for WezTerm at a stable path (/run/current-system/sw/bin/fish), with the Nix environment
   programs.fish.enable = true;

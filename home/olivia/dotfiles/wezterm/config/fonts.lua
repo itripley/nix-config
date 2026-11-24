@@ -9,10 +9,11 @@ local font_family = 'TX-02'
 local font_size = platform.is_mac and 14 or 10.5
 
 return {
-   -- TX-02 has no Nerd Font icons; take them from JetBrainsMono
+   -- TX-02 has no Nerd Font icons; take them from JetBrainsMono. Flowers: fastfetch's symbols
    font = wezterm.font_with_fallback({
       { family = font_family, weight = 'Medium' },
       'JetBrainsMono Nerd Font',
+      'Fastfetch Flowers',
    }),
    font_size = font_size,
 

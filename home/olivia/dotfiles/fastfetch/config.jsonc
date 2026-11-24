@@ -1,78 +1,70 @@
+// Layout and colours after Pond's fastfetch config (bflycomputer/pond-interface, BSD-3-Clause,
+// © 2026 Butterfly Interaction Inc.). Needs a terminal with kitty's image protocol (kitty, WezTerm, Konsole).
+// The symbols are Pond's, from ../fonts/fastfetch-flowers.
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
   "logo": {
-    "source": "~/.config/fastfetch/ascii.txt",
-    "type": "file",
-    "color": {
-      "1": "38;2;245;194;231",
-      "2": "38;2;235;188;186",
-      "3": "38;2;246;193;119",
-      "4": "38;2;156;207;216",
-      "5": "38;2;196;167;231",
-    },
+    "type": "kitty",
+    "source": "~/.config/fastfetch/nixos.png",
+    "width": 36,
+    "padding": { "top": 5, "left": 1, "right": 2 },
   },
   "display": {
     "separator": "  ",
-    "color": "38;2;245;194;231",
-    "constants": [
-      "\u001b[38;2;245;194;231m",
-      "\u001b[38;2;235;188;186m",
-      "\u001b[38;2;246;193;119m",
-      "\u001b[38;2;156;207;216m",
-      "\u001b[38;2;196;167;231m",
-    ],
+    "brightColor": false,
+    "disableLinewrap": true,
+    "color": { "output": "#e2e1f1" },
+    "percent": { "color": { "green": "#c673c2", "yellow": "#a47bdd" } },
   },
   "modules": [
     "break",
     {
       "type": "custom",
-      "key": "╭───────────────────────────────────╮",
-    },
-    {
-      "type": "kernel",
-      "key": "│ {$2}{$1}  kernel",
-      "format": "{$1}{release>22}{$1} │",
-    },
-    {
-      "type": "uptime",
-      "key": "│ {$3}{$1}  uptime",
-      "format": "{$1}{formatted>22}{$1} │",
-    },
-    {
-      "type": "shell",
-      "key": "│ {$4}{$1}  shell ",
-      "format": "{$1}{pretty-name>22}{$1} │",
-    },
-    {
-      "type": "memory",
-      "key": "│ {$5}{$1}  mem   ",
-      "format": "{$1}{used>10} / {total>9}{$1} │",
-    },
-    {
-      "type": "packages",
-      "key": "│ {$2}{$1}  pkgs  ",
-      "format": "{$1}{all>22}{$1} │",
-    },
-    {
-      "type": "command",
-      "key": "│ {$3}{$1}  user  ",
-      "text": "echo $USER",
-      "format": "{$1}{>22}{$1} │",
-    },
-    {
-      "type": "title",
-      "key": "│ {$4}{$1}  hname ",
-      "format": "{$1}{host-name>22}{$1} │",
-    },
-    {
-      "type": "os",
-      "key": "│ {$5}󰻀{$1}  distro",
-      "format": "{$1}{pretty-name>22}{$1} │",
-    },
-    {
-      "type": "custom",
-      "key": "╰───────────────────────────────────╯",
+      "key": " ",
+      "format": "{##402e6f}󵄐  {##9985bf}󵄑  {##c673c2}󵄒  {##a47ce3}󵄓  {##ac81bf}󵄔  {##a680ca}󵄕  {##9389b4}󵄖  {##e2e1f1}󵄗  ",
     },
     "break",
+    "break",
+
+    { "type": "os", "key": "╭─ OS:", "keyColor": "#a680ca" },
+    { "type": "kernel", "key": "├─ Kernel:", "keyColor": "#a680ca", "format": "{release}" },
+    { "type": "wm", "key": "├─ Window manager:", "keyColor": "#a680ca", "format": "{pretty-name}" },
+    { "type": "terminal", "key": "├─ Terminal:", "keyColor": "#a680ca" },
+    { "type": "terminalfont", "key": "╰─ Font:", "keyColor": "#a680ca" },
+    // Konsole and unknown terminals don't report one: still close the bracket
+    { "type": "custom", "key": "╰─ Font:", "keyColor": "#a680ca", "format": "unknown", "condition": { "succeeded": false } },
+    "break",
+
+    { "type": "host", "key": "╭─ PC:", "keyColor": "#a47ce3" },
+    // Self-built PCs have no model name: the motherboard instead
+    { "type": "board", "key": "╭─ PC:", "keyColor": "#a47ce3", "format": "{name}", "condition": { "succeeded": false } },
+    { "type": "cpu", "key": "├─ CPU:", "keyColor": "#a47ce3" },
+    { "type": "gpu", "key": "├─ GPU:", "keyColor": "#a47ce3" },
+    {
+      "type": "display",
+      "key": "├─ Display:",
+      "keyColor": "#a47ce3",
+      "format": "{width}x{height} @ {refresh-rate} Hz ({name})",
+    },
+    {
+      "type": "disk",
+      "key": "├─ Storage:",
+      "keyColor": "#a47ce3",
+      "folders": "/",
+      "format": "{size-used} / {size-total} ({size-percentage}) [{filesystem}]",
+    },
+    { "type": "memory", "key": "├─ Memory:", "keyColor": "#a47ce3" },
+    { "type": "swap", "key": "╰─ Swap:", "keyColor": "#a47ce3" },
+    "break",
+
+    { "type": "disk", "key": "╭─ OS Age:", "keyColor": "#c673c2", "folders": "/", "format": "{days} days" },
+    { "type": "uptime", "key": "╰─ Uptime:", "keyColor": "#c673c2" },
+    "break",
+    "break",
+    {
+      "type": "custom",
+      "key": " ",
+      "format": "{##7c55be}󵄘  {##9985be}󵄙  {##c972c4}󵄚  {##a47bdd}󵄛  {##aa81bf}󵄜  {##a87ecc}󵄝  {##9289b2}󵄞  {##f4e7ff}󵄟  ",
+    },
   ],
 }
