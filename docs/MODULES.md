@@ -338,7 +338,9 @@ directory (DESIGN §11, §12).
 - `default.nix`: imports the others. It also has the **`xdg.configFile` live links** for `wezterm`,
   `nvim` and `fastfetch`, pointing into `~/nix-config/home/olivia/dotfiles/` (DESIGN §6). The path
   is built from `home.homeDirectory`, because nix-darwin has no `programs.nh`. The dotfiles stay
-  under `home/olivia/` on both machines.
+  under `home/olivia/` on both machines. `fastfetch/config.jsonc` draws a box next to the cat in
+  `ascii.txt`; no row runs a Linux-only command (`free`, `hostnamectl`, `uptime -p`),
+  since the Mac reads the same file. Values are cut at 22 characters to keep the box.
 - `cli.nix`: Python + uv, docker-compose, tmux, mc, fastfetch, jq, gh, btop, and from Fedora: Go,
   rustup (cargo/rustc), lazydocker. All of them are in the binary cache for both systems.
 - `shell.nix`: fish, with `fish_greeting = "krabby random 1-4 --no-mega --no-gmax --no-regional"` (a
