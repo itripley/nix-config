@@ -81,13 +81,46 @@ let
   pond = pkgs.pond-interface.override { inherit launcher; };
   share = "${pond}/share/pond-interface";
 
-  # Same for what niri starts itself (kitty, and what runs in it)
-  miscKdl = pkgs.runCommand "misc.kdl" { } ''
-    substitute ${share}/config/niri/cfg/misc.kdl $out --replace-fail \
+  # Pond's personal files with olivia's changes, for a new account. --replace-fail: a Pond update
+  # that moves these lines fails the build instead of dropping a change.
+  personal = pkgs.runCommand "pond-personal" { } ''
+    mkdir $out
+    cfg=${share}/config/niri/cfg
+
+    # The same desktop name as pond-app, for what niri starts itself (kitty, and what runs in it)
+    substitute $cfg/misc.kdl $out/misc.kdl --replace-fail \
       '    XDG_CURRENT_DESKTOP "niri"' \
       '    // KDE + version 6: Chromium and Electron logins from KWallet
         XDG_CURRENT_DESKTOP "niri:KDE"
         KDE_SESSION_VERSION "6"'
+
+    # Super + scroll goes through windows, with Shift through workspaces (Pond: the other way)
+    substitute $cfg/keybinds.kdl $out/keybinds.kdl \
+      --replace-fail \
+        'Mod+WheelScrollDown                 cooldown-ms=10 { focus-workspace-down; }' \
+        'Mod+WheelScrollDown                 cooldown-ms=10 { focus-column-right; }' \
+      --replace-fail \
+        'Mod+WheelScrollUp                   cooldown-ms=10 { focus-workspace-up; }' \
+        'Mod+WheelScrollUp                   cooldown-ms=10 { focus-column-left; }' \
+      --replace-fail \
+        'Mod+Shift+WheelScrollDown           { focus-column-right; }' \
+        'Mod+Shift+WheelScrollDown           cooldown-ms=10 { focus-workspace-down; }' \
+      --replace-fail \
+        'Mod+Shift+WheelScrollUp             { focus-column-left; }' \
+        'Mod+Shift+WheelScrollUp             cooldown-ms=10 { focus-workspace-up; }'
+
+    # Faster mouse, as Pond's settings write it
+    substitute $cfg/input.kdl $out/input.kdl \
+      --replace-fail \
+        '        natural-scroll // Enable natural (macOS-style) scrolling' \
+        '        natural-scroll // Enable natural (macOS-style) scrolling
+            accel-speed -0.21
+            scroll-factor 1.0
+            accel-profile "flat"' \
+      --replace-fail \
+        '        accel-speed -0.5' \
+        '        accel-speed -0.21
+            scroll-factor 1.0'
   '';
 
   # Nautilus with GVfs (modules/nixos/niri.nix), without setting it for every app
@@ -161,8 +194,7 @@ in
     seed() { [ -e "$2" ] || run install -Dm644 "$1" "$2"; }
     # This PC's monitors, instead of Pond's example
     seed ${./display.kdl} "$HOME/.config/niri/cfg/display.kdl"
-    seed ${miscKdl} "$HOME/.config/niri/cfg/misc.kdl"
-    for f in ${share}/config/niri/cfg/*.kdl; do
+    for f in ${personal}/*.kdl ${share}/config/niri/cfg/*.kdl; do
       seed "$f" "$HOME/.config/niri/cfg/$(basename "$f")"
     done
     seed ${share}/config/kitty/current-theme.conf "$HOME/.config/kitty/current-theme.conf"
