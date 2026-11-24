@@ -19,6 +19,12 @@
     ];
   };
 
+  # Razer Basilisk: its wheel click is dead, so the top side button (Forward) is the middle click
+  services.udev.extraHwdb = ''
+    evdev:input:b0003v1532p0064e0111-e0,1,2,4,k110,*
+     KEYBOARD_KEY_90005=btn_middle
+  '';
+
   # RGB (Windows used OpenRGB + PawnIO for SMBus; here it's i2c-piix4)
   services.hardware.openrgb = {
     enable = true;
