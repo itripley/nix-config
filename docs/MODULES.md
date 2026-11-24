@@ -273,8 +273,9 @@ What every Mac gets. Until 2026-11-10 this was in the MacBook's host file.
   (`pam_reattach`, so Touch ID also works inside tmux). Both lines can only let sudo succeed early;
   the password check in macOS's `/etc/pam.d/sudo` is untouched. macOS 14+ includes `sudo_local`
   on its own, so nix-darwin doesn't edit `/etc/pam.d/sudo`.
-- `fonts.packages = [ nerd-fonts.jetbrains-mono ]`: into `/Library/Fonts/Nix Fonts`. It's
-  WezTerm's icon fallback, as on the desktop (`desktop.nix`). TX-02 and the other personal fonts
+- `fonts.packages`: into `/Library/Fonts/Nix Fonts`. JetBrainsMono Nerd Font is
+  WezTerm's icon fallback, as on the desktop (`desktop.nix`); fastfetch-flowers has fastfetch's
+  symbols (macOS never picks it by itself, so WezTerm's `fonts.lua` names it). TX-02 and the other personal fonts
   stay in `~/Library/Fonts` by hand.
 - `nix.settings.experimental-features` and `nix.channel.enable = false`, as on the desktop.
   `trusted-users` stays root-only.
@@ -338,9 +339,17 @@ directory (DESIGN §11, §12).
 - `default.nix`: imports the others. It also has the **`xdg.configFile` live links** for `wezterm`,
   `nvim` and `fastfetch`, pointing into `~/nix-config/home/olivia/dotfiles/` (DESIGN §6). The path
   is built from `home.homeDirectory`, because nix-darwin has no `programs.nh`. The dotfiles stay
-  under `home/olivia/` on both machines. `fastfetch/config.jsonc` draws a box next to the cat in
-  `ascii.txt`; no row runs a Linux-only command (`free`, `hostnamectl`, `uptime -p`),
-  since the Mac reads the same file. Values are cut at 22 characters to keep the box.
+  under `home/olivia/` on both machines. `fastfetch/config.jsonc` is Pond's layout and colours (BSD-3, credited in
+  the file) next to `nixos.png`, the NixOS snowflake as ASCII in the characters and colours of
+  Pond's butterfly. The background is transparent on purpose (a solid 3D version looked wrong); the
+  strokes are heavy so it stays readable over the wallpapers. It's an image (kitty's protocol: kitty, WezTerm, Konsole), because the characters are a third of
+  the terminal's size. The symbols above and below are Pond's own font (U+F5110–F511F, BSD-3), in
+  `dotfiles/fonts/fastfetch-flowers`. No row runs a Linux-only command, since the Mac reads the same file. The colours
+  are fixed, not the terminal theme's. Two rows have a fallback (`condition.succeeded`): the
+  motherboard where the firmware names no model (the desktop), and "unknown" where the terminal
+  reports no font (Konsole), so the brackets stay whole. Lines are cut, not wrapped: the longest
+  needs about 90 columns, so WezTerm opens at 100 (`initial_cols` in `appearance.lua`). fastfetch caches the scaled image by path, so after replacing `nixos.png`
+  run `rm -r ~/.cache/fastfetch/images`.
 - `cli.nix`: Python + uv, docker-compose, tmux, mc, fastfetch, jq, gh, btop, and from Fedora: Go,
   rustup (cargo/rustc), lazydocker. All of them are in the binary cache for both systems.
 - `shell.nix`: fish, with `fish_greeting = "krabby random 1-4 --no-mega --no-gmax --no-regional"` (a
@@ -601,7 +610,7 @@ that, `home/olivia/default.nix` imported these modules itself.
 - Imports `../shared` and, from `home/olivia/`: `apps.nix`, `dev.nix`, `firefox.nix`,
   `obsidian.nix`, `mpv.nix`, `easyeffects.nix`. A module added here reaches every Linux machine; one
   that needs NixOS services (Plasma, Flatpak, WARP) goes in `home/olivia/default.nix` instead.
-- **`xdg.dataFile."fonts/nix-config"`** → live link to `home/olivia/dotfiles/fonts/` (gitignored, like the wallpapers), which fontconfig reads as part of `~/.local/share/fonts`. It holds **TX-02** (30 styles), the font for WezTerm (`dotfiles/wezterm/config/fonts.lua`, with JetBrainsMono Nerd Font as fallback for icons) and Obsidian (`obsidian.nix`). The font is licensed, so the files are copied in by hand and never committed; a new font dropped in that folder works without a rebuild.
+- **`xdg.dataFile."fonts/nix-config"`** → live link to `home/olivia/dotfiles/fonts/` (gitignored, like the wallpapers), which fontconfig reads as part of `~/.local/share/fonts`. It holds **TX-02** (30 styles), the font for WezTerm (`dotfiles/wezterm/config/fonts.lua`, with JetBrainsMono Nerd Font as fallback for icons) and Obsidian (`obsidian.nix`). The font is licensed, so the files are copied in by hand and never committed; a new font dropped in that folder works without a rebuild. The exception is **fastfetch-flowers** (Pond's symbol, BSD-3-Clause, license next to it), which is in git. kitty and WezTerm find it by its characters; Konsole needs the fontconfig rule next to the link (`60-fastfetch-flowers.conf`).
   The path is built from `home.homeDirectory` (`~/nix-config`), as in `home/shared`, because
   standalone home-manager has no `osConfig`. On the desktop it's the same path as before.
 - On another distro the GUI apps find the GPU through `targets.genericLinux.gpu` (enabled by
