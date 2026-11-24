@@ -143,6 +143,8 @@ with `scripts/bootstrap.sh` ([OPERATIONS.md](OPERATIONS.md#setting-up-a-new-mach
 | 2026-11-23 | Drives and trash in Files (Nautilus) under niri: GVfs, for Nautilus only | `niri.nix`, `home/pond`, [VERIFICATION.md](VERIFICATION.md#drives-in-files-2026-11-23) |
 | 2026-11-23 | WezTerm's backgrounds in kitty, random and with WezTerm's keys | `dotfiles/kitty/`, `home/pond` |
 | 2026-11-24 | niri: Olivia's scaling, scroll binds and mouse speed as the starting values of a new install | `home/pond` |
+| 2026-11-24 | kitty: tab bar always shown, with a + button | `dotfiles/kitty/tabs.conf`, `home/pond` |
+| 2026-11-24 | Files: Windows disk and Unraid bookmarks on a new install | `home/pond` |
 
 ## Conventions
 
