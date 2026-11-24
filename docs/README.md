@@ -149,6 +149,7 @@ with `scripts/bootstrap.sh` ([OPERATIONS.md](OPERATIONS.md#setting-up-a-new-mach
 | 2026-11-24 | niri: Pond's look without Pond's identity. NixOS and niri on the Information page, Olivia's own manual (Markdown + live keys), the update badge is a restart reminder, the timezone is read-only | `pkgs/pond-interface/nixos`, `home/pond`, `dotfiles/niri`, [VERIFICATION.md](VERIFICATION.md#niri-without-pond-2026-11-24) |
 | 2026-11-24 | fastfetch: a box layout with a cat. No Linux-only commands, since the Mac reads the same file | `dotfiles/fastfetch/` |
 | 2026-11-24 | fastfetch: Pond's layout, colours and symbols with the NixOS snowflake as ASCII art, instead of the box and the cat. WezTerm opens at 100 columns | `dotfiles/fastfetch/`, `dotfiles/fonts/fastfetch-flowers`, `dotfiles/wezterm/config`, `home/linux`, `modules/darwin/common.nix` |
+| 2026-11-24 | WezTerm opens at 28 rows, so fastfetch fits | `dotfiles/wezterm/config/appearance.lua` |
 
 ## Conventions
 

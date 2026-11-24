@@ -348,7 +348,7 @@ directory (DESIGN §11, §12).
   are fixed, not the terminal theme's. Two rows have a fallback (`condition.succeeded`): the
   motherboard where the firmware names no model (the desktop), and "unknown" where the terminal
   reports no font (Konsole), so the brackets stay whole. Lines are cut, not wrapped: the longest
-  needs about 90 columns, so WezTerm opens at 100 (`initial_cols` in `appearance.lua`). fastfetch caches the scaled image by path, so after replacing `nixos.png`
+  needs about 90 columns, so WezTerm opens at 100×28 (`initial_cols` and `initial_rows` in `appearance.lua`; with two displays the output plus the prompt doesn't fit the default 24 rows). fastfetch caches the scaled image by path, so after replacing `nixos.png`
   run `rm -r ~/.cache/fastfetch/images`.
 - `cli.nix`: Python + uv, docker-compose, tmux, mc, fastfetch, jq, gh, btop, and from Fedora: Go,
   rustup (cargo/rustc), lazydocker. All of them are in the binary cache for both systems.
