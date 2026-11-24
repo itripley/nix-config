@@ -43,6 +43,7 @@ return {
    command_palette_rows = 25,
 
    -- window
+   initial_cols = 100, -- fastfetch's longest row needs about 90
    window_padding = {
       left = 0,
       right = 0,
