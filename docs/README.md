@@ -152,6 +152,7 @@ with `scripts/bootstrap.sh` ([OPERATIONS.md](OPERATIONS.md#setting-up-a-new-mach
 | 2026-11-24 | WezTerm opens at 28 rows, so fastfetch fits | `dotfiles/wezterm/config/appearance.lua` |
 | 2026-11-24 | kitty: TX-02, as in WezTerm | `dotfiles/kitty/font.conf`, `home/pond` |
 | 2026-11-24 | kitty: a bit less blur (opacity 0.70 → 0.78) | `dotfiles/kitty/backgrounds.conf` |
+| 2026-11-24 | kitty: each tab has its own background; the Alt keys change only that tab | `dotfiles/kitty/tab_backgrounds.py`, [VERIFICATION.md](VERIFICATION.md#kitty-tab-backgrounds-2026-11-24) |
 
 ## Conventions
 

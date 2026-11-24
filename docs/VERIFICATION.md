@@ -547,6 +547,12 @@ Checked before switching, without activating anything. Shell, lock screen and la
 - `/dev/input/event1` while Olivia pressed: both side buttons and left arrive, the wheel click doesn't (left seen in the same run). Worn switch or onboard profile: not known. The top side button is `BTN_EXTRA`, scan code `90005` (15 of 15).
 - Fix: `systemd-hwdb --root` on the built database returns `KEYBOARD_KEY_90005=btn_middle` for the mouse's modalias. (`UDEV_HWDB_BIN` is ignored, so that query reads the running database.)
 
+## kitty tab backgrounds (2026-11-24)
+
+- Tested in a separate kitty 0.49.1 under headless sway, comparing screenshots: new tabs differ, each keeps its image when switching back, next/previous/random/off stay with their tab, closing and detaching tabs, a second window, a reload, more tabs than images (they repeat) and no images at all. No errors in kitty's log from the script.
+- Time until the image changes, 14 images: 30–40 ms if already loaded, 50–300 ms the first time (nothing in `~/.cache/kitty/rgba`). Going back from the first image to the last loads all 14: about 1 s, once. That's why random takes the next unseen image.
+- Not tested with real key presses: the bindings were parsed, and their actions run through remote control.
+
 ## Still to check by hand
 
 The Mac's checks are in [MACOS.md](MACOS.md#checked); all of them are done.
