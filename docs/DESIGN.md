@@ -361,5 +361,13 @@ lock screen, volume/brightness keys), so "Pond's niri config" means the whole
   app edits them.
 - **Pond's launcher under niri, upstream Vicinae in Plasma.** Pond's is a fork of it, as a flake
   input pinned to the commit Pond ships.
+- **Pond's look, not its identity (2026-11-24).** This is NixOS, so what presented itself as Pond
+  (logo, version, links, manual) or only worked with Pond's package manager was replaced, and the
+  look, the themes and the keys stayed. Olivia chose this over forking the shell or using another
+  one. It's done with a patch and a few whole files on top of upstream, so its updates still come
+  through. `Footer.qml` and the patch are Butterfly's code with changes, so their license
+  (BSD-3-Clause) is next to them, `pkgs/pond-interface/nixos/LICENSE`.
+- **The manual is a Markdown file, the keys in it are read live.** A copy of the key list would go
+  stale; niri's config can't.
 - **Built from unstable**, the one package that has to be: its Qt minimum is 6.12. Pinned to a
   commit like the other third-party sources; updating is a `rev`/`hash` bump.

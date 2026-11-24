@@ -527,6 +527,21 @@ After Olivia's first login to niri as ripley ("only displaying on my second moni
 - **Cause:** no GVfs; without its GIO module `gio mount -l` lists nothing, with it the three disks and the USB drive's volume (private session bus).
 - **Fix, built, not activated:** the built Nautilus rendered in headless sway lists the USB drive and the bookmarks. `set-environment` is identical, so no other app loads GVfs. `nvd diff`: +19 MiB.
 
+## niri without Pond (2026-11-24)
+
+Checked before switching, without activating anything. Shell, lock screen and launcher ran in headless sway inside `bwrap`: scratch `$HOME` and runtime dir, no system bus, a stub `niri` for the keyboard layouts.
+
+- **Pages:** Information with each link's hover, System, Settings with the badge off and (forced, with a path that doesn't exist) on, the whole manual, in Daylight; Settings and the manual in Hazel. No QML errors. The only warnings are the ones the sandbox causes, also there with the old package, minus `pm -a` ("binary could not be found"), which is gone. The lock screen still draws.
+- **Timezone:** `settings open timezone` is refused; the row shows the zone.
+- **Manual:** `binds.py` covers all 77 binds in Olivia's two files (42 rows, compared by script; media keys aside). An edit shows on reopening; without the file it says so and still lists the keys; without `keybinds.kdl` it lists the shell's.
+- **Launcher:** no "Pond" in its themes' descriptions; `theme set` takes all four and refuses an unknown one. The C++ build is the same store path.
+- **niri:** `niri validate` passes on the package's config and on Olivia's assembled one.
+- **Branding check:** 0 hits in the built tree; a Butterfly link, `arch.svg`, `manual.svg` and `FooterButton` each trip its pattern.
+- **Rest of the system:** `nvd diff` only adds the manual's link (−3.1 MiB). In the home files only Pond's own change (shell, niri config, kitty defaults, fonts, launcher) and what follows from the profile (completions, man path, font paths).
+- **Other machines:** the standalone homes, WSL and the Mac's home have the same `drvPath` as before.
+- **Sandbox slip:** the first run let the private bus start services, and ksecretd aborted in it for lack of a display (00:50:28, `coredumpctl`). Olivia's wallet wasn't involved, but DrKonqi may have shown it. After that the bus had no service directories.
+- **Rule slip:** `--impure` was used once, to look up the launcher's source path. Nothing in the repo depends on it.
+
 ## Basilisk middle click (2026-11-24)
 
 - `/dev/input/event1` while Olivia pressed: both side buttons and left arrive, the wheel click doesn't (left seen in the same run). Worn switch or onboard profile: not known. The top side button is `BTN_EXTRA`, scan code `90005` (15 of 15).
@@ -560,6 +575,7 @@ The Mac's checks are in [MACOS.md](MACOS.md#checked); all of them are done.
 | SSH from Unraid (after `nh os switch`) | `systemctl status sshd` is active; the Unraid Claude container logs in as olivia with its key; `ssh -o PubkeyAuthentication=no olivia@desktop-olivia` from another machine is refused (no password prompt). |
 | Drives in Files (after `nh os switch` and a login) | ✅ Checked by Olivia 2026-11-24. Under niri, Files shows the USB drive and Trash opens; `windows` and `unraid` open. Deleting a file moves it to the trash. |
 | Middle click (after `nh os switch`, then replug the mouse or restart) | ✅ Checked by Olivia 2026-11-24. The top side button closes a kitty tab and opens a Firefox link in a new tab; the bottom one still goes back. If the mouse's pink is gone after replugging, it returns at the next boot. |
+| niri without Pond (after `nh os switch`, then Ctrl+Alt+Delete and back into Niri) | Switched 2026-11-24 to the build that was tested; Olivia likes it. `systemd-inhibit --list` has "Lock screen" and no "Pond", and the shell's log has no `pm` failure. Still to do: Settings > Information: snowflake, 26.05, NixOS Yarara, NIRI; the four links open. Manual opens from there and from the launcher, its keys are right, and an edit to `manual.md` shows on reopening. System: Timezone can't be clicked. Super+L and sleep still lock. After the next kernel update: "Restart recommended" in Settings. |
 | Portal, niri → Plasma | Under niri done 2026-11-23 (`portal-check` restarted it, color scheme `u 1`). After going back to Plasma: `journalctl --user -u portal-check`, and Firefox on automatic looks right. |
 | ripley removed (after `nh os switch`) | `id ripley` finds no user; the login screen doesn't list it. `/home/ripley` stays on disk until `sudo rm -r /home/ripley`. |
 | Crash loop gone (after `nh os switch`, then log out and in once so PipeWire restarts) | Log out of Plasma into niri: no crash notification; `coredumpctl list --since -5min` shows no pipewire and no drkonqi. |

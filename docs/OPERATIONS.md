@@ -106,6 +106,7 @@ drop `amd.nix`, `login-art.nix` and `./machine.nix` as needed).
 | Play Minecraft 1.16 or older | Add `jdk17` / `jdk8` to the Prism Launcher `jdks` list in `apps.nix`. |
 | Free disk space | Automatic (`programs.nh.clean`: keeps 10 generations / 14 days). Manual: `nh clean all`. On the Mac: automatic every Sunday (`nix.gc`: generations older than 14 days, then `nix-store --optimise`); by hand, `sudo nix-collect-garbage --delete-older-than 14d`. |
 | Add a font for yourself | Copy the `.otf`/`.ttf` files into `home/olivia/dotfiles/fonts/<Name>/` (gitignored, linked into `~/.local/share/fonts`). No rebuild; restart the app. After a fresh clone, TX-02 has to be copied back in by hand. Packaged fonts go in `fonts.packages` in `modules/nixos/desktop.nix` instead. |
+| Edit niri's manual | `home/olivia/dotfiles/niri/manual.md`, then reopen the manual; no rebuild. The keys in it come from `~/.config/niri/cfg/keybinds.kdl`. |
 | Edit nvim / WezTerm / fastfetch config | Edit under `home/olivia/dotfiles/…`; they're live links, so there's no rebuild. |
 | Edit Firefox `userChrome.css` | Edit `home/olivia/dotfiles/firefox/userChrome.css`, then `nh os switch`, then restart Firefox. |
 | Change time zone | `time.timeZone` in `modules/nixos/desktop.nix` (e.g. `"Europe/London"`). |
