@@ -90,11 +90,17 @@ let
         KDE_SESSION_VERSION "6"'
   '';
 
+  # Nautilus with GVfs (modules/nixos/niri.nix), without setting it for every app
+  nautilus = pkgs.runCommand "nautilus-gvfs" { nativeBuildInputs = [ pkgs.makeWrapper ]; } ''
+    makeWrapper ${pkgs.nautilus}/bin/nautilus $out/bin/nautilus \
+      --prefix GIO_EXTRA_MODULES : ${pkgs.gnome.gvfs}/lib/gio/modules
+  '';
+
   # Pond's apps, listed only under niri and without file types or D-Bus services, so Plasma's menu,
   # default apps and "Show in folder" don't change
   tools = pkgs.runCommand "pond-tools" { } ''
     mkdir -p $out/bin $out/share/applications $out/share/icons
-    ln -s ${pond}/bin/qs ${pkgs.kitty}/bin/kitty ${pkgs.kitty}/bin/kitten ${pkgs.nautilus}/bin/nautilus $out/bin/
+    ln -s ${pond}/bin/qs ${pkgs.kitty}/bin/kitty ${pkgs.kitty}/bin/kitten ${nautilus}/bin/nautilus $out/bin/
     for f in ${pond}/share/applications/pond-manual.desktop \
       ${pkgs.kitty}/share/applications/kitty.desktop \
       ${pkgs.nautilus}/share/applications/org.gnome.Nautilus.desktop; do
@@ -140,6 +146,12 @@ in
 
   xdg.dataFile = {
     "fonts/pond".source = pkgs.callPackage ./fonts.nix { inherit pond; };
+    # D-Bus starts Nautilus too (file dialogs under niri): the same wrapped one
+    "dbus-1/services/org.gnome.Nautilus.service".text = ''
+      [D-BUS Service]
+      Name=org.gnome.Nautilus
+      Exec=${nautilus}/bin/nautilus --gapplication-service
+    '';
     # Pond's cursor: niri's config names it, nothing else does
     "icons/capitaine-cursors".source = "${pkgs.capitaine-cursors}/share/icons/capitaine-cursors";
   };
