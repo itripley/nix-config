@@ -69,10 +69,20 @@ let
   launcherSettings = pkgs.writeText "pond-launcher.json" (
     builtins.toJSON { providers.applications.preferences.launchPrefix = "${startApp}"; }
   );
-  # On XDG_DATA_DIRS only its own data (the Pond themes), not its .desktop files
+  # On XDG_DATA_DIRS only its own data (the themes, without Pond in their descriptions), not its
+  # .desktop files
   launcher = pkgs.runCommand "pond-launcher" { nativeBuildInputs = [ pkgs.makeWrapper ]; } ''
     mkdir -p $out/share
-    ln -s ${launcherUnwrapped}/share/vicinae $out/share/vicinae
+    cp -rs --no-preserve=mode ${launcherUnwrapped}/share/vicinae $out/share/vicinae
+    theme() { # file, old description, new description
+      rm $out/share/vicinae/themes/$1.toml
+      substitute ${launcherUnwrapped}/share/vicinae/themes/$1.toml $out/share/vicinae/themes/$1.toml \
+        --replace-fail "$2" "$3"
+    }
+    theme default "Default theme for Pond" "Default theme"
+    theme pond-hazel "Warm Pond theme" "Warm theme"
+    theme pond-north "Cold Pond theme" "Cold theme"
+    theme pond-wisteria "Violet Pond theme" "Violet theme"
     makeWrapper ${launcherUnwrapped}/bin/vicinae $out/bin/vicinae \
       --set VICINAE_OVERRIDES ${launcherSettings} \
       --prefix XDG_DATA_DIRS : $out/share
@@ -162,6 +172,9 @@ in
   xdg.configFile = {
     "niri/config.kdl".source = "${share}/config/niri/config.kdl";
     "niri/shell".source = "${share}/config/niri/shell";
+    # The manual's text, live: edited in the checkout, no rebuild
+    "niri/manual.md".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/olivia/dotfiles/niri/manual.md";
     "quickshell/pond-shell".source = "${share}/shell"; # `qs -c pond-shell`
     "kitty/pond-defaults.conf".source = "${share}/config/kitty/etc/kitty.conf";
 

@@ -2,6 +2,7 @@
 # the Quickshell shell, lock screen, wallpaper and niri config, with /usr paths moved to the
 # store. Built from pkgs.unstable (overlays/packages.nix): its native QML module needs Qt 6.12.
 # `qs` here is Quickshell wrapped with what the shell runs (python helpers, nmcli, pactl, ...).
+# ./nixos replaces what's Pond's own in it (logo, links, manual, package manager) with NixOS's.
 {
   lib,
   stdenv,
@@ -30,6 +31,7 @@
   bash,
   xkeyboard_config,
   tzdata,
+  nixos-icons,
   launcher ? null, # Pond's Vicinae fork (home/pond); without it, `vicinae` from PATH
 }:
 let
@@ -82,6 +84,8 @@ stdenv.mkDerivation {
     hash = "sha256-KiI32YFJHWS+ViRZNOJgjcxsVdeGUxw/LE3kEssSDiE=";
   };
 
+  patches = [ ./nixos/nixos.patch ];
+
   nativeBuildInputs = [
     cmake
     pkg-config
@@ -103,6 +107,21 @@ stdenv.mkDerivation {
   dontPatchShebangs = true;
 
   postPatch = ''
+    # NixOS instead of Pond: the Information page's footer, the manual, and none of Pond's art
+    rm -r config/fastfetch shell/settings/manual/FooterButton.qml \
+      shell/assets/information/{pond,arch}.svg \
+      shell/assets/manual/{manual,super-note-hover,super-tip,discord,x,mail}.svg
+    cp --no-preserve=mode ${./nixos/Footer.qml} shell/settings/information/Footer.qml
+    cp --no-preserve=mode ${./nixos/manual}/* shell/settings/manual/
+    cp ${./nixos/niri.svg} shell/assets/information/niri.svg
+    cp ${nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake-white.svg shell/assets/information/nixos.svg
+    # New branding in an update fails the build, as does anything still using what's gone
+    if grep -rniE 'butterfly|bfly|manual\.svg|super-(note|tip)|information/(pond|arch)|FooterButton' \
+        shell lockscreen screenshot wallpaper config; then
+      echo "pond-interface: Pond's branding (above)" >&2
+      exit 1
+    fi
+
     # /usr/share/pond-interface -> the store
     grep -rlZ /usr/share/pond-interface . | xargs -0 sed -i "s#/usr/share/pond-interface#$out/share/pond-interface#g"
     # Absolute /usr/bin tools -> PATH (the qs wrapper, the session); the launcher by its full path

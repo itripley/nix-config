@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="143" height="43" viewBox="0 0 143 43" fill="none">
+<defs><mask id="letters" maskUnits="userSpaceOnUse" x="0" y="0" width="143" height="43">
+<path fill="#ffffff" fill-rule="evenodd" d="M0.00 41.97L7.21 0.98L22.21 0.98L39.81 26.00L44.21 0.98L57.21 0.98L50.00 41.97L35.00 41.97L17.39 17.00L13.00 41.97Z"/>
+<path fill="#ffffff" fill-rule="evenodd" d="M54.00 41.97L61.21 0.98L75.21 0.98L68.00 41.97Z"/>
+<path fill="#ffffff" fill-rule="evenodd" d="M72.00 41.97L79.21 0.98L108.21 0.98C119.21 0.98 124.47 5.20 123.06 13.20C121.83 20.20 117.26 24.60 110.21 26.00L118.00 41.97L103.40 41.97L96.73 27.60L88.03 27.60L85.50 41.97ZM91.02 10.60L89.61 18.60L102.71 18.60C106.71 18.60 108.92 17.40 109.42 14.60C109.91 11.80 108.12 10.60 104.12 10.60Z"/>
+<path fill="#ffffff" fill-rule="evenodd" d="M122.00 41.97L129.21 0.98L142.81 0.98L135.60 41.97Z"/>
+</mask></defs>
+<g mask="url(#letters)" fill="#ffffff" fill-opacity="0.5">
+<rect x="0" y="-0.04" width="143" height="2.57"/>
+<rect x="0" y="5.09" width="143" height="2.57"/>
+<rect x="0" y="10.22" width="143" height="2.57"/>
+<rect x="0" y="15.35" width="143" height="2.57"/>
+<rect x="0" y="20.48" width="143" height="2.57"/>
+<rect x="0" y="25.61" width="143" height="2.57"/>
+<rect x="0" y="30.74" width="143" height="2.57"/>
+<rect x="0" y="35.87" width="143" height="2.57"/>
+<rect x="0" y="41.00" width="143" height="2.57"/>
+</g>
+</svg>
